@@ -1,0 +1,13 @@
+{
+  "extends": "config/base.config.json",
+  "compilerOptions": {
+    "target": "es6",
+    "module": "commonjs",
+    "isolatedModules": true,
+    "outDir": "./dist"
+  },
+  "include": ["src", "types.d.ts"],
+  "ts-node": {
+    "files": true
+  }
+}
