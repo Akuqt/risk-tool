@@ -1,0 +1,10 @@
+/.idea/* text eol=crlf
+* text=auto
+*.* text eol=lf
+*.* conflict-marker-size=10
+*.png binary
+*.jpeg binary
+*.jpg binary
+*.svg binary
+*.exe binary
+*.jar binary
