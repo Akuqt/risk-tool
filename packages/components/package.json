@@ -1,0 +1,25 @@
+{
+  "name": "components",
+  "version": "0.0.0",
+  "main": "src/index.tsx",
+  "types": "src/index.tsx",
+  "private": true,
+  "dependencies": {
+    "config": "*",
+    "types": "*",
+    "react": "^17.0.2",
+    "styled-components": "^5.3.3",
+    "react-native-maps": "^0.29.3",
+    "react-native-svg": "^12.1.1",
+    "react-native-webview": "^11.13.0",
+    "react-native-svg-charts": "^5.4.0",
+    "react-native-vector-icons": "^8.1.0"
+  },
+  "devDependencies": {
+    "@types/react": "^17.0.38",
+    "@types/styled-components": "^5.1.19",
+    "@types/styled-components-react-native": "^5.1.3",
+    "@types/react-native-svg-charts": "^5.0.9",
+    "@types/react-native-vector-icons": "^6.4.9"
+  }
+}
