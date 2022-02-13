@@ -3,7 +3,8 @@
   "compilerOptions": {
     "skipLibCheck": false,
     "isolatedModules": true,
-    "noEmit": true
+    "noEmit": true,
+    "jsx": "react-native"
   },
   "exclude": [
     "node_modules",
