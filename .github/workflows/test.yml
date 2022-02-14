@@ -8,10 +8,21 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
+    env:
+      PORT: ${{ secrets.PORT }}
+      JWT_ACCESS: ${{ secrets.JWT_ACCESS }}
+      JWT_REFRESH: ${{ secrets.JWT_REFRESH }}
+      MONGODB_URI: ${{ secrets.MONGODB_URI }}
+      MONGODB_URI_TEST: ${{ secrets.MONGODB_URI_TEST }}
+      VITE_GOOGLE_KEY: ${{ secrets.VITE_GOOGLE_KEY }}
+
     strategy:
       matrix:
         node: [16.x]
-        mongodb: [5.x]
+        mongodb: [5.0]
+        python: [3.9]
+
+    name: Test - Node ${{ matrix.node }} - Mongo ${{ matrix.mongodb }}
 
     steps:
       - name: Git checkout
@@ -24,5 +35,12 @@ jobs:
         uses: supercharge/mongodb-github-action@1.7.0
         with:
           mongodb-version: ${{ matrix.mongodb }}
+      - name: Setup python
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python }}
+      - run: pip install wheel
+      - run: pip install numpy matplotlib
+      - run: pip install -U scikit-fuzzy
       - run: yarn
       - run: yarn test
