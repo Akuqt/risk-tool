@@ -16,6 +16,7 @@ app.use(
     credentials: true,
   }),
 );
+/* istanbul ignore next */
 if (config.NODE_ENV === "development") {
   app.use(morgan("dev"));
 }

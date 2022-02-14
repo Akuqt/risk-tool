@@ -3,8 +3,7 @@ import { EventStack } from "../websocket";
 const stack = new EventStack();
 
 stack.push("ping", function (data) {
-  console.log(data);
-  this.emit("pong", { msg: "test" });
+  this.emit("pong", data);
 });
 
 export default stack;

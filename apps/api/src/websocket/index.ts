@@ -8,6 +8,7 @@ export interface Params {
   callback: EventCallback;
 }
 
+/* istanbul ignore next */
 export class EventStack {
   private evs: Params[];
 
@@ -34,6 +35,7 @@ export class EventStack {
   }
 }
 
+/* istanbul ignore next */
 export default class WebSocket {
   private io: WebSocketServer;
   static socket: Socket;
