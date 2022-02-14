@@ -4,10 +4,11 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useInputHandler } from "../../hooks";
 import { useDispatch } from "react-redux";
 import { Input, Btn } from "components/src/native";
-import { saveUser, User } from "../../redux/user";
+import { saveUser } from "../../redux/user";
 import { Post } from "services";
 import { Alert } from "react-native";
 import { logo } from "assets";
+import { User } from "types";
 
 type Props = NativeStackScreenProps<{ Home: undefined }, "Home">;
 
