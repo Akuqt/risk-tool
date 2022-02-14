@@ -17,7 +17,7 @@
     "build:rn": "turbo run build:rn",
     "extract:apk": "turbo run extract",
     "lint": "eslint . --ext .js,.ts,.tsx,.md --fix",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "format": "prettier --write \"**/*.{js,ts,tsx,md}\"",
     "prepare": "husky install"
   },
   "devDependencies": {
