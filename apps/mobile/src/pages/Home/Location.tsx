@@ -4,8 +4,9 @@ import { useLocation } from "../../hooks";
 import { useDispatch, useSelector } from "react-redux";
 import { UserCard, DataCard, Btn } from "components/src/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { setLocation, Data } from "../../redux/location";
+import { setLocation } from "../../redux/location";
 import { RootState } from "../../redux";
+import { Data } from "types";
 
 const Container = styled.View`
   display: flex;
@@ -48,6 +49,7 @@ export const Location: React.FC<Props> = ({ navigation }) => {
     states: { location },
   } = useLocation((data: Data) => {
     //Send Data
+    console.log(location);
     dispatch(setLocation(data));
   }, 1000);
 

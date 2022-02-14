@@ -23,6 +23,7 @@
       "version": "17"
     }
   },
+  "ignorePatterns": ["**/coverage/**", "**/build/**", "**/dist/**"],
   "rules": {
     "indent": ["error", 2, { "SwitchCase": 1 }],
     "linebreak-style": ["error", "unix"],
@@ -32,6 +33,7 @@
     "react-hooks/exhaustive-deps": "warn",
     "react-hooks/rules-of-hooks": "error",
     "react-native/no-inline-styles": "off",
-    "curly": "off"
+    "curly": "off",
+    "react/react-in-jsx-scope": "off"
   }
 }
