@@ -3,7 +3,7 @@ import { Server } from "http";
 
 type EventCallback = (this: Socket, data?: object) => void;
 
-interface Params {
+export interface Params {
   ev: string;
   callback: EventCallback;
 }
