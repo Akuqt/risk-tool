@@ -5,6 +5,7 @@ export const App: React.FC = () => {
   return (
     <div>
       <Counter />
+      <p>{import.meta.env.VITE_GOOGLE_KEY}</p>
     </div>
   );
 };
