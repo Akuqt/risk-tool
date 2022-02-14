@@ -1,14 +1,25 @@
 {
-  "name": "turborepo-basic-shared",
+  "name": "risk-tool-repo",
   "version": "0.0.0",
   "private": true,
   "type": "module",
+  "author": "Akuqt",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Akuqt/risk-tool.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Akuqt/risk-tool/issues"
+  },
+  "homepage": "https://github.com/Akuqt/risk-tool#readme",
   "workspaces": [
     "apps/*",
     "packages/*",
     "scripts/*"
   ],
   "scripts": {
+    "test": "turbo run test --parallel",
     "dev": "turbo run dev --parallel",
     "clean": "cd scripts/clean && yarn clean && yarn",
     "build": "turbo run build",
