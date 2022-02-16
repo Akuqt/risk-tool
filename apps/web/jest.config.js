@@ -3,7 +3,7 @@ module.exports = {
   rootDir: "./",
   testMatch: ["./test/**/*.+(ts|tsx|js)", "**/?(*.)+(spec|test).+(ts|tsx|js)"],
   transform: {
-    "^.+\\.(ts|tsx)$": "../../node_modules/babel-jest",
+    "^.+\\.(ts|tsx)$": "babel-jest",
   },
   transformIgnorePatterns: [
     "[/\\\\]node_modules[/\\\\].+\\.(js|jsx|mjs|cjs|ts|tsx)$",
