@@ -6,7 +6,8 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "test": "jest"
+    "test": "jest",
+    "test:staged": "jest --bail --findRelatedTests"
   },
   "dependencies": {
     "@reduxjs/toolkit": "^1.6.1",

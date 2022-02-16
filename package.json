@@ -20,6 +20,7 @@
   ],
   "scripts": {
     "test": "turbo run test --parallel",
+    "test:staged": "turbo run test:staged --parallel --",
     "dev": "turbo run dev --parallel",
     "clean": "cd scripts/clean && yarn clean && yarn",
     "build": "turbo run build",
