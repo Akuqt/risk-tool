@@ -37,7 +37,7 @@ type Props = NativeStackScreenProps<
 export const Location: React.FC<Props> = ({ navigation }) => {
   const dispatch = useDispatch();
 
-  const user = useSelector((state: RootState) => state.userReducer.user);
+  // const user = useSelector((state: RootState) => state.userReducer.user);
   const { watchId } = useSelector(
     (state: RootState) => state.watchReducer.data,
   );
@@ -82,11 +82,11 @@ export const Location: React.FC<Props> = ({ navigation }) => {
         />
       </ButtonsContainer>
       <UserCard
-        img={`https://avatars.dicebear.com/api/${user.gender}/${user.name}.svg`}
-        name={user.name}
-        lastname={user.lastname}
-        id={user.id}
-        role={user.role}
+        img={`https://avatars.dicebear.com/api/${"user.gender"}/${"user.name"}.svg`}
+        name={"user.name"}
+        lastname={"user.lastname"}
+        id={"user.id"}
+        role={"user.role"}
         onPress={() => {
           navigation.navigate("Profile");
         }}
