@@ -92,7 +92,7 @@ export const useLocation = (
 
     await startForegroundService();
 
-    const s = Geolocation.watchPosition(
+    const watchId = Geolocation.watchPosition(
       (position) => {
         setLocation(position);
         updateHandler({
@@ -112,7 +112,7 @@ export const useLocation = (
         fastestInterval: Math.floor(updateRate) - Math.floor(updateRate * 0.4),
       },
     );
-    store.dispatch(setWatch({ watchId: s }));
+    store.dispatch(setWatch({ watchId }));
   };
 
   const stopForegroundService = useCallback(() => {
