@@ -54,12 +54,14 @@ export const Location: React.FC<Props> = ({ navigation }) => {
   }, 1000);
 
   useEffect(() => {
-    getLocation();
-
+    (async () => {
+      await getLocation();
+    })();
     return () => {
       removeLocationUpdates();
     };
-  }, [removeLocationUpdates, getLocation]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <Container>
