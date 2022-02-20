@@ -9,6 +9,12 @@ export const location = {
   lng: -74.809196472168,
 };
 
+export const expRisk = 61.30306325901758;
+
+export const riskPayload = {
+  values: ["9", "9", "9", "9", "9", "0", "0", "0", "0", "0", "0"],
+};
+
 const baseUrl = "/api/v1";
 
 export const simplePost = (

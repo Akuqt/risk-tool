@@ -1,15 +1,5 @@
-import mongoose from "mongoose";
 import { simpleGet, app } from "./helper";
 import { wsrequest } from "wsreq";
-import { connect } from "../src/database";
-
-beforeAll(() => {
-  connect();
-});
-
-afterAll(async () => {
-  await mongoose.connection.close(true);
-});
 
 describe("GET /api/v1", () => {
   it("should get msg", async () => {
