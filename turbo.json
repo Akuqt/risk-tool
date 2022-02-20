@@ -4,13 +4,6 @@
       "dependsOn": ["^build"],
       "outputs": ["dist/**", "release/**", "build/**"]
     },
-    "build:rn": {
-      "dependsOn": ["^build:rn"]
-    },
-    "extract": {
-      "dependsOn": ["^extract"],
-      "outputs": ["out/**"]
-    },
     "dev": {
       "cache": false
     },

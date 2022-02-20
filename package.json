@@ -26,8 +26,8 @@
     "build": "turbo run build",
     "start:rn": "cd apps/mobile && yarn start",
     "android": "cd apps/mobile && yarn android",
-    "build:rn": "turbo run build:rn",
-    "extract:apk": "turbo run extract",
+    "build:rn": "cd apps/mobile/android && gradlew assembleRelease",
+    "gen:route": "cd scripts/routes && yarn gen:route",
     "lint": "eslint . --ext .js,.ts,.tsx --fix",
     "format": "prettier --write \"**/*.{js,ts,tsx}\"",
     "prepare": "husky install"
