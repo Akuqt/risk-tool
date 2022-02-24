@@ -11,6 +11,6 @@ export default {
     TEST_URI: process.env.MONGODB_URI_TEST || "mongodb://localhost/risk2",
   },
   CORS: {
-    ORIGIN: ["*"],
+    ORIGIN: ["*", "http://localhost:3000"],
   },
 };
