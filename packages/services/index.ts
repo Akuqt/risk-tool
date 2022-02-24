@@ -15,8 +15,8 @@ export const Post = async <T>(
         Authorization: `bearer ${token}`,
       },
     })
-    .catch((_e: AxiosError<T>) => {
-      return _e.response as AxiosResponse<T>;
+    .catch((e: AxiosError<T>) => {
+      return e.response as AxiosResponse<T>;
     });
 };
 
