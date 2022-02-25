@@ -55,7 +55,7 @@ export const Map: React.FC<Props> = memo(
       if (location) {
         map?.panTo(location);
       }
-    }, [map, location]);
+    }, [location, map]);
 
     const onLoad = useCallback((map: MAP) => {
       setMap(map);
