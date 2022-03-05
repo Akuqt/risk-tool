@@ -18,7 +18,6 @@ import {
   TrafficLayer,
   useGoogleMap,
   useJsApiLoader,
-  // DistanceMatrixService,
 } from "@react-google-maps/api";
 import { containerStyle, initOptions, mapOptions } from "./helper";
 
@@ -51,6 +50,18 @@ export const Map: React.FC<Props> = memo(
       lng: -74.809196472168,
     });
 
+    const [count, setCount] = useState<{
+      coord: { lat: number; lng: number }[];
+      c: number;
+    }>({ coord: [], c: 0 });
+
+    const onClick = useCallback(
+      ({ lat, lng }: { lat: number; lng: number }) => {
+        setCount((ci) => ({ c: ci.c + 1, coord: [...ci.coord, { lat, lng }] }));
+      },
+      [],
+    );
+
     const panToUserLocation = useCallback(() => {
       if (location) {
         map?.panTo(location);
@@ -66,24 +77,44 @@ export const Map: React.FC<Props> = memo(
     }, []);
 
     useEffect(() => {
-      (async () => {
-        if (map) {
-          Post<{ result: WazeTrafficInfo[] }>("/report/traffic", {
-            lat: map.getCenter()?.lat(),
-            lng: map.getCenter()?.lng(),
-          }).then((res) => {
-            setWazeTrafficInfo(res.data.result);
-          });
+      if (map) {
+        Post<{ result: WazeTrafficInfo[] }>("/report/traffic", {
+          lat: map.getCenter()?.lat(),
+          lng: map.getCenter()?.lng(),
+        }).then((res) => {
+          setWazeTrafficInfo(res.data.result);
+        });
 
-          Post<{ result: WazeAlertInfo[] }>("/report/alerts", {
-            lat: map.getCenter()?.lat(),
-            lng: map.getCenter()?.lng(),
-          }).then((res) => {
-            setWazeAlertInfo(res.data.result);
-          });
-        }
-      })();
+        Post<{ result: WazeAlertInfo[] }>("/report/alerts", {
+          lat: map.getCenter()?.lat(),
+          lng: map.getCenter()?.lng(),
+        }).then((res) => {
+          setWazeAlertInfo(res.data.result);
+        });
+      }
     }, [map]);
+
+    useEffect(() => {
+      if (count.c === 2) {
+        Post<any>("/path", {
+          points: count.coord,
+        }).then((res) => {
+          setWazeTrafficInfo([
+            {
+              city: "" + res.data.time,
+              date: 0,
+              description: "" + res.data.distance,
+              level: 0,
+              path: res.data.coords,
+              speedKh: 0,
+              street: "",
+              time: 0,
+            },
+          ]);
+        });
+        setCount({ coord: [], c: 0 });
+      }
+    }, [count]);
 
     return isLoaded ? (
       <Container>
@@ -97,21 +128,11 @@ export const Map: React.FC<Props> = memo(
           onLoad={onLoad}
           onUnmount={onUnmount}
           options={mapOptions}
+          onClick={(e) => {
+            onClick({ lat: e.latLng?.lat() || 0, lng: e.latLng?.lng() || 0 });
+          }}
         >
           {showGoogleTrafficLayer && <TrafficLayer />}
-          {/* <DistanceMatrixService
-          callback={(a, b) => {
-            console.log(a);
-            console.log(b);
-          }}
-          options={{
-            travelMode: window.google.maps.TravelMode.DRIVING,
-            destinations: [
-              { lat: 11.096641586377432, lng: -74.81902955652312 },
-            ],
-            origins: [{ lat: 11.006496778495276, lng: -74.81869830370978 }],
-          }}
-        /> */}
           {polys &&
             polys?.length > 0 &&
             polys.map((poly, i) => (
