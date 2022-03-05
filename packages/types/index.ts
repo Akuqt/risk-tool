@@ -18,6 +18,10 @@ export interface DataID {
   watchId: number | null;
 }
 
+export interface WazeCoord {
+  y: number;
+  x: number;
+}
 export interface Coord {
   lat: number;
   lng: number;
@@ -58,4 +62,14 @@ export interface InfoWindowData {
   speedKh?: number;
   type?: string;
   time?: number;
+}
+
+export interface WazePathResponse {
+  alternatives: {
+    coords: WazeCoord[];
+    response: {
+      totalLength: number;
+      totalSeconds: number;
+    };
+  }[];
 }
