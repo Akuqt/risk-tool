@@ -1,6 +1,11 @@
 import React from "react";
-import { Map } from "./Map";
+import { SocketProvider } from "./context";
+import { Home } from "./pages";
 
 export const App: React.FC = () => {
-  return <Map showWazeTrafficLayer />;
+  return (
+    <SocketProvider>
+      <Home />
+    </SocketProvider>
+  );
 };
