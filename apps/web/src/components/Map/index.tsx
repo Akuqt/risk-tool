@@ -2,7 +2,7 @@ import React, { useCallback, useState, useEffect, memo } from "react";
 import { Container, UserLocation } from "./Elements";
 import { AiOutlineAim } from "react-icons/ai";
 import { Information } from "./Information";
-import { useLocation } from "../hooks";
+import { useLocation } from "../../hooks";
 import { Post } from "services";
 import {
   PolyPath,
