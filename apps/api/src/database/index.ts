@@ -1,5 +1,6 @@
 import config from "../config";
 import mongoose from "mongoose";
+import { initRoles } from "../lib";
 
 /* istanbul ignore next */
 const uri =
@@ -19,6 +20,7 @@ connection.on("error", (err) => {
   process.exit(0);
 });
 
-export const connect = () => {
+export const connect = async () => {
   mongoose.connect(uri);
+  await initRoles();
 };
