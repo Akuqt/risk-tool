@@ -1,3 +1,5 @@
+import mongoose, { Document } from "mongoose";
+
 export interface Data {
   lat: number;
   lng: number;
@@ -72,4 +74,46 @@ export interface WazePathResponse {
       totalSeconds: number;
     };
   }[];
+}
+
+export interface IRole extends Document {
+  _id?: mongoose.ObjectId;
+  name: string;
+}
+
+export interface ILog extends Document {
+  _id?: mongoose.ObjectId;
+  event: string;
+  action: string;
+  timestamp: number;
+  lat: number;
+  lng: number;
+}
+
+export interface ICompany extends Document {
+  _id?: mongoose.ObjectId;
+  name: string;
+  materials: string[];
+  address: string;
+  lat: number;
+  lng: number;
+  logs: ILog[];
+  username: string;
+  password: string;
+  role: IRole;
+  tokenVersion: number;
+}
+
+export interface IDriver extends Document {
+  _id?: mongoose.ObjectId;
+  name: string;
+  username: string;
+  password: string;
+  plate: string;
+  company: ICompany;
+  lat: number;
+  lng: number;
+  material: string;
+  role: IRole;
+  tokenVersion: number;
 }
