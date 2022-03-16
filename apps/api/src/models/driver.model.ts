@@ -4,6 +4,7 @@ import { IDriver } from "types";
 const driverSchema = new Schema(
   {
     name: String,
+    lastname: String,
     plate: String,
     company: {
       ref: "Company",
@@ -12,6 +13,7 @@ const driverSchema = new Schema(
     lat: Number,
     lng: Number,
     material: String,
+    gender: String,
     role: {
       ref: "Role",
       type: Schema.Types.ObjectId,
