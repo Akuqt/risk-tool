@@ -1,0 +1,7 @@
+{
+  "name": "s-common",
+  "version": "0.0.0",
+  "main": "index.js",
+  "type": "module",
+  "private": true
+}
