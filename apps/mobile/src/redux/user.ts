@@ -1,8 +1,8 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { User } from "types";
+import { FDriver } from "types";
 
 interface Init {
-  user: User;
+  user: FDriver;
 }
 
 const initialState: Init = {
@@ -13,6 +13,18 @@ const initialState: Init = {
     role: "",
     id: "",
     gender: "",
+    lat: NaN,
+    lng: NaN,
+    material: "",
+    plate: "",
+    username: "",
+    company: {
+      address: "",
+      id: "",
+      lat: NaN,
+      lng: NaN,
+      name: "",
+    },
   },
 };
 
@@ -20,7 +32,7 @@ export const userSlide = createSlice({
   name: "user",
   initialState,
   reducers: {
-    saveUser: (state, action: PayloadAction<User>) => {
+    saveUser: (state, action: PayloadAction<FDriver>) => {
       state.user = action.payload;
     },
     clearUser: (state) => {

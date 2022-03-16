@@ -21,8 +21,7 @@ describe("POST /api/v1/auth/sign-up", () => {
     const res = await simplePost("/auth/sign-up", company);
     expect(res.status).toBe(200);
     expect(res.body.ok).toEqual(true);
-    expect(res.body.result.token).toBeDefined();
-    expect(res.body.result.data).toBeDefined();
+    expect(res.body.result).toBeDefined();
   });
 
   it("shouldn't register a new company", async () => {
@@ -38,8 +37,7 @@ describe("POST /api/v1/auth/sign-up", () => {
     const res = await simplePost("/auth/sign-up", driver);
     expect(res.status).toBe(200);
     expect(res.body.ok).toEqual(true);
-    expect(res.body.result.token).toBeDefined();
-    expect(res.body.result.data).toBeDefined();
+    expect(res.body.result).toBeDefined();
   });
 
   it("shouldn't register a new driver", async () => {
@@ -66,8 +64,7 @@ describe("POST /api/v1/auth/sign-in", () => {
     const res = await simplePost("/auth/sign-in", company);
     expect(res.status).toBe(200);
     expect(res.body.ok).toEqual(true);
-    expect(res.body.result.token).toBeDefined();
-    expect(res.body.result.data).toBeDefined();
+    expect(res.body.result).toBeDefined();
   });
 
   it("shouldn't login a company (1)", async () => {
@@ -92,8 +89,7 @@ describe("POST /api/v1/auth/sign-in", () => {
     const res = await simplePost("/auth/sign-in", driver);
     expect(res.status).toBe(200);
     expect(res.body.ok).toEqual(true);
-    expect(res.body.result.token).toBeDefined();
-    expect(res.body.result.data).toBeDefined();
+    expect(res.body.result).toBeDefined();
   });
 
   it("shouldn't login a driver (1)", async () => {
