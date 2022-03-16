@@ -7,15 +7,6 @@ export interface Data {
   tmp: number;
 }
 
-export interface User {
-  id: string;
-  name: string;
-  token: string;
-  role: string;
-  gender: string;
-  lastname: string;
-}
-
 export interface DataID {
   watchId: number | null;
 }
@@ -107,6 +98,8 @@ export interface ICompany extends Document {
 export interface IDriver extends Document {
   _id?: mongoose.ObjectId;
   name: string;
+  lastname: string;
+  gender: string;
   username: string;
   password: string;
   plate: string;
@@ -116,4 +109,44 @@ export interface IDriver extends Document {
   material: string;
   role: IRole;
   tokenVersion: number;
+}
+
+export interface FDriver {
+  id: string;
+  name: string;
+  lastname: string;
+  gender: string;
+  username: string;
+  plate: string;
+  company: {
+    id: string;
+    name: string;
+    address: string;
+    lat: number;
+    lng: number;
+  };
+  lat: number;
+  lng: number;
+  material: string;
+  role: string;
+  token: string;
+}
+
+export interface FCompany {
+  id: string;
+  name: string;
+  username: string;
+  address: string;
+  lat: number;
+  lng: number;
+  materials: string[];
+  role: string;
+  drivers: {
+    name: string;
+    lastname: string;
+    gender: string;
+    id: string;
+    plate: string;
+  }[];
+  token: string;
 }
