@@ -12,6 +12,8 @@ export const location = {
 export const driver = {
   type: "driver",
   name: "Jhon",
+  lastname: "Doel",
+  gender: "male",
   plate: "Ea1u1",
   company: "Company1",
   material: "O2",
