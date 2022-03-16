@@ -1,31 +1,12 @@
 import React, { useEffect } from "react";
-import styled from "styled-components/native";
-import { useLocation } from "../../hooks";
+import { ButtonsContainer, Container } from "./Elements";
 import { useDispatch, useSelector } from "react-redux";
 import { UserCard, DataCard, Btn } from "components/src/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { setLocation } from "../../redux/location";
+import { useLocation } from "../../hooks";
 import { RootState } from "../../redux";
 import { Data } from "types";
-
-const Container = styled.View`
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px;
-  width: 100%;
-  height: 100%;
-  background-color: #ffffff;
-`;
-const ButtonsContainer = styled.View`
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-  margin: 30px 0px;
-`;
 
 type Props = NativeStackScreenProps<
   {
@@ -37,7 +18,7 @@ type Props = NativeStackScreenProps<
 export const Location: React.FC<Props> = ({ navigation }) => {
   const dispatch = useDispatch();
 
-  // const user = useSelector((state: RootState) => state.userReducer.user);
+  const user = useSelector((state: RootState) => state.userReducer.user);
   const { watchId } = useSelector(
     (state: RootState) => state.watchReducer.data,
   );
@@ -82,11 +63,13 @@ export const Location: React.FC<Props> = ({ navigation }) => {
         />
       </ButtonsContainer>
       <UserCard
-        img={`https://avatars.dicebear.com/api/${"user.gender"}/${"user.name"}.svg`}
-        name={"user.name"}
-        lastname={"user.lastname"}
-        id={"user.id"}
-        role={"user.role"}
+        img={`https://avatars.dicebear.com/api/${user.gender || "male"}/${
+          user.username || "driverU"
+        }.svg`}
+        name={user.name || "Some"}
+        lastname={user.lastname || "Name"}
+        id={user.id || "6231ff99810c15ca985658ee"}
+        role={user.role || "driver"}
         onPress={() => {
           navigation.navigate("Profile");
         }}

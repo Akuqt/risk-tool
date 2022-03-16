@@ -5,10 +5,10 @@ import { useInputHandler } from "../../hooks";
 import { useDispatch } from "react-redux";
 import { Input, Btn } from "components/src/native";
 import { saveUser } from "../../redux/user";
-import { Post } from "services";
+import { FDriver } from "types";
 import { Alert } from "react-native";
+import { Post } from "services";
 import { logo } from "assets";
-import { User } from "types";
 
 type Props = NativeStackScreenProps<{ Home: undefined }, "Home">;
 
@@ -39,12 +39,12 @@ export const Login: React.FC<Props> = ({ navigation }) => {
           bg="#FF6347"
           label="Sign In"
           onPress={async () => {
-            const res = await Post<{ ok: boolean; user: User }>(
+            const res = await Post<{ ok: boolean; result: FDriver }>(
               "/auth/sign-in",
               values,
             );
             if (res.data.ok) {
-              dispatch(saveUser(res.data.user));
+              dispatch(saveUser(res.data.result));
               navigation.navigate("Home");
             } else {
               Alert.alert("Error");
