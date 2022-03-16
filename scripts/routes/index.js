@@ -1,6 +1,7 @@
 import fs from "fs";
 import yargs from "yargs";
 import { fileURLToPath } from "url";
+import { getFileText } from "s-common";
 import { hideBin } from "yargs/helpers";
 import { join } from "path";
 
@@ -107,33 +108,5 @@ async function addToIndexRoute(routeName, path) {
   file.write(final, (err) => {
     if (err) throw err;
     file.close();
-  });
-}
-
-/**
- *
- * @param {string} path file path
- * @returns {Promise<string>} file text
- */
-async function getFileText(path) {
-  const file = fs.createReadStream(path);
-  const text = await streamToString(file);
-  file.close();
-  return text;
-}
-
-/**
- *
- * @param {fs.ReadStream} stream read stream
- * @returns {Promise<string>} stream text representation
- */
-function streamToString(stream) {
-  const chunks = [];
-  return new Promise((resolve, reject) => {
-    // eslint-disable-next-line no-undef
-    stream.on("data", (chunk) => chunks.push(Buffer.from(chunk)));
-    stream.on("error", (err) => reject(err));
-    // eslint-disable-next-line no-undef
-    stream.on("end", () => resolve(Buffer.concat(chunks).toString("utf8")));
   });
 }
