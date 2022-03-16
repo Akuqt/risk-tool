@@ -28,6 +28,7 @@
     "android": "cd apps/mobile && yarn android",
     "build:rn": "cd apps/mobile/android && gradlew assembleRelease",
     "gen:route": "cd scripts/routes && yarn gen:route",
+    "gen:page": "cd scripts/pages && yarn gen:page",
     "lint": "eslint . --ext .js,.ts,.tsx --fix",
     "format": "prettier --write \"**/*.{js,ts,tsx}\"",
     "prepare": "husky install"
