@@ -9,6 +9,27 @@ export const location = {
   lng: -74.809196472168,
 };
 
+export const driver = {
+  type: "driver",
+  name: "Jhon",
+  plate: "Ea1u1",
+  company: "Company1",
+  material: "O2",
+  username: "driver1",
+  password: "1234",
+};
+
+export const company = {
+  type: "company",
+  lat: 10.997265,
+  lng: -74.814256,
+  address: "fake street 123",
+  name: "Company1",
+  materials: ["water", "O2"],
+  username: "company1",
+  password: "1234",
+};
+
 export const expRisk = 61.30306325901758;
 
 export const riskPayload = {
