@@ -47,7 +47,8 @@ export const getPath = async (
       );
     }
   } catch (error) {
-    console.log(error);
+    /* istanbul ignore next */
+    return res.json({ ok: false });
   }
 
   res.json({
