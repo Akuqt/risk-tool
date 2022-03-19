@@ -7,18 +7,16 @@
     "start": "react-native start"
   },
   "dependencies": {
-    "assets": "*",
-    "config": "*",
-    "types": "*",
-    "services": "*",
-    "components": "*",
     "@react-native-async-storage/async-storage": "^1.15.8",
     "@react-navigation/bottom-tabs": "^6.0.5",
     "@react-navigation/native": "^6.0.2",
     "@react-navigation/native-stack": "^6.1.0",
     "@reduxjs/toolkit": "^1.6.1",
     "@voximplant/react-native-foreground-service": "^2.0.0",
+    "assets": "*",
     "axios": "^0.21.4",
+    "components": "*",
+    "config": "*",
     "react": "17.0.2",
     "react-native": "0.67.2",
     "react-native-geolocation-service": "^5.3.0-beta.3",
@@ -33,7 +31,10 @@
     "react-native-webview": "^11.13.0",
     "react-redux": "^7.2.5",
     "redux-persist": "^6.0.0",
-    "styled-components": "^5.3.1"
+    "services": "*",
+    "socket.io-client": "4.4.1",
+    "styled-components": "^5.3.1",
+    "types": "*"
   },
   "devDependencies": {
     "@babel/core": "^7.12.9",
@@ -92,7 +93,9 @@
       "react-native-geolocation-service",
       "react-native-geolocation-service/**",
       "react-native-svg-charts",
-      "react-native-svg-charts/**"
+      "react-native-svg-charts/**",
+      "socket.io-client",
+      "socket.io-client/**"
     ]
   }
 }
