@@ -90,6 +90,8 @@ export const signIn = async (
           gender: d.gender,
           id: d._id,
           plate: d.plate,
+          lat: d.lat,
+          lng: d.lng,
         })),
         token: createAcessToken(_company),
       },

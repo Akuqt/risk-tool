@@ -1,5 +1,13 @@
 import mongoose, { Document } from "mongoose";
 
+export interface DriverLocation {
+  id: string;
+  lat: number;
+  lng: number;
+  speed: number;
+  tmp: number;
+}
+
 export interface Data {
   lat: number;
   lng: number;
