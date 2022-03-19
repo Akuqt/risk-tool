@@ -1,16 +1,5 @@
-import React, { useEffect } from "react";
-import { Map } from "../components";
-import { useSocket } from "../hooks";
+import React from "react";
 
 export const Home: React.FC = () => {
-  const socket = useSocket();
-  useEffect(() => {
-    if (socket) {
-      socket.on("pong", (d) => {
-        console.log("from api socket: ", d);
-      });
-      socket.emit("ping", { test: "something" });
-    }
-  }, [socket]);
-  return <Map showWazeTrafficLayer />;
+  return <h1>Hello Home</h1>;
 };
