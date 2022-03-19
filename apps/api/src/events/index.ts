@@ -1,9 +1,30 @@
+import { DriverLocation } from "types";
+import { DriverModel } from "../models";
 import { EventStack } from "../websocket";
 
 const stack = new EventStack();
 
-stack.push("ping", function (data) {
-  this.emit("pong", data);
+stack.push("ping", (socket, data) => {
+  console.log(data);
+  socket.emit("pong", data);
+});
+
+stack.push<DriverLocation>("save:driver:location", async (_, data, io) => {
+  if (!data) return;
+  try {
+    const driver = await DriverModel.findById(data.id);
+    if (!driver) return;
+    driver.lat = data.lat;
+    driver.lng = data.lng;
+    await driver.save();
+    io!.emit("update:driver", {
+      id: driver._id,
+      lat: driver.lat,
+      lng: driver.lng,
+    });
+  } catch {
+    return;
+  }
 });
 
 export default stack;
