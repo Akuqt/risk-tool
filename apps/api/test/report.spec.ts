@@ -1,14 +1,4 @@
-import mongoose from "mongoose";
 import { location, simplePost } from "./helper";
-import { connect } from "../src/database";
-
-beforeAll(() => {
-  connect();
-});
-
-afterAll(async () => {
-  await mongoose.connection.close(true);
-});
 
 describe("Post /api/v1/report/alerts", () => {
   it("should get alerts", async () => {

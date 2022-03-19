@@ -1,31 +1,13 @@
 import React, { useEffect } from "react";
-import styled from "styled-components/native";
-import { useLocation } from "../../hooks";
+import { ButtonsContainer, Container } from "./Elements";
 import { useDispatch, useSelector } from "react-redux";
 import { UserCard, DataCard, Btn } from "components/src/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { setLocation } from "../../redux/location";
+import { useLocation } from "../../hooks";
 import { RootState } from "../../redux";
+import { useSocket } from "../../hooks/useSocket";
 import { Data } from "types";
-
-const Container = styled.View`
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px;
-  width: 100%;
-  height: 100%;
-  background-color: #ffffff;
-`;
-const ButtonsContainer = styled.View`
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-  margin: 30px 0px;
-`;
 
 type Props = NativeStackScreenProps<
   {
@@ -41,6 +23,7 @@ export const Location: React.FC<Props> = ({ navigation }) => {
   const { watchId } = useSelector(
     (state: RootState) => state.watchReducer.data,
   );
+  const socket = useSocket();
 
   const {
     getLocation,
@@ -48,18 +31,22 @@ export const Location: React.FC<Props> = ({ navigation }) => {
     removeLocationUpdates,
     states: { location },
   } = useLocation((data: Data) => {
-    //Send Data
-    console.log(location);
+    socket?.emit("save:driver:location", {
+      id: user.id || "62320bbb38160372eac74c52",
+      ...data,
+    });
     dispatch(setLocation(data));
   }, 1000);
 
   useEffect(() => {
-    getLocation();
-
+    (async () => {
+      await getLocation();
+    })();
     return () => {
       removeLocationUpdates();
     };
-  }, [removeLocationUpdates, getLocation]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <Container>
@@ -80,11 +67,13 @@ export const Location: React.FC<Props> = ({ navigation }) => {
         />
       </ButtonsContainer>
       <UserCard
-        img={`https://avatars.dicebear.com/api/${user.gender}/${user.name}.svg`}
-        name={user.name}
-        lastname={user.lastname}
-        id={user.id}
-        role={user.role}
+        img={`https://avatars.dicebear.com/api/${user.gender || "male"}/${
+          user.username || "driverU"
+        }.svg`}
+        name={user.name || "Some"}
+        lastname={user.lastname || "Name"}
+        id={user.id || "6231ff99810c15ca985658ee"}
+        role={user.role || "driver"}
         onPress={() => {
           navigation.navigate("Profile");
         }}

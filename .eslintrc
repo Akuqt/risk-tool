@@ -30,10 +30,12 @@
     "quotes": ["error", "double", { "allowTemplateLiterals": false }],
     "semi": ["error", "always"],
     "@typescript-eslint/no-explicit-any": "off",
+    "@typescript-eslint/no-unused-vars": ["warn"],
     "react-hooks/exhaustive-deps": "warn",
     "react-hooks/rules-of-hooks": "error",
     "react-native/no-inline-styles": "off",
     "curly": "off",
-    "react/react-in-jsx-scope": "off"
+    "react/react-in-jsx-scope": "off",
+    "no-shadow": "off"
   }
 }

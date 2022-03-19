@@ -1,16 +1,20 @@
 import { Server as WebSocketServer, Socket, ServerOptions } from "socket.io";
 import { Server } from "http";
 
-type EventCallback = (this: Socket, data?: object) => void;
+type EventCallback<T> = (
+  socket: Socket,
+  data?: T,
+  io?: WebSocketServer,
+) => void;
 
-export interface Params {
+export interface Params<T> {
   ev: string;
-  callback: EventCallback;
+  callback: EventCallback<T>;
 }
 
 /* istanbul ignore next */
 export class EventStack {
-  private evs: Params[];
+  private evs: Params<any>[];
 
   constructor() {
     this.evs = [];
@@ -22,7 +26,7 @@ export class EventStack {
    * @param name Name of the event
    * @param callback Callback for the event
    */
-  public push(name: string, callback: EventCallback) {
+  public push<U = any>(name: string, callback: EventCallback<U>) {
     if (name === "") throw new Error("The event needs a name.");
     else this.evs.push({ callback, ev: name });
   }
@@ -37,11 +41,9 @@ export class EventStack {
 
 /* istanbul ignore next */
 export default class WebSocket {
-  private io: WebSocketServer;
-  static socket: Socket;
-  static id: string;
+  private static io: WebSocketServer;
   constructor(httpServer: Server, opts: Partial<ServerOptions>) {
-    this.io = new WebSocketServer(httpServer, opts);
+    WebSocket.io = new WebSocketServer(httpServer, opts);
   }
 
   /**
@@ -50,13 +52,11 @@ export default class WebSocket {
    * @param eventStack Stack of events to start with.
    */
   public init(eventStack?: EventStack) {
-    this.io.on("connection", (socket) => {
-      WebSocket.socket = socket;
-      WebSocket.id = socket.id;
+    WebSocket.io.on("connection", (socket) => {
       if (eventStack) {
         if (eventStack.events.length > 0)
           for (const ev of eventStack.events) {
-            socket.on(ev.ev, ev.callback);
+            socket.on(ev.ev, (data) => ev.callback(socket, data, WebSocket.io));
           }
         else throw new Error("Event stack need at least one event");
       }
@@ -68,10 +68,8 @@ export default class WebSocket {
    * @param ev Event name
    * @param data Data to send
    */
-  public static emit(ev: string, data?: any) {
-    if (WebSocket.socket) {
-      WebSocket.socket.emit(ev, data);
-    }
+  public static emit<U = any>(ev: string, data?: U) {
+    WebSocket.io.emit(ev, data);
   }
 
   /**
@@ -79,9 +77,7 @@ export default class WebSocket {
    * @param ev Event name.
    * @param callback Callback for the event.
    */
-  public static on(ev: string, callback: EventCallback) {
-    if (WebSocket.socket) {
-      WebSocket.socket.on(ev, callback);
-    }
+  public static on<U = any>(ev: string, callback: EventCallback<U>) {
+    WebSocket.io.on(ev, callback);
   }
 }

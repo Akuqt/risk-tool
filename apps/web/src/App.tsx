@@ -1,11 +1,11 @@
 import React from "react";
-import { Counter } from "components";
+import { SocketProvider } from "./context";
+import { Pages } from "./pages";
 
 export const App: React.FC = () => {
   return (
-    <div>
-      <Counter />
-      <p>{import.meta.env.VITE_GOOGLE_KEY}</p>
-    </div>
+    <SocketProvider>
+      <Pages />
+    </SocketProvider>
   );
 };
