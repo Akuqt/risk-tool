@@ -1,5 +1,15 @@
 import mongoose, { Document } from "mongoose";
 
+export type Justify =
+  | "center"
+  | "flex-start"
+  | "flex-end"
+  | "space-around"
+  | "space-between"
+  | "space-evenly";
+
+export type Align = "center" | "flex-start" | "flex-end";
+
 export interface Data {
   lat: number;
   lng: number;
