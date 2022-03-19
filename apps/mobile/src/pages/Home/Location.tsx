@@ -6,6 +6,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { setLocation } from "../../redux/location";
 import { useLocation } from "../../hooks";
 import { RootState } from "../../redux";
+import { useSocket } from "../../hooks/useSocket";
 import { Data } from "types";
 
 type Props = NativeStackScreenProps<
@@ -22,6 +23,7 @@ export const Location: React.FC<Props> = ({ navigation }) => {
   const { watchId } = useSelector(
     (state: RootState) => state.watchReducer.data,
   );
+  const socket = useSocket();
 
   const {
     getLocation,
@@ -29,8 +31,10 @@ export const Location: React.FC<Props> = ({ navigation }) => {
     removeLocationUpdates,
     states: { location },
   } = useLocation((data: Data) => {
-    //Send Data
-    console.log(location);
+    socket?.emit("save:driver:location", {
+      id: user.id || "62320bbb38160372eac74c52",
+      ...data,
+    });
     dispatch(setLocation(data));
   }, 1000);
 

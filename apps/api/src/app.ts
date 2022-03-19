@@ -7,6 +7,7 @@ import events from "./events";
 import express from "express";
 import WebSocket from "./websocket";
 import cookieParser from "cookie-parser";
+import { swaggerUI, swaggerSpecs } from "./swagger";
 
 const app = express();
 
@@ -24,6 +25,13 @@ app.use(cookieParser());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use("/api/v1", routes);
+app.use(
+  "/api/v1/docs",
+  swaggerUI.serve,
+  swaggerUI.setup(swaggerSpecs, {
+    customSiteTitle: "Risk Tool Public Docs",
+  }),
+);
 
 const httpServer = http.createServer(app);
 

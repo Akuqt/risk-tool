@@ -7,6 +7,30 @@ import auth from "./auth.routes";
 
 const router = Router();
 
+/**
+ * @swagger
+ * tags:
+ *  name: Index
+ *  description: Index endpoint
+ */
+
+/**
+ * @swagger
+ * /:
+ *  get:
+ *   summary: Index route
+ *   tags: [Index]
+ *   responses:
+ *    200:
+ *      description: Returns Hello message
+ *      content:
+ *        application/json:
+ *          schema:
+ *            type: object
+ *            example:
+ *              msg: "Hello"
+ *
+ */
 router.get("/", index);
 
 router.use("/risk", risk);
