@@ -49,6 +49,7 @@ export const comparePassword = async (
   password: string,
 ): Promise<boolean> => await verify(hash, password);
 
+/* istanbul ignore next */
 export const initRoles = async (): Promise<void> => {
   try {
     const count = await RoleModel.estimatedDocumentCount();
