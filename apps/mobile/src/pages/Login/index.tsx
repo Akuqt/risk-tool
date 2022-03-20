@@ -5,7 +5,7 @@ import { useInputHandler } from "../../hooks";
 import { useDispatch } from "react-redux";
 import { Input, Btn } from "components/src/native";
 import { saveUser } from "../../redux/user";
-import { FDriver } from "types";
+import { FDriver, IError } from "types";
 import { Alert } from "react-native";
 import { Post } from "services";
 import { logo } from "assets";
@@ -45,18 +45,16 @@ export const Login: React.FC<Props> = ({ navigation }) => {
           onPress={async () => {
             console.log(values);
 
-            const res = await Post<{ ok: boolean; result: FDriver }>(
-              "mobile",
-              "/auth/sign-in",
-              { ...values, type: "driver" },
-            );
+            const res = await Post<{
+              ok: boolean;
+              result: FDriver;
+              error?: IError;
+            }>("mobile", "/auth/sign-in", { ...values, type: "driver" });
             if (res.data.ok) {
-              console.log(res.data.result);
-
               dispatch(saveUser(res.data.result));
               navigation.navigate("Home");
             } else {
-              Alert.alert("Error");
+              Alert.alert(res.data.error?.message || "Error");
             }
           }}
         />
