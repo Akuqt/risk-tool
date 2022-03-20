@@ -1,8 +1,7 @@
 import React from "react";
-import { Container, Txt, TextInput, Btn } from "components/src/Elements";
+import { Container, Txt } from "components/src/Elements";
 import { useNavigate } from "react-router-dom";
 import { Navbar } from "components";
-import { NavigationType } from "../../../../node_modules/react-router-dom/index";
 
 export const Home: React.FC = () => {
   const navigation = useNavigate();
@@ -55,7 +54,7 @@ export const Home: React.FC = () => {
       <Container
         width="100%"
         justify="center"
-        align="left"
+        align="flex-start"
         heigh="100%"
         bg="#FFFFFF"
         direction="column"
