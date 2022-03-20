@@ -17,6 +17,7 @@ stack.push<DriverLocation>("save:driver:location", async (_, data, io) => {
     driver.lat = data.lat;
     driver.lng = data.lng;
     await driver.save();
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     io!.emit("update:driver", {
       id: driver._id,
       lat: driver.lat,
