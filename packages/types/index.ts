@@ -190,3 +190,8 @@ export interface LoginAction {
   type: "setPassword" | "setUsername" | "clearAll";
   payload?: any;
 }
+
+export interface IError {
+  code: number;
+  message: string;
+}
