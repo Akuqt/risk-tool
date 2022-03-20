@@ -13,7 +13,7 @@ import { logo } from "assets";
 type Props = NativeStackScreenProps<{ Home: undefined }, "Home">;
 
 export const Login: React.FC<Props> = ({ navigation }) => {
-  const { values, handler } = useInputHandler({ user: "", password: "" });
+  const { values, handler } = useInputHandler({ username: "", password: "" });
   const dispatch = useDispatch();
   return (
     <Container>
@@ -22,7 +22,11 @@ export const Login: React.FC<Props> = ({ navigation }) => {
       </LogoContainer>
 
       <Form>
-        <Input label="User" handler={handler("user")} value={values.user} />
+        <Input
+          label="User"
+          handler={handler("username")}
+          value={values.username}
+        />
         <Input
           label="Password"
           password
@@ -39,11 +43,16 @@ export const Login: React.FC<Props> = ({ navigation }) => {
           bg="#FF6347"
           label="Sign In"
           onPress={async () => {
+            console.log(values);
+
             const res = await Post<{ ok: boolean; result: FDriver }>(
+              "mobile",
               "/auth/sign-in",
-              values,
+              { ...values, type: "driver" },
             );
             if (res.data.ok) {
+              console.log(res.data.result);
+
               dispatch(saveUser(res.data.result));
               navigation.navigate("Home");
             } else {

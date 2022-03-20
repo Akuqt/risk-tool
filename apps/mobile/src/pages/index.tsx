@@ -14,7 +14,7 @@ export const Pages: React.FC = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator
-        initialRouteName={!user.id ? "Home" : "Login"}
+        initialRouteName={user.id ? "Home" : "Login"}
         screenOptions={{
           headerShown: false,
           animation: "slide_from_right",
