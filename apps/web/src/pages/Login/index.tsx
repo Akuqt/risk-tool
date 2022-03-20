@@ -6,6 +6,7 @@ import { saveCompany } from "../../redux";
 import { useDispatch } from "react-redux";
 import { FCompany } from "types";
 import { Navbar } from "components";
+import { truck } from "assets";
 import { Post } from "services";
 
 export const Login: React.FC = () => {
@@ -25,7 +26,8 @@ export const Login: React.FC = () => {
       direction="column"
     >
       <Navbar
-        logo={() => navigation("/")}
+        logo={truck}
+        logoHandler={() => navigation("/")}
         content={
           <Container justify="flex-end" align="center" width="100%">
             <Container

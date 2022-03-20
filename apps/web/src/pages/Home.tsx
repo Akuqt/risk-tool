@@ -1,6 +1,7 @@
 import React from "react";
 import { Container, Txt } from "components/src/Elements";
 import { useNavigate } from "react-router-dom";
+import { truckDark } from "assets";
 import { Navbar } from "components";
 
 export const Home: React.FC = () => {
@@ -15,7 +16,8 @@ export const Home: React.FC = () => {
       direction="column"
     >
       <Navbar
-        logo={() => navigation("/")}
+        logo={truckDark}
+        logoHandler={() => navigation("/")}
         content={
           <Container justify="flex-end" align="center" width="100%">
             <Container

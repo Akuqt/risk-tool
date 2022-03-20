@@ -7,6 +7,7 @@ import { saveCompany } from "../../redux";
 import { FCompany } from "types";
 import { Navbar } from "components";
 import { Post } from "services";
+import { truck } from "assets";
 
 export const Register: React.FC = () => {
   const navigation = useNavigate();
@@ -25,7 +26,8 @@ export const Register: React.FC = () => {
       direction="column"
     >
       <Navbar
-        logo={() => navigation("/")}
+        logo={truck}
+        logoHandler={() => navigation("/")}
         content={
           <Container justify="flex-end" align="center" width="100%">
             <Container
