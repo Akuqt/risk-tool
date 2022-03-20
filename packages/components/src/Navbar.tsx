@@ -23,7 +23,12 @@ export const Navbar: React.FC<Props> = ({
       heigh="30px"
       direction={reverse ? "row-reverse" : "row"}
     >
-      <Container justify="space-between" align="center" width="auto">
+      <Container
+        justify="space-between"
+        align="center"
+        width="auto"
+        heigh="30px"
+      >
         <Img
           width="30px"
           src={logo}
@@ -32,7 +37,7 @@ export const Navbar: React.FC<Props> = ({
           onClick={logoHandler}
         />
       </Container>
-      <Container justify="center" align="center" width="auto">
+      <Container justify="center" align="center" width="auto" heigh="30px">
         {content}
       </Container>
     </Container>

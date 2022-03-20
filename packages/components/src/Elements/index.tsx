@@ -12,6 +12,8 @@ export const Container = styled.div<{
   borderRadius?: string;
   shadow?: boolean;
   direction?: "row" | "column" | "row-reverse";
+  borderBottom?: boolean;
+  borderBottomColor?: string;
 }>`
   display: flex;
   justify-content: ${(p) => p.justify};
@@ -24,6 +26,8 @@ export const Container = styled.div<{
   border-radius: ${(p) => p.borderRadius || "0px"};
   height: ${(p) => p.heigh || "auto"};
   box-shadow: ${(p) => (p.shadow ? "4px 4px 9px -5px #000000" : "none")};
+  border-bottom: ${(p) => (p.borderBottom ? "1px" : "0px")} solid
+    ${(p) => p.borderBottomColor || "transparent"};
 `;
 
 export const Txt = styled.p<{

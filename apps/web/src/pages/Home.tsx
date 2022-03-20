@@ -3,9 +3,14 @@ import { Container, Txt } from "components/src/Elements";
 import { useNavigate } from "react-router-dom";
 import { truckDark } from "assets";
 import { Navbar } from "components";
+import { useSelector } from "react-redux";
+import { RootState } from "../redux";
 
 export const Home: React.FC = () => {
   const navigation = useNavigate();
+  const company = useSelector(
+    (state: RootState) => state.companyReducer.company,
+  );
   return (
     <Container
       width="100%"
@@ -20,36 +25,88 @@ export const Home: React.FC = () => {
         logoHandler={() => navigation("/")}
         content={
           <Container justify="flex-end" align="center" width="100%">
-            <Container
-              justify="space-between"
-              align="center"
-              width="fit-content"
-              margin="0px 5px"
-            >
-              <Txt
-                fs="16px"
-                color="#0D1117"
-                pointer
-                onClick={() => navigation("/login")}
-              >
-                Sign In
-              </Txt>
-            </Container>
-            <Container
-              justify="space-between"
-              align="center"
-              width="fit-content"
-              margin="0px 5px"
-            >
-              <Txt
-                fs="16px"
-                color="#0D1117"
-                pointer
-                onClick={() => navigation("/register")}
-              >
-                Sign Up
-              </Txt>
-            </Container>
+            {company.token ? (
+              <>
+                <Container
+                  justify="space-between"
+                  align="center"
+                  width="fit-content"
+                  margin="0px 10px"
+                >
+                  <Txt
+                    fs="16px"
+                    color="#0D1117"
+                    pointer
+                    onClick={() => navigation("/main/dashboard")}
+                  >
+                    Dashboard
+                  </Txt>
+                </Container>
+                <Container
+                  justify="space-between"
+                  align="center"
+                  width="fit-content"
+                  margin="0px 10px"
+                >
+                  <Txt
+                    fs="16px"
+                    color="#0D1117"
+                    pointer
+                    onClick={() => navigation("/main/planner")}
+                  >
+                    Planner
+                  </Txt>
+                </Container>
+                <Container
+                  justify="space-between"
+                  align="center"
+                  width="fit-content"
+                  margin="0px 30px 0px 10px"
+                >
+                  <Txt
+                    fs="16px"
+                    color="#0D1117"
+                    pointer
+                    onClick={() => navigation("/main/general")}
+                  >
+                    General
+                  </Txt>
+                </Container>
+              </>
+            ) : (
+              <>
+                <Container
+                  justify="space-between"
+                  align="center"
+                  width="fit-content"
+                  margin="0px 10px"
+                >
+                  <Txt
+                    fs="16px"
+                    color="#0D1117"
+                    pointer
+                    onClick={() => navigation("/login")}
+                  >
+                    Sign In
+                  </Txt>
+                </Container>
+                <Container
+                  justify="space-between"
+                  align="center"
+                  width="fit-content"
+                  margin="0px 30px 0px 10px"
+                >
+                  <Txt
+                    fs="16px"
+                    color="#0D1117"
+                    pointer
+                    onClick={() => navigation("/register")}
+                  >
+                    Sign Up
+                  </Txt>
+                </Container>
+              </>
+            )}
           </Container>
         }
       />
