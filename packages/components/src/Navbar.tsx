@@ -1,14 +1,19 @@
 import React from "react";
 import { Container, Img } from "./Elements";
-import { truck } from "assets";
 
 interface Props {
   reverse?: boolean;
   content: React.ReactNode;
-  logo?: () => void;
+  logoHandler?: () => void;
+  logo: string;
 }
 
-export const Navbar: React.FC<Props> = ({ content, reverse, logo }) => {
+export const Navbar: React.FC<Props> = ({
+  content,
+  reverse,
+  logoHandler,
+  logo,
+}) => {
   return (
     <Container
       justify="space-between"
@@ -19,7 +24,13 @@ export const Navbar: React.FC<Props> = ({ content, reverse, logo }) => {
       direction={reverse ? "row-reverse" : "row"}
     >
       <Container justify="space-between" align="center" width="auto">
-        <Img width="30px" src={truck} alt="truck-logo" pointer onClick={logo} />
+        <Img
+          width="30px"
+          src={logo}
+          alt="truck-logo"
+          pointer
+          onClick={logoHandler}
+        />
       </Container>
       <Container justify="center" align="center" width="auto">
         {content}
