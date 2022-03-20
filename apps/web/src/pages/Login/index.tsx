@@ -4,7 +4,7 @@ import { initialState, reducer } from "./helper";
 import { useNavigate } from "react-router-dom";
 import { saveCompany } from "../../redux";
 import { useDispatch } from "react-redux";
-import { FCompany } from "types";
+import { FCompany, IError } from "types";
 import { Navbar } from "components";
 import { truck } from "assets";
 import { Post } from "services";
@@ -128,19 +128,21 @@ export const Login: React.FC = () => {
               borderRadius="4px"
               margin="40px 0px 0px 0px"
               onClick={async () => {
-                const res = await Post<{ ok: boolean; result: FCompany }>(
-                  "web",
-                  "/auth/sign-in",
-                  {
-                    type: "company",
-                    password,
-                    username,
-                  },
-                );
+                const res = await Post<{
+                  ok: boolean;
+                  result: FCompany;
+                  error?: IError;
+                }>("web", "/auth/sign-in", {
+                  type: "company",
+                  password,
+                  username,
+                });
                 if (res.data.ok) {
                   dispatch(saveCompany(res.data.result));
                   dispatcher({ type: "clearAll" });
                   navigation("/main/dashboard");
+                } else {
+                  console.log(res.data.error);
                 }
               }}
             >

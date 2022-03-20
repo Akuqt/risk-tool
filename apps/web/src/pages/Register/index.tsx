@@ -4,7 +4,7 @@ import { initialState, reducer } from "./helper";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { saveCompany } from "../../redux";
-import { FCompany } from "types";
+import { FCompany, IError } from "types";
 import { Navbar } from "components";
 import { Post } from "services";
 import { truck } from "assets";
@@ -155,24 +155,26 @@ export const Register: React.FC = () => {
               borderRadius="4px"
               margin="30px 0px 0px 0px"
               onClick={async () => {
-                const res = await Post<{ ok: boolean; result: FCompany }>(
-                  "web",
-                  "/auth/sign-up",
-                  {
-                    type: "company",
-                    name,
-                    password,
-                    username,
-                    address,
-                    lat: NaN,
-                    lng: NaN,
-                    materials: [],
-                  },
-                );
+                const res = await Post<{
+                  ok: boolean;
+                  result: FCompany;
+                  error?: IError;
+                }>("web", "/auth/sign-up", {
+                  type: "company",
+                  name,
+                  password,
+                  username,
+                  address,
+                  lat: NaN,
+                  lng: NaN,
+                  materials: [],
+                });
                 if (res.data.ok) {
                   dispatch(saveCompany(res.data.result));
                   dispatcher({ type: "clearAll" });
                   navigation("/main/dashboard");
+                } else {
+                  console.log(res.data.error);
                 }
               }}
             >
