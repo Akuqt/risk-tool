@@ -78,14 +78,14 @@ export const Map: React.FC<Props> = memo(
 
     useEffect(() => {
       if (map) {
-        Post<{ result: WazeTrafficInfo[] }>("/report/traffic", {
+        Post<{ result: WazeTrafficInfo[] }>("web", "/report/traffic", {
           lat: map.getCenter()?.lat(),
           lng: map.getCenter()?.lng(),
         }).then((res) => {
           setWazeTrafficInfo(res.data.result);
         });
 
-        Post<{ result: WazeAlertInfo[] }>("/report/alerts", {
+        Post<{ result: WazeAlertInfo[] }>("web", "/report/alerts", {
           lat: map.getCenter()?.lat(),
           lng: map.getCenter()?.lng(),
         }).then((res) => {
@@ -96,7 +96,7 @@ export const Map: React.FC<Props> = memo(
 
     useEffect(() => {
       if (count.c === 2) {
-        Post<any>("/path", {
+        Post<any>("web", "/path", {
           points: count.coord,
         }).then((res) => {
           setWazeTrafficInfo([

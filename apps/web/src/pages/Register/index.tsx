@@ -154,6 +154,7 @@ export const Register: React.FC = () => {
               margin="30px 0px 0px 0px"
               onClick={async () => {
                 const res = await Post<{ ok: boolean; result: FCompany }>(
+                  "web",
                   "/auth/sign-up",
                   {
                     type: "company",
