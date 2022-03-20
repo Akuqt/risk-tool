@@ -1,6 +1,7 @@
 import { CompanyModel, DriverModel, RoleModel } from "../models";
 import { ICompany, IDriver, IRole } from "types";
 import { Request, Response } from "express";
+import { errors } from "utils";
 import {
   cookieConf,
   encryptPassword,
@@ -22,11 +23,13 @@ export const signIn = async (
       .populate("role")
       .populate("company");
 
-    if (!_driver) return res.status(401).json({ ok: false });
+    if (!_driver)
+      return res.status(401).json({ ok: false, error: errors.invalidLogin });
 
     const matchPass = await comparePassword(_driver.password, password);
 
-    if (!matchPass) return res.status(401).json({ ok: false });
+    if (!matchPass)
+      return res.status(401).json({ ok: false, error: errors.invalidLogin });
 
     res.cookie("jid", createRefreshToken(_driver), cookieConf);
 
@@ -59,11 +62,13 @@ export const signIn = async (
       username,
     }).populate("role");
 
-    if (!_company) return res.status(401).json({ ok: false });
+    if (!_company)
+      return res.status(401).json({ ok: false, error: errors.invalidLogin });
 
     const matchPass = await comparePassword(_company.password, password);
 
-    if (!matchPass) return res.status(401).json({ ok: false });
+    if (!matchPass)
+      return res.status(401).json({ ok: false, error: errors.invalidLogin });
 
     const _drivers: IDriver[] = await DriverModel.find()
       .populate("company")
@@ -98,7 +103,7 @@ export const signIn = async (
     });
   }
 
-  return res.status(401).json({ ok: false });
+  return res.status(401).json({ ok: false, error: errors.invalidAuth });
 };
 
 export const signUp = async (
@@ -129,7 +134,7 @@ export const signUp = async (
     const _role2: IRole | null = await RoleModel.findOne({ name: type });
 
     if (_driver2 || !_company2 || !_role2) {
-      return res.status(401).json({ ok: false });
+      return res.status(401).json({ ok: false, error: errors.invalidRegister });
     }
 
     const _driver = new DriverModel({
@@ -182,7 +187,7 @@ export const signUp = async (
     const _role2: IRole | null = await RoleModel.findOne({ name: type });
 
     if (_company2 || !_role2) {
-      return res.status(401).json({ ok: false });
+      return res.status(401).json({ ok: false, error: errors.invalidRegister });
     }
 
     const _company = new CompanyModel({
@@ -218,5 +223,5 @@ export const signUp = async (
     });
   }
 
-  return res.status(401).json({ ok: false });
+  return res.status(401).json({ ok: false, error: errors.invalidAuth });
 };
