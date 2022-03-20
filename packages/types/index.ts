@@ -168,3 +168,25 @@ export interface FCompany {
   }[];
   token: string;
 }
+
+export interface RegisterState {
+  name: string;
+  password: string;
+  username: string;
+  address: string;
+}
+
+export interface RegisterAction {
+  type: "setName" | "setPassword" | "setUsername" | "setAddress" | "clearAll";
+  payload?: any;
+}
+
+export interface LoginState {
+  password: string;
+  username: string;
+}
+
+export interface LoginAction {
+  type: "setPassword" | "setUsername" | "clearAll";
+  payload?: any;
+}
