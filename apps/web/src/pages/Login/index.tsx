@@ -140,7 +140,7 @@ export const Login: React.FC = () => {
                 if (res.data.ok) {
                   dispatch(saveCompany(res.data.result));
                   dispatcher({ type: "clearAll" });
-                  navigation("/main");
+                  navigation("/main/dashboard");
                 }
               }}
             >

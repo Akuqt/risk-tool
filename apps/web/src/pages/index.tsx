@@ -13,7 +13,7 @@ export const Pages: React.FC = () => {
         <Route path="/" element={<Home />} />
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/main" element={<Main />} />
+        <Route path="/main/*" element={<Main />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
