@@ -39,7 +39,7 @@ async function main(n_, r_, Help_) {
 
 function showHelp() {
   console.log("\nUsage:\n");
-  console.log("yarn gen:route -n <page_name> -r <route_name>\n");
+  console.log("yarn gen:page -n <page_name> -r <route_name>\n");
 }
 
 /**
