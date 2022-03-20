@@ -48,7 +48,7 @@ export const Login: React.FC = () => {
             >
               <Txt
                 fs="16px"
-                color="#ff0000"
+                color="#FF6347"
                 pointer
                 onClick={() => navigation("/register")}
               >
@@ -92,7 +92,7 @@ export const Login: React.FC = () => {
               fs="16px"
               width="100%"
               borderBottom
-              borderBottomColor="red"
+              borderBottomColor="#FF6347"
               placerholderColor="#a3a3a3"
               placeholder="Username"
               value={username}
@@ -107,7 +107,7 @@ export const Login: React.FC = () => {
               fs="16px"
               width="100%"
               borderBottom
-              borderBottomColor="red"
+              borderBottomColor="#FF6347"
               placerholderColor="#a3a3a3"
               placeholder="Password"
               value={password}
@@ -122,7 +122,7 @@ export const Login: React.FC = () => {
             </Container>
             <Btn
               type="submit"
-              bg="#f7160f"
+              bg="#FF6347"
               width="100%"
               height="30px"
               borderRadius="4px"
