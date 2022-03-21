@@ -195,3 +195,12 @@ export interface IError {
   code: number;
   message: string;
 }
+
+export interface JWTPayload {
+  username: string;
+  _id: string;
+  role: string;
+  tokenVersion: number;
+  iat: number;
+  exp: number;
+}
