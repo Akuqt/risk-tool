@@ -12,4 +12,12 @@ export const errors = {
     code: 5000,
     message: "Something went wrong.",
   },
+  noAuthToken: {
+    message: "There's no auth token.",
+    code: 9090,
+  },
+  invalidAuthToken: {
+    message: "Invalid auth token.",
+    code: 9091,
+  },
 };
