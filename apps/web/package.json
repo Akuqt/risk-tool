@@ -22,7 +22,6 @@
     "react-router-dom": "^6.2.2",
     "redux-persist": "^6.0.0",
     "services": "*",
-    "utils": "*",
     "socket.io-client": "^4.4.1",
     "styled-components": "^5.3.1",
     "types": "*"
