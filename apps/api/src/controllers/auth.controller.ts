@@ -1,7 +1,7 @@
 import { CompanyModel, DriverModel, RoleModel } from "../models";
 import { ICompany, IDriver, IRole } from "types";
 import { Request, Response } from "express";
-import { errors } from "utils";
+import { errors } from "../lib";
 import {
   cookieConf,
   encryptPassword,

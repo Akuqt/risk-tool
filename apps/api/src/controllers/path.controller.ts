@@ -1,7 +1,7 @@
 import { Response, Request } from "express";
 import { WazeAPI } from "waze-api";
+import { errors } from "../lib";
 import { Coord } from "types";
-import { errors } from "utils";
 
 const waze = new WazeAPI();
 
