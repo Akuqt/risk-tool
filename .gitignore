@@ -19,6 +19,7 @@ build
 dist
 dist-ssr
 *.local
+release/
 
 # misc
 .DS_Store
