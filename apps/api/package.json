@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "ts-node-dev --respawn src",
     "build": "tsc",
+    "postbuild": "npx cpy-cli src/python/*.py ../../release/api/python/ && npx cpy-cli package.json ../../release/api/",
     "start": "node dist",
     "test": "jest",
     "test:staged": "jest --bail --findRelatedTests"
