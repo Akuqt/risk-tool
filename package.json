@@ -2,7 +2,7 @@
   "name": "risk-tool-repo",
   "version": "0.0.0",
   "private": true,
-  "type": "module",
+  "type": "commonjs",
   "author": "Akuqt",
   "license": "MIT",
   "repository": {
