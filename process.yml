@@ -1,0 +1,9 @@
+apps:
+  - name: "backend"
+    script: "release/api/index.js"
+    env:
+      NODE_ENV: "production"
+  - name: "frontend"
+    script: "release/web/index.js"
+    env:
+      NODE_ENV: "production"
