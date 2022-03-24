@@ -1,6 +1,13 @@
 import axios, { AxiosResponse, AxiosError } from "axios";
-const baseURL1 = "http://10.0.2.2:4000/api/v1";
-const baseURL2 = "http://localhost:4000/api/v1";
+
+const baseURL1 =
+  process.env.NODE_ENV !== "production"
+    ? "http://10.0.2.2:4000/api/v1"
+    : "https://api.risk-tool.xyz/api/v1";
+const baseURL2 =
+  process.env.NODE_ENV !== "production"
+    ? "http://localhost:4000/api/v1"
+    : "https://api.risk-tool.xyz/api/v1";
 
 export const Post = async <T>(
   type: "mobile" | "web",
