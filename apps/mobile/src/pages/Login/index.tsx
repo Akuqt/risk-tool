@@ -2,10 +2,10 @@ import React from "react";
 import { Container, Logo, LogoContainer, Form } from "./Elements";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useInputHandler } from "../../hooks";
+import { FDriver, IError } from "types";
 import { useDispatch } from "react-redux";
 import { Input, Btn } from "components/src/native";
 import { saveUser } from "../../redux/user";
-import { FDriver, IError } from "types";
 import { Alert } from "react-native";
 import { Post } from "services";
 import { logo } from "assets";
@@ -49,7 +49,10 @@ export const Login: React.FC<Props> = ({ navigation }) => {
               ok: boolean;
               result: FDriver;
               error?: IError;
-            }>("mobile", "/auth/sign-in", { ...values, type: "driver" });
+            }>("http://10.0.2.2:4000/api/v1", "/auth/sign-in", {
+              ...values,
+              type: "driver",
+            });
             if (res.data.ok) {
               dispatch(saveUser(res.data.result));
               navigation.navigate("Home");
