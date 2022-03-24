@@ -1,16 +1,18 @@
 import React, { useReducer } from "react";
 import { Btn, Container, TextInput, Txt } from "components/src/Elements";
 import { initialState, reducer } from "./helper";
+import { FCompany, IError } from "types";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { saveCompany } from "../../redux";
-import { FCompany, IError } from "types";
+import { useApiUrl } from "../../hooks";
 import { Navbar } from "components";
-import { Post } from "services";
 import { truck } from "assets";
+import { Post } from "services";
 
 export const Register: React.FC = () => {
   const navigation = useNavigate();
+  const apiUrl = useApiUrl();
   const [{ address, name, password, username }, dispatcher] = useReducer(
     reducer,
     initialState,
@@ -159,7 +161,7 @@ export const Register: React.FC = () => {
                   ok: boolean;
                   result: FCompany;
                   error?: IError;
-                }>("web", "/auth/sign-up", {
+                }>(apiUrl, "/auth/sign-up", {
                   type: "company",
                   name,
                   password,
