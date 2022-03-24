@@ -13,7 +13,7 @@ hooks:
       timeout: 300
       runas: root
   AfterInstall:
-    - location: aws/install_dependencies.sh
+    - location: aws/after_install.sh
       timeout: 300
       runas: root
   ApplicationStart:

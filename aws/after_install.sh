@@ -1,3 +1,4 @@
 #!/bin/bash
 cd /home/ubuntu/risk-tool
-echo "yarn"
+yarn install
+yarn build
