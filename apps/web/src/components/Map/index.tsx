@@ -1,8 +1,9 @@
 import React, { useCallback, useState, useEffect, memo } from "react";
+import { containerStyle, initOptions, mapOptions } from "./helper";
 import { Container, UserLocation } from "./Elements";
 import { AiOutlineAim } from "react-icons/ai";
 import { Information } from "./Information";
-import { useLocation } from "../../hooks";
+import { useLocation, useApiUrl } from "../../hooks";
 import { Post } from "services";
 import {
   PolyPath,
@@ -19,7 +20,6 @@ import {
   useGoogleMap,
   useJsApiLoader,
 } from "@react-google-maps/api";
-import { containerStyle, initOptions, mapOptions } from "./helper";
 
 type MAP = ReturnType<typeof useGoogleMap>;
 
@@ -37,6 +37,7 @@ export const Map: React.FC<Props> = memo(
     showWazeTrafficLayer,
     showGoogleTrafficLayer,
   }) => {
+    const apiUrl = useApiUrl();
     const { location } = useLocation();
     const { isLoaded } = useJsApiLoader(initOptions);
     const [map, setMap] = useState<MAP>(null);
@@ -78,25 +79,25 @@ export const Map: React.FC<Props> = memo(
 
     useEffect(() => {
       if (map) {
-        Post<{ result: WazeTrafficInfo[] }>("web", "/report/traffic", {
+        Post<{ result: WazeTrafficInfo[] }>(apiUrl, "/report/traffic", {
           lat: map.getCenter()?.lat(),
           lng: map.getCenter()?.lng(),
         }).then((res) => {
           setWazeTrafficInfo(res.data.result);
         });
 
-        Post<{ result: WazeAlertInfo[] }>("web", "/report/alerts", {
+        Post<{ result: WazeAlertInfo[] }>(apiUrl, "/report/alerts", {
           lat: map.getCenter()?.lat(),
           lng: map.getCenter()?.lng(),
         }).then((res) => {
           setWazeAlertInfo(res.data.result);
         });
       }
-    }, [map]);
+    }, [map, apiUrl]);
 
     useEffect(() => {
       if (count.c === 2) {
-        Post<any>("web", "/path", {
+        Post<any>(apiUrl, "/path", {
           points: count.coord,
         }).then((res) => {
           setWazeTrafficInfo([
@@ -114,7 +115,7 @@ export const Map: React.FC<Props> = memo(
         });
         setCount({ coord: [], c: 0 });
       }
-    }, [count]);
+    }, [count, apiUrl]);
 
     return isLoaded ? (
       <Container>

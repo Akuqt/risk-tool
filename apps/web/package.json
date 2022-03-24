@@ -5,7 +5,6 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "postbuild": "npx cpy-cli package.json ../../release/web/ && npx cpy-cli index.js ../../release/web/",
     "preview": "vite preview"
   },
   "dependencies": {

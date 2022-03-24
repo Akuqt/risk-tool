@@ -1,16 +1,18 @@
 import React, { useReducer } from "react";
 import { Container, Txt, TextInput, Btn } from "components/src/Elements";
 import { initialState, reducer } from "./helper";
+import { FCompany, IError } from "types";
 import { useNavigate } from "react-router-dom";
 import { saveCompany } from "../../redux";
 import { useDispatch } from "react-redux";
-import { FCompany, IError } from "types";
+import { useApiUrl } from "../../hooks";
 import { Navbar } from "components";
 import { truck } from "assets";
 import { Post } from "services";
 
 export const Login: React.FC = () => {
   const navigation = useNavigate();
+  const apiUrl = useApiUrl();
   const [{ password, username }, dispatcher] = useReducer(
     reducer,
     initialState,
@@ -132,7 +134,7 @@ export const Login: React.FC = () => {
                   ok: boolean;
                   result: FCompany;
                   error?: IError;
-                }>("web", "/auth/sign-in", {
+                }>(apiUrl, "/auth/sign-in", {
                   type: "company",
                   password,
                   username,

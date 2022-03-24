@@ -1,9 +1,7 @@
 import axios, { AxiosResponse, AxiosError } from "axios";
-const baseURL1 = "http://10.0.2.2:4000/api/v1";
-const baseURL2 = "http://localhost:4000/api/v1";
 
 export const Post = async <T>(
-  type: "mobile" | "web",
+  baseURL: string,
   url: string,
   body: object,
   token = "",
@@ -12,7 +10,7 @@ export const Post = async <T>(
     .post(url, body, {
       withCredentials: true,
       timeout: 2000,
-      baseURL: type === "mobile" ? baseURL1 : baseURL2,
+      baseURL,
       headers: {
         Authorization: `bearer ${token}`,
       },
@@ -23,7 +21,7 @@ export const Post = async <T>(
 };
 
 export const Get = async <T>(
-  type: "mobile" | "web",
+  baseURL: string,
   url: string,
   token = "",
 ): Promise<AxiosResponse<T>> => {
@@ -31,7 +29,7 @@ export const Get = async <T>(
     .get(url, {
       withCredentials: true,
       timeout: 2000,
-      baseURL: type === "mobile" ? baseURL1 : baseURL2,
+      baseURL,
       headers: {
         Authorization: `bearer ${token}`,
       },

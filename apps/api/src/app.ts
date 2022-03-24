@@ -30,6 +30,7 @@ app.use(
   swaggerUI.serve,
   swaggerUI.setup(swaggerSpecs, {
     customSiteTitle: "Risk Tool Public Docs",
+    customCss: ".scheme-container {display: none}",
   }),
 );
 
