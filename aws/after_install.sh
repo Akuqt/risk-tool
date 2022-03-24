@@ -1,5 +1,7 @@
 #!/bin/bash
 
+sudo chmod -R 777 /home/ubuntu/risk-tool
+
 cd /home/ubuntu/risk-tool
 
 export NVM_DIR="$HOME/.nvm"	
@@ -12,7 +14,7 @@ yarn install
 
 cd apps/web/
 yarn build
+cp index.js ../../release/web/
 cd ..
 cd api/
 yarn build
-cd ../..
