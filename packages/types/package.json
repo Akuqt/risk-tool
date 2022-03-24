@@ -4,6 +4,9 @@
   "main": "index.ts",
   "types": "index.ts",
   "private": true,
+  "dependencies": {
+    "config": "*"
+  },
   "devDependencies": {
     "@types/mongoose": "^5.11.97"
   }

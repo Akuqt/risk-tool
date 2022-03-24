@@ -5,7 +5,7 @@ import { useInputHandler } from "../../hooks";
 import { useDispatch } from "react-redux";
 import { Input, Btn } from "components/src/native";
 import { saveUser } from "../../redux/user";
-import { FDriver } from "types";
+import { FDriver, IError } from "types";
 import { Alert } from "react-native";
 import { Post } from "services";
 import { logo } from "assets";
@@ -13,7 +13,7 @@ import { logo } from "assets";
 type Props = NativeStackScreenProps<{ Home: undefined }, "Home">;
 
 export const Login: React.FC<Props> = ({ navigation }) => {
-  const { values, handler } = useInputHandler({ user: "", password: "" });
+  const { values, handler } = useInputHandler({ username: "", password: "" });
   const dispatch = useDispatch();
   return (
     <Container>
@@ -22,7 +22,11 @@ export const Login: React.FC<Props> = ({ navigation }) => {
       </LogoContainer>
 
       <Form>
-        <Input label="User" handler={handler("user")} value={values.user} />
+        <Input
+          label="User"
+          handler={handler("username")}
+          value={values.username}
+        />
         <Input
           label="Password"
           password
@@ -39,15 +43,18 @@ export const Login: React.FC<Props> = ({ navigation }) => {
           bg="#FF6347"
           label="Sign In"
           onPress={async () => {
-            const res = await Post<{ ok: boolean; result: FDriver }>(
-              "/auth/sign-in",
-              values,
-            );
+            console.log(values);
+
+            const res = await Post<{
+              ok: boolean;
+              result: FDriver;
+              error?: IError;
+            }>("mobile", "/auth/sign-in", { ...values, type: "driver" });
             if (res.data.ok) {
               dispatch(saveUser(res.data.result));
               navigation.navigate("Home");
             } else {
-              Alert.alert("Error");
+              Alert.alert(res.data.error?.message || "Error");
             }
           }}
         />

@@ -4,7 +4,8 @@
     "target": "es6",
     "module": "commonjs",
     "isolatedModules": true,
-    "outDir": "./dist"
+    "outDir": "../../release/api/",
+    "newLine": "lf"
   },
   "include": ["src", "types.d.ts"],
   "ts-node": {

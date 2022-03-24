@@ -1,5 +1,4 @@
-import { simpleGet, app } from "./helper";
-import { wsrequest } from "wsreq";
+import { simpleGet } from "./helper";
 
 describe("GET /api/v1", () => {
   it("should get msg", async () => {

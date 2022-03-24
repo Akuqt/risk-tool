@@ -19,27 +19,27 @@ main(n, r, Help);
  */
 async function main(n_, r_, Help_) {
   if (Help_) {
-    console.log("\nUsage:\n");
-    console.log("yarn gen:route -n <page_name> -r <route_name>\n");
+    showHelp();
     return;
   }
-
   if (n_ && r_) {
     const __name = capitalize(n_);
     const __pages = join(__web, "/src/pages/index.tsx");
     const page = fs.createWriteStream(join(__web, `/src/pages/${__name}.tsx`));
-
     page.write(pageTemplate(__name), (err) => {
       if (err) throw err;
       page.close();
     });
-
     await addToPages(__pages, __name, r_);
-
     console.log("done...");
   } else {
-    throw new Error("Please provide valid params");
+    showHelp();
   }
+}
+
+function showHelp() {
+  console.log("\nUsage:\n");
+  console.log("yarn gen:page -n <page_name> -r <route_name>\n");
 }
 
 /**
@@ -72,7 +72,6 @@ async function addToPages(path, name, route) {
   const element = `<Route path="/${route}" element={<${name} />} />\n`;
   final += element.padStart(element.length + 8, " ");
   final += lines.slice(i, lines.length).join("\n");
-
   const file = fs.createWriteStream(path);
   file.write(final, (err) => {
     if (err) throw err;

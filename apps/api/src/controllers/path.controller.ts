@@ -1,5 +1,6 @@
 import { Response, Request } from "express";
 import { WazeAPI } from "waze-api";
+import { errors } from "../lib";
 import { Coord } from "types";
 
 const waze = new WazeAPI();
@@ -46,9 +47,9 @@ export const getPath = async (
         })),
       );
     }
-  } catch (error) {
+  } catch (error: any) {
     /* istanbul ignore next */
-    return res.json({ ok: false });
+    return res.json({ ok: false, error: errors.generic });
   }
 
   res.json({

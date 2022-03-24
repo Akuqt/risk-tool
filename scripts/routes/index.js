@@ -24,8 +24,7 @@ main(n, c, Help);
  */
 async function main(n_, c_, Help_) {
   if (Help_) {
-    console.log("\nUsage:\n");
-    console.log("yarn gen:route -n <route_name> -c <controller_name>\n");
+    showHelp();
     return;
   }
 
@@ -65,8 +64,13 @@ async function main(n_, c_, Help_) {
 
     console.log("done...");
   } else {
-    throw new Error("Please provide valid params");
+    showHelp();
   }
+}
+
+function showHelp() {
+  console.log("\nUsage:\n");
+  console.log("yarn gen:route -n <route_name> -c <controller_name>\n");
 }
 
 /**

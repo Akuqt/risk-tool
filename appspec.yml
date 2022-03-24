@@ -1,0 +1,14 @@
+version: 0.0
+os: linux
+files:
+  - source: .
+    destination: /home/ubuntu/risk-tool
+hooks:
+  AfterInstall:
+    - location: aws/install_dependencies
+      timeout: 300
+      runas: root
+  ApplicationStart:
+    - location: aws/start_apps
+      timeout: 300
+      runas: root

@@ -168,3 +168,39 @@ export interface FCompany {
   }[];
   token: string;
 }
+
+export interface RegisterState {
+  name: string;
+  password: string;
+  username: string;
+  address: string;
+}
+
+export interface RegisterAction {
+  type: "setName" | "setPassword" | "setUsername" | "setAddress" | "clearAll";
+  payload?: any;
+}
+
+export interface LoginState {
+  password: string;
+  username: string;
+}
+
+export interface LoginAction {
+  type: "setPassword" | "setUsername" | "clearAll";
+  payload?: any;
+}
+
+export interface IError {
+  code: number;
+  message: string;
+}
+
+export interface JWTPayload {
+  username: string;
+  _id: string;
+  role: string;
+  tokenVersion: number;
+  iat: number;
+  exp: number;
+}
