@@ -5,10 +5,10 @@ files:
     destination: /home/ubuntu/risk-tool
 hooks:
   AfterInstall:
-    - location: scripts/install_dependencies
+    - location: aws/install_dependencies
       timeout: 300
       runas: root
   ApplicationStart:
-    - location: scripts/start_apps
+    - location: aws/start_apps
       timeout: 300
       runas: root
