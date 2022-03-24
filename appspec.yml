@@ -4,11 +4,19 @@ files:
   - source: .
     destination: /home/ubuntu/risk-tool
 hooks:
+  ApplicationStop:
+    - location: aws/stop_apps.sh
+      timeout: 300
+      runas: root
+  BeforeInstall:
+    - location: aws/before_install.sh
+      timeout: 300
+      runas: root
   AfterInstall:
-    - location: aws/install_dependencies
+    - location: aws/install_dependencies.sh
       timeout: 300
       runas: root
   ApplicationStart:
-    - location: aws/start_apps
+    - location: aws/start_apps.sh
       timeout: 300
       runas: root
