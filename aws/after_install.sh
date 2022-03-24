@@ -9,4 +9,10 @@ export NVM_DIR="$HOME/.nvm"
 npm i -g yarn
 yarn set version stable
 yarn install
+
+cd apps/web/
 yarn build
+cd ..
+cd api/
+yarn build
+cd ../..
