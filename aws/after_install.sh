@@ -17,4 +17,6 @@ yarn build
 cp index.js ../../release/web/
 cd ..
 cd api/
+mkdir ../../release/api/python
+cp src/python/risk.py ../../release/api/python/
 yarn build
