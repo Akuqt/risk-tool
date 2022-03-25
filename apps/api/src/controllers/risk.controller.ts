@@ -4,7 +4,7 @@ import { resolve } from "path";
 
 export const getRisk = (req: Request, res: Response) => {
   const { values } = req.body;
-  const data = spawnSync("python", [
+  const data = spawnSync("python3", [
     resolve(__dirname, "../python/risk.py"),
     ...values,
   ]);
