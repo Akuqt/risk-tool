@@ -16,6 +16,10 @@ import {
   useNavigate,
 } from "react-router-dom";
 
+import { Edit } from "./Edit";
+
+import { Driver } from "./Driver";
+
 export const Main: React.FC = () => {
   const company = useSelector(
     (state: RootState) => state.companyReducer.company,
@@ -89,6 +93,8 @@ export const Main: React.FC = () => {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/planner" element={<Planner />} />
         <Route path="/general" element={<General />} />
+        <Route path="/edit" element={<Edit />} />
+        <Route path="/driver" element={<Driver />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </>
