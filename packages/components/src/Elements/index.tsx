@@ -103,3 +103,27 @@ export const Img = styled.img<{ width: string; pointer?: boolean }>`
   width: ${(p) => p.width};
   cursor: ${(p) => (p.pointer ? "pointer" : "default")};
 `;
+
+export const Slct = styled.select`
+  background: transparent;
+  border: none;
+  outline: none;
+  border-bottom: 1px solid #ff6347;
+  color: #000000;
+  width: 100%;
+  margin: 20px 0px 5px 0px;
+  border-radius: 1px;
+  font-size: 16px;
+
+  option {
+    color: #a3a3a3;
+    border: none;
+    outline: none;
+    background: transparent;
+  }
+
+  &:focus {
+    outline: none;
+    border: none;
+  }
+`;
