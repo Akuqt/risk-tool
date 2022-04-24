@@ -70,8 +70,8 @@ export const Location: React.FC<Props> = ({ navigation }) => {
         img={`https://avatars.dicebear.com/api/${user.gender || "male"}/${
           user.username || "driverU"
         }.svg`}
-        name={user.name || "Some"}
-        lastname={user.lastname || "Name"}
+        name={user.name || "Name"}
+        lastname={user.lastname || "Lastname"}
         id={user.id || "6231ff99810c15ca985658ee"}
         role={user.role || "driver"}
         onPress={() => {
