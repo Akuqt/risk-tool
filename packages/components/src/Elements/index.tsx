@@ -127,3 +127,21 @@ export const Slct = styled.select`
     border: none;
   }
 `;
+
+export const Card = styled.div`
+  margin: 2rem 2rem 2rem 0;
+  padding: 1.5rem;
+  width: 230px;
+  box-shadow: 0 0 28px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+  border-radius: 4px;
+  &:hover {
+    transform: scale(1.1);
+  }
+`;
+
+export const CardCtnr = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+`;
