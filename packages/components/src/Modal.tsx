@@ -1,5 +1,6 @@
 import React from "react";
 import { Container, Txt, Btn } from "components/src/Elements";
+import { AiOutlineClose } from "react-icons/ai";
 
 interface IState {
   stt: boolean;
@@ -49,7 +50,7 @@ export const Modal: React.FC<IState> = ({ stt, changeState, children }) => {
               onClick={() => changeState(false)}
               style={{ position: "absolute", top: "20px", right: "20px" }}
             >
-              X
+              <AiOutlineClose color="#000000a0" size={18} />
             </Btn>
             {children}
           </Container>
