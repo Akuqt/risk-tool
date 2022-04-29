@@ -1,60 +1,82 @@
-import React, { useEffect, useState } from "react";
-import { Container, Btn, Txt, TextInput, Slct } from "components/src/Elements";
+import React, { useEffect, useState, useReducer } from "react";
+import {
+  Container,
+  Btn,
+  Txt,
+  TextInput,
+  Slct,
+  Card,
+  CardCtnr,
+} from "components/src/Elements";
 import { Modal } from "components";
 
 const driversBackend = [
   {
-    name: "Nombre1",
-    lastname: "Apellido1",
+    name: "Laura",
+    lastname: "Arango",
     plate: "AAA111",
-    gender: "F",
-    username: "username",
+    gender: "Female",
+    username: "lmarangoc",
   },
   {
-    name: "Nombre2",
-    lastname: "Apellido2",
+    name: "Italo",
+    lastname: "Alfaro",
     plate: "BBB222",
-    gender: "M",
-    username: "napellido",
+    gender: "Male",
+    username: "ialfaro",
   },
   {
-    name: "Nombre3",
-    lastname: "Apellido3",
+    name: "Laura",
+    lastname: "Correa",
     plate: "CCC333",
-    gender: "F",
-    username: "nombrea",
+    gender: "Female",
+    username: "lmcorrea",
   },
   {
-    name: "Nombre4",
-    lastname: "Apellido4",
-    plate: "DDD444",
-    gender: "M",
-    username: "myuser",
+    name: "Carlos",
+    lastname: "Gonzalez",
+    plate: "AAD444",
+    gender: "Male",
+    username: "cgonzalez",
   },
   {
-    name: "Nombre5",
-    lastname: "Apellido5",
+    name: "Laura",
+    lastname: "Villegas",
     plate: "EEE555",
-    gender: "F",
-    username: "myname",
+    gender: "Female",
+    username: "lvillegas",
   },
 ];
 
 export const Driver: React.FC = () => {
   const [modalState, changeModalState] = useState(false);
   const [drivers, setDrivers] = useState<typeof driversBackend>([]);
+  const [search, setSearch] = useState("");
+  const [filterD, setFilterD] = useState(drivers);
 
   useEffect(() => {
     setDrivers(driversBackend);
   }, []);
 
+  useEffect(() => {
+    console.log("search", search);
+    console.log("original list", drivers);
+    setFilterD(
+      drivers.filter((elemento) => {
+        console.log("elemento", elemento);
+        return JSON.stringify(elemento)
+          .toLowerCase()
+          .includes(search.toLowerCase());
+      }),
+    );
+  }, [search, drivers]);
+
   return (
     <Container
       width="100%"
+      heigh="calc(100% - 30px)"
       justify="center"
       align="center"
-      heigh="calc(100% - 30px)"
-      bg="#FFFFFF"
       direction="column"
     >
       <Container
@@ -62,59 +84,81 @@ export const Driver: React.FC = () => {
         justify="center"
         align="center"
         heigh="100%"
-        bg="#FFFFFF"
         direction="column"
       >
-        <Txt fs="28px" bold color="#000000" margin="0px 0px 20px 0px">
+        <Txt fs="28px" bold color="#000000" margin="0px 0px 30px 0px">
           Drivers
         </Txt>
+        <Container width="100%" justify="center" align="center" direction="row">
+          <TextInput
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            style={{ border: "1px solid #FF6347", height: "30px" }}
+            margin="0px 0px 20px 0px"
+            padding="0px 0px 0px 10px"
+            type="text"
+            color="#000000"
+            fs="16px"
+            width="25%"
+            placerholderColor="#a3a3a3"
+            borderRadius="4px"
+            placeholder="Search"
+          />
+          <Btn
+            onClick={() => changeModalState(!modalState)}
+            type="submit"
+            bg="#FF6347"
+            width="15%"
+            height="30px"
+            borderRadius="4px"
+            margin="0px 0px 20px 40px"
+          >
+            <Txt color="#000000" fs="16px" pointer>
+              Add New Driver
+            </Txt>
+          </Btn>
+        </Container>
         <Container
-          bg="#FFFFFF"
+          width="100%"
           justify="center"
-          heigh="5%"
-          width="45%"
           align="center"
-          borderRadius="8px"
-          padding="10px"
           direction="column"
-          shadow
         >
-          <Container justify="space-around" align="center" width="100%">
-            <Txt fs="20px" color="#000000" margin="0px 0px 5px 0px">
-              Name
-            </Txt>
-            <Txt fs="20px" color="#000000" margin="0px 0px 5px 0px">
-              Lastname
-            </Txt>
-            <Txt fs="20px" color="#000000" margin="0px 0px 5px 0px">
-              Plate
-            </Txt>
-            <Txt fs="20px" color="#000000" margin="0px 0px 5px 0px">
-              Gender
-            </Txt>
-            <Txt fs="20px" color="#000000" margin="0px 0px 5px 0px">
-              Username
-            </Txt>
+          <Container
+            width="80%"
+            justify="center"
+            align="center"
+            direction="column"
+          >
+            <CardCtnr>
+              {filterD?.map((drvr, index) => {
+                return (
+                  <Card key={index}>
+                    <Txt color="#000000" fs="16px">
+                      Name: {drvr?.name}
+                    </Txt>
+                    <Txt color="#000000" fs="16px">
+                      Lastname: {drvr?.lastname}
+                    </Txt>
+                    <Txt color="#000000" fs="16px">
+                      Plate: {drvr?.plate}
+                    </Txt>
+                    <Txt color="#000000" fs="16px">
+                      Gender: {drvr?.gender}
+                    </Txt>
+                    <Txt color="#000000" fs="16px">
+                      Username: {drvr?.username}
+                    </Txt>
+                  </Card>
+                );
+              })}
+            </CardCtnr>
           </Container>
         </Container>
-        <CardsDrivers />
-        <Btn
-          onClick={() => changeModalState(!modalState)}
-          type="submit"
-          bg="#FF0000"
-          width="20%"
-          height="30px"
-          borderRadius="4px"
-          margin="30px 0px 0px 0px"
-        >
-          <Txt color="#000000" fs="16px" pointer>
-            Add New Driver
-          </Txt>
-        </Btn>
       </Container>
       <Modal stt={modalState} changeState={changeModalState}>
         <FormDriver
-          ModalState
+          modalState
           changeModalState={changeModalState}
           listDrivers={drivers}
           addDriver={setDrivers}
@@ -124,52 +168,71 @@ export const Driver: React.FC = () => {
   );
 };
 
-export const CardsDrivers: React.FC = () => {
-  return (
-    <Container
-      bg="#FFFFFF"
-      justify="center"
-      heigh="5%"
-      width="45%"
-      align="center"
-      borderRadius="8px"
-      padding="10px"
-      margin="15px 0px 0px 0px"
-      direction="column"
-      shadow
-    >
-      <Container justify="space-around" align="center" width="100%">
-        <Txt fs="20px" color="#000000" margin="0px 0px 5px 0px">
-          Name
-        </Txt>
-        <Txt fs="20px" color="#000000" margin="0px 0px 5px 0px">
-          Lastname
-        </Txt>
-        <Txt fs="20px" color="#000000" margin="0px 0px 5px 0px">
-          Plate
-        </Txt>
-        <Txt fs="20px" color="#000000" margin="0px 0px 5px 0px">
-          Gender
-        </Txt>
-        <Txt fs="20px" color="#000000" margin="0px 0px 5px 0px">
-          Username
-        </Txt>
-      </Container>
-    </Container>
-  );
-};
-
 interface IState {
-  ModalState: boolean;
+  modalState: boolean;
   changeModalState: React.Dispatch<React.SetStateAction<boolean>>;
   listDrivers: typeof driversBackend;
   addDriver: React.Dispatch<React.SetStateAction<typeof driversBackend>>;
 }
 
 export const FormDriver: React.FC<IState> = ({
-  ModalState,
+  modalState,
   changeModalState,
 }) => {
+  const initialState: DriverState = {
+    name: "",
+    lastname: "",
+    plate: "",
+    gender: "",
+    username: "",
+    password: "",
+  };
+
+  interface DriverState {
+    name: string;
+    lastname: string;
+    plate: string;
+    gender: string;
+    username: string;
+    password: string;
+  }
+
+  interface DriverAction {
+    type:
+      | "setName"
+      | "setLastname"
+      | "setPlate"
+      | "setGender"
+      | "setUsername"
+      | "setPassword"
+      | "clearAll";
+    payload?: any;
+  }
+
+  const reducer = (state: DriverState, action: DriverAction): DriverState => {
+    switch (action.type) {
+      case "setName":
+        return { ...state, name: action.payload };
+      case "setLastname":
+        return { ...state, lastname: action.payload };
+      case "setPlate":
+        return { ...state, plate: action.payload };
+      case "setGender":
+        return { ...state, gender: action.payload };
+      case "setUsername":
+        return { ...state, username: action.payload };
+      case "setPassword":
+        return { ...state, password: action.payload };
+      case "clearAll":
+        return initialState;
+      default:
+        return state;
+    }
+  };
+
+  const [{ name, lastname, plate, gender, username, password }, dispatcher] =
+    useReducer(reducer, initialState);
+
   return (
     <Container
       width="100%"
@@ -179,7 +242,11 @@ export const FormDriver: React.FC<IState> = ({
       bg="#FFFFFF"
       direction="column"
     >
-      <form>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+        }}
+      >
         <TextInput
           margin="60px 0px 5px 0px"
           type="text"
@@ -191,6 +258,10 @@ export const FormDriver: React.FC<IState> = ({
           placerholderColor="#a3a3a3"
           placeholder="Name"
           name="name"
+          value={name}
+          onChange={(e) =>
+            dispatcher({ type: "setName", payload: e.target.value })
+          }
         />
         <TextInput
           margin="20px 0px 5px 0px"
@@ -203,6 +274,10 @@ export const FormDriver: React.FC<IState> = ({
           placerholderColor="#a3a3a3"
           placeholder="Lastname"
           name="lastname"
+          value={lastname}
+          onChange={(e) =>
+            dispatcher({ type: "setLastname", payload: e.target.value })
+          }
         />
         <TextInput
           margin="20px 0px 5px 0px"
@@ -215,13 +290,24 @@ export const FormDriver: React.FC<IState> = ({
           placerholderColor="#a3a3a3"
           placeholder="Plate"
           name="plate"
+          value={plate}
+          onChange={(e) =>
+            dispatcher({ type: "setPlate", payload: e.target.value })
+          }
         />
-        <Slct name="gender" defaultValue={0}>
+        <Slct
+          name="gender"
+          defaultValue={0}
+          value={gender}
+          onChange={(e) =>
+            dispatcher({ type: "setGender", payload: e.target.value })
+          }
+        >
           <option disabled value={0}>
             Gender
           </option>
-          <option>M</option>
-          <option>F</option>
+          <option>Male</option>
+          <option>Female</option>
         </Slct>
         <TextInput
           margin="20px 0px 5px 0px"
@@ -234,6 +320,10 @@ export const FormDriver: React.FC<IState> = ({
           placerholderColor="#a3a3a3"
           placeholder="Username"
           name="username"
+          value={username}
+          onChange={(e) =>
+            dispatcher({ type: "setUsername", payload: e.target.value })
+          }
         />
         <TextInput
           margin="20px 0px 5px 0px"
@@ -246,10 +336,14 @@ export const FormDriver: React.FC<IState> = ({
           placerholderColor="#a3a3a3"
           placeholder="Password"
           name="password"
+          value={password}
+          onChange={(e) =>
+            dispatcher({ type: "setPassword", payload: e.target.value })
+          }
         />
         <Btn
           type="submit"
-          onClick={() => changeModalState(!ModalState)}
+          onClick={() => changeModalState(!modalState)}
           bg="#FF0000"
           width="100%"
           height="30px"
