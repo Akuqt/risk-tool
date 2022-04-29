@@ -180,6 +180,8 @@ export const Map: React.FC<Props> = memo(
               />
             ))}
           {info && (
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
             <InfoWindow
               position={info.location}
               onCloseClick={() => {
