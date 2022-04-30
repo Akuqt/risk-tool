@@ -1,14 +1,14 @@
 import React, { useEffect, useState, useReducer } from "react";
-import {
-  Container,
-  Btn,
-  Txt,
-  TextInput,
-  Slct,
-  Card,
-  CardCtnr,
-} from "components/src/Elements";
 import { Modal } from "components";
+import {
+  Txt,
+  Btn,
+  Card,
+  Slct,
+  CardCtnr,
+  TextInput,
+  Container,
+} from "components/src/Elements";
 
 const driversBackend = [
   {
@@ -59,15 +59,10 @@ export const Driver: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    console.log("search", search);
-    console.log("original list", drivers);
     setFilterD(
-      drivers.filter((elemento) => {
-        console.log("elemento", elemento);
-        return JSON.stringify(elemento)
-          .toLowerCase()
-          .includes(search.toLowerCase());
-      }),
+      drivers.filter((elemento) =>
+        JSON.stringify(elemento).toLowerCase().includes(search.toLowerCase()),
+      ),
     );
   }, [search, drivers]);
 
