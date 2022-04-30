@@ -297,15 +297,12 @@ export const FormDriver: React.FC<IState> = ({
         />
         <Slct
           name="gender"
-          defaultValue={0}
           value={gender}
           onChange={(e) =>
             dispatcher({ type: "setGender", payload: e.target.value })
           }
         >
-          <option disabled value={0}>
-            Gender
-          </option>
+          <option>Gender</option>
           <option>Male</option>
           <option>Female</option>
         </Slct>
