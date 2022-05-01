@@ -66,6 +66,7 @@ export const Map: React.FC<Props> = memo(
     const panToUserLocation = useCallback(() => {
       if (location) {
         map?.panTo(location);
+        map?.setZoom(14);
       }
     }, [location, map]);
 
