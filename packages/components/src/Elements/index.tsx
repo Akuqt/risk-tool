@@ -1,3 +1,4 @@
+/* eslint-disable indent */
 import styled from "styled-components";
 import { Align, Justify } from "types";
 
@@ -80,6 +81,7 @@ export const Btn = styled.button<{
   borderRadius?: string;
   margin?: string;
   padding?: string;
+  hover?: boolean;
 }>`
   height: ${(p) => p.height || "auto"};
   width: ${(p) => p.width || "fit-content"};
@@ -95,7 +97,8 @@ export const Btn = styled.button<{
   cursor: pointer;
 
   &:hover {
-    background-color: ${(p) => (p.bg ? p.bg + "c0" : "transparent")};
+    background-color: ${(p) =>
+      p.bg ? p.bg + (!p.hover ? "c0" : "ff") : "transparent"};
   }
 `;
 
@@ -144,4 +147,54 @@ export const CardCtnr = styled.div`
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
+`;
+
+export const AniRotation = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation: rotation 1s linear infinite reverse;
+  @keyframes rotation {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+`;
+
+export const Check = styled.input<{
+  bg: string;
+  activeColor: string;
+  inactiveColor: string;
+}>`
+  position: relative;
+  margin: 0px 5px;
+  appearance: none;
+  border: none;
+  cursor: pointer;
+  outline: none;
+  border: 1px solid black;
+  width: 40px;
+  height: 20px;
+  background-color: ${(p) => p.bg};
+  border-radius: 10px;
+  &:checked {
+    &::after {
+      transform: translateX(calc(200% - 6px));
+      background-color: ${(p) => p.activeColor};
+    }
+  }
+  &::after {
+    position: absolute;
+    content: "";
+    top: 3px;
+    left: 4px;
+    width: 12px;
+    height: 12px;
+    background-color: ${(p) => p.inactiveColor};
+    border-radius: 50%;
+    transition: transform 200ms ease-in-out, background-color 200ms ease-in-out;
+  }
 `;
