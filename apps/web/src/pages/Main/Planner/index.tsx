@@ -1,8 +1,31 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { CustomInput, CustomSelect, CustomBtn } from "components";
 import { MdClear, MdSettingsSuggest } from "react-icons/md";
 import { Container, Btn, Txt, Check } from "components/src/Elements";
 import { Map } from "../../../components";
+
+import Geocode from "react-geocode";
+
+import { destinationIcon, originIcon } from "assets";
+
+import { Coord, PolyPath } from "types";
+import { RootState } from "../../../redux";
+import { useSelector } from "react-redux";
+import { Post } from "services";
+import { useApiUrl } from "../../../hooks";
+
+Geocode.setApiKey(import.meta.env.VITE_GOOGLE_KEY);
+
+Geocode.setLanguage("en");
+Geocode.setRegion("co");
+
+const debounce = (cb: (...args: any) => void, delay = 1000) => {
+  let timeout: any;
+  return (...args: any) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => cb(...args), delay);
+  };
+};
 
 const options = [
   { value: "option1", label: "Option 1" },
@@ -11,15 +34,60 @@ const options = [
 ];
 
 export const Planner: React.FC = () => {
+  const apiUrl = useApiUrl();
+
   const [address, setAddress] = useState("");
   const [material, setMaterial] = useState<typeof options[0]>();
   const [driver, setDriver] = useState<typeof options[0]>();
+  const [clickable, setClickable] = useState(false);
+  const [loadingAddress, setLoadingAddress] = useState(false);
+
+  const [destination, setDestination] = useState<Coord | null>(null);
 
   const [settings, setSettings] = useState(false);
 
   const [googleTL, setGoogleTL] = useState(false);
   const [wazeTL, setWazeTL] = useState(false);
   const [wazeTA, setWazeTA] = useState(false);
+
+  const [paths, setPaths] = useState<PolyPath[]>([]);
+
+  const company = useSelector(
+    (state: RootState) => state.companyReducer.company,
+  );
+
+  const latlngFromAddress = useCallback(async (address: string) => {
+    try {
+      const res = await Geocode.fromAddress(address);
+      const { lat, lng } = res.results[0].geometry.location;
+      setDestination({ lat, lng });
+    } catch (error) {
+      // TODO: Notify error
+      console.log(error);
+    }
+  }, []);
+
+  const addressFromLatLng = useCallback(async (lat: number, lng: number) => {
+    try {
+      setLoadingAddress(true);
+      const { results } = await Geocode.fromLatLng(
+        lat.toString(),
+        lng.toString(),
+      );
+      const address = (results[0].formatted_address as string)
+        .split(",")
+        .filter((u) => !/.*ntico$|.*lombia$/gi.test(u.trim()))
+        .join(", ");
+      setAddress(address);
+      setLoadingAddress(false);
+    } catch (error) {
+      setAddress("");
+    }
+  }, []);
+
+  useEffect(() => {
+    if (address) debounce(() => latlngFromAddress(address))();
+  }, [address, latlngFromAddress]);
 
   return (
     <Container
@@ -139,26 +207,33 @@ export const Planner: React.FC = () => {
           direction="column"
         >
           <CustomInput
+            loading={loadingAddress}
             value={address}
             onChange={(e) => setAddress(e)}
             margin="12px 0px"
             placeholder="Destination"
             onClick={(e) => {
-              console.log("click", e);
+              setClickable(e);
             }}
           />
           <CustomSelect
             placeholder="Material"
             value={material}
             onChange={(e) => setMaterial(e)}
-            options={options}
+            options={company.materials.map((m) => ({
+              label: m,
+              value: m,
+            }))}
             margin="12px 0px"
           />
           <CustomSelect
             placeholder="Driver"
             value={driver}
             onChange={(e) => setDriver(e)}
-            options={options}
+            options={company.drivers.map((d) => ({
+              label: d.name + " " + d.lastname,
+              value: d.id,
+            }))}
             margin="12px 0px"
           />
         </Container>
@@ -169,17 +244,36 @@ export const Planner: React.FC = () => {
           direction="column"
           margin="20px 0px 0px 0px"
         >
-          <Btn
+          <CustomBtn
             bg="#c4c4c4"
-            width="100%"
-            borderRadius="4px"
             padding="4px"
             margin="15px 0px"
-          >
-            <Txt color="black" fs="18px" pointer>
-              Calculate Paths
-            </Txt>
-          </Btn>
+            label="Calculate Paths"
+            // lock={
+            //   driver === undefined || material === undefined || address === ""
+            // }
+            lock={address === ""}
+            onClick={async () => {
+              const res = await Post<{
+                distance: number;
+                time: number;
+                coords: Coord[];
+              }>(apiUrl, "/path", {
+                points: [
+                  {
+                    lat: 11.007100105286,
+                    lng: -74.809196472168,
+                  },
+                  {
+                    lat: destination?.lat,
+                    lng: destination?.lng,
+                  },
+                ],
+              });
+
+              setPaths([{ color: "tomato", path: res.data.coords }]);
+            }}
+          />
           <CustomBtn
             bg="#eb4242"
             padding="4px"
@@ -237,15 +331,49 @@ export const Planner: React.FC = () => {
           justify="flex-start"
           margin="40px 0px"
         >
-          <Btn width="100%" bg="#0ca82e" borderRadius="4px" padding="4px">
-            <Txt fs="18px" color="black" pointer>
-              Set Route
-            </Txt>
-          </Btn>
+          <CustomBtn
+            bg="#0ca82e"
+            padding="4px"
+            margin="10px 0px"
+            label="Set Route"
+          />
+        </Container>
+        <Container
+          width="100%"
+          align="center"
+          justify="flex-start"
+          margin="5px 0px"
+        >
+          <Txt fs="18px" color="black" bold>
+            {company.name}
+          </Txt>
+        </Container>
+        <Container
+          width="100%"
+          align="center"
+          justify="flex-start"
+          margin="5px 0px"
+        >
+          <Txt fs="16px" color="black">
+            {company.address}
+          </Txt>
         </Container>
       </Container>
       <Container width="80%" heigh="100%" align="center" justify="center">
         <Map
+          polys={paths}
+          markers={[
+            { coords: destination, icon: destinationIcon },
+            {
+              coords: { lat: 11.007100105286, lng: -74.809196472168 },
+              icon: originIcon,
+            },
+          ]}
+          canClick={clickable}
+          onClick={({ lat, lng }) => {
+            addressFromLatLng(lat, lng);
+            setClickable(false);
+          }}
           showWazeAlertsLayer={wazeTA}
           showWazeTrafficLayer={wazeTL}
           showGoogleTrafficLayer={googleTL}
