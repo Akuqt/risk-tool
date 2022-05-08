@@ -4,6 +4,7 @@ import { Container, UserLocation } from "./Elements";
 import { useLocation, useApiUrl } from "../../hooks";
 import { AiOutlineAim } from "react-icons/ai";
 import { Information } from "./Information";
+import { Coord } from "types";
 import { Post } from "services";
 import {
   PolyPath,
@@ -42,14 +43,20 @@ const getTimeColor = (t: number) => {
 
 interface Props {
   polys?: PolyPath[];
+  markers?: { icon: any; coords: Coord | null }[];
   showWazeAlertsLayer?: boolean;
   showWazeTrafficLayer?: boolean;
   showGoogleTrafficLayer?: boolean;
+  canClick?: boolean;
+  onClick?: (coord: Coord) => void;
 }
 
 export const Map: React.FC<Props> = memo(
   ({
     polys,
+    markers,
+    onClick,
+    canClick,
     showWazeAlertsLayer,
     showWazeTrafficLayer,
     showGoogleTrafficLayer,
@@ -68,19 +75,7 @@ export const Map: React.FC<Props> = memo(
       lng: -74.809196472168,
     });
 
-    const [count, setCount] = useState<{
-      coord: { lat: number; lng: number }[];
-      c: number;
-    }>({ coord: [], c: 0 });
-
     const [init, setInit] = useState(true);
-
-    const onClick = useCallback(
-      ({ lat, lng }: { lat: number; lng: number }) => {
-        setCount((ci) => ({ c: ci.c + 1, coord: [...ci.coord, { lat, lng }] }));
-      },
-      [],
-    );
 
     const updateWazeInfo = useCallback(() => {
       if (map) {
@@ -131,28 +126,6 @@ export const Map: React.FC<Props> = memo(
       showWazeTrafficLayer,
     ]);
 
-    useEffect(() => {
-      if (count.c === 2) {
-        Post<any>(apiUrl, "/path", {
-          points: count.coord,
-        }).then((res) => {
-          setWazeTrafficInfo([
-            {
-              city: "" + res.data.time,
-              date: 0,
-              description: "" + res.data.distance,
-              level: 0,
-              path: res.data.coords,
-              speedKh: 0,
-              street: "",
-              time: 0,
-            },
-          ]);
-        });
-        setCount({ coord: [], c: 0 });
-      }
-    }, [count, apiUrl]);
-
     return isLoaded ? (
       <Container>
         <UserLocation onClick={panToUserLocation}>
@@ -166,7 +139,9 @@ export const Map: React.FC<Props> = memo(
           onUnmount={onUnmount}
           options={mapOptions}
           onClick={(e) => {
-            onClick({ lat: e.latLng?.lat() || 0, lng: e.latLng?.lng() || 0 });
+            if (onClick && canClick) {
+              onClick({ lat: e.latLng?.lat() || 0, lng: e.latLng?.lng() || 0 });
+            }
           }}
         >
           {showGoogleTrafficLayer && <TrafficLayer />}
@@ -178,6 +153,7 @@ export const Map: React.FC<Props> = memo(
                 path={poly.path}
                 options={{
                   strokeColor: poly.color,
+                  strokeWeight: 6,
                 }}
               />
             ))}
@@ -203,6 +179,23 @@ export const Map: React.FC<Props> = memo(
                 }}
               />
             ))}
+          {markers &&
+            markers.length > 0 &&
+            markers.map((marker, i) => {
+              if (marker.coords) {
+                return (
+                  <Marker
+                    key={i}
+                    position={{
+                      lat: marker.coords.lat,
+                      lng: marker.coords.lng,
+                    }}
+                    icon={{ url: marker.icon }}
+                  />
+                );
+              }
+            })}
+
           {showWazeAlertsLayer &&
             wazeAlertInfo.length > 0 &&
             wazeAlertInfo.map((alert, i) => {
