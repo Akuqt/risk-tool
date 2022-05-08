@@ -1,9 +1,9 @@
 import React, { useCallback, useState, useEffect, memo } from "react";
 import { containerStyle, initOptions, mapOptions } from "./helper";
 import { Container, UserLocation } from "./Elements";
+import { useLocation, useApiUrl } from "../../hooks";
 import { AiOutlineAim } from "react-icons/ai";
 import { Information } from "./Information";
-import { useLocation, useApiUrl } from "../../hooks";
 import { Post } from "services";
 import {
   PolyPath,
@@ -22,6 +22,23 @@ import {
 } from "@react-google-maps/api";
 
 type MAP = ReturnType<typeof useGoogleMap>;
+
+const getAlertIcon = (alert: WazeAlertInfo) => {
+  switch (alert.type) {
+    case "ACCIDENT":
+      return "https://www.waze.com/livemap/assets/accident-major-e4499a78307739ab9e04b2c57eb65feb.svg";
+    case "POLICE":
+      return "https://www.waze.com/livemap/assets/police-987e7deeb8893a0e088fbf5aac5082f7.svg";
+    case "ROAD_CLOSED":
+      return "https://www.waze.com/livemap/assets/closure-d85b532570fa89f0cc951f5f3ef1e387.svg";
+    default:
+      return "https://www.waze.com/livemap/assets/hazard-02e4ae89da4f6b5a88a7bc5e4725f2e5.svg";
+  }
+};
+
+const getTimeColor = (t: number) => {
+  return t > 0 && t < 5 ? "green" : t > 5 && t < 10 ? "orange" : "red";
+};
 
 interface Props {
   polys?: PolyPath[];
@@ -56,12 +73,28 @@ export const Map: React.FC<Props> = memo(
       c: number;
     }>({ coord: [], c: 0 });
 
+    const [init, setInit] = useState(true);
+
     const onClick = useCallback(
       ({ lat, lng }: { lat: number; lng: number }) => {
         setCount((ci) => ({ c: ci.c + 1, coord: [...ci.coord, { lat, lng }] }));
       },
       [],
     );
+
+    const updateWazeInfo = useCallback(() => {
+      if (map) {
+        Post<{ result: WazeTrafficInfo[] }>(apiUrl, "/report/traffic", {
+          lat: map.getCenter()?.lat(),
+          lng: map.getCenter()?.lng(),
+        }).then(({ data: { result } }) => setWazeTrafficInfo(result));
+
+        Post<{ result: WazeAlertInfo[] }>(apiUrl, "/report/alerts", {
+          lat: map.getCenter()?.lat(),
+          lng: map.getCenter()?.lng(),
+        }).then(({ data: { result } }) => setWazeAlertInfo(result));
+      }
+    }, [apiUrl, map]);
 
     const panToUserLocation = useCallback(() => {
       if (location) {
@@ -79,22 +112,24 @@ export const Map: React.FC<Props> = memo(
     }, []);
 
     useEffect(() => {
-      if (map) {
-        Post<{ result: WazeTrafficInfo[] }>(apiUrl, "/report/traffic", {
-          lat: map.getCenter()?.lat(),
-          lng: map.getCenter()?.lng(),
-        }).then((res) => {
-          setWazeTrafficInfo(res.data.result);
-        });
-
-        Post<{ result: WazeAlertInfo[] }>(apiUrl, "/report/alerts", {
-          lat: map.getCenter()?.lat(),
-          lng: map.getCenter()?.lng(),
-        }).then((res) => {
-          setWazeAlertInfo(res.data.result);
-        });
+      const condition = map && (showWazeAlertsLayer || showWazeTrafficLayer);
+      if (init && map) {
+        updateWazeInfo();
+        setInit(false);
+      } else if (condition) {
+        const interval = setInterval(() => {
+          updateWazeInfo();
+        }, 6 * 1000 * 60);
+        return () => clearInterval(interval);
       }
-    }, [map, apiUrl]);
+    }, [
+      map,
+      init,
+      apiUrl,
+      updateWazeInfo,
+      showWazeAlertsLayer,
+      showWazeTrafficLayer,
+    ]);
 
     useEffect(() => {
       if (count.c === 2) {
@@ -153,8 +188,9 @@ export const Map: React.FC<Props> = memo(
                 key={i}
                 path={poly.path}
                 options={{
-                  strokeColor: "black",
+                  strokeColor: getTimeColor(poly.time / 60),
                   clickable: true,
+                  strokeWeight: 3,
                 }}
                 onClick={(e) => {
                   setInfo({
@@ -169,17 +205,26 @@ export const Map: React.FC<Props> = memo(
             ))}
           {showWazeAlertsLayer &&
             wazeAlertInfo.length > 0 &&
-            wazeAlertInfo.map((alert, i) => (
-              <Marker
-                position={alert.location}
-                key={i}
-                onClick={() => {
-                  setInfo({
-                    ...alert,
-                  });
-                }}
-              />
-            ))}
+            wazeAlertInfo.map((alert, i) => {
+              if (alert.type !== "JAM") {
+                const Sizer = window.google.maps.Size;
+                return (
+                  <Marker
+                    position={alert.location}
+                    icon={{
+                      url: getAlertIcon(alert),
+                      scaledSize: new Sizer(35, 40),
+                    }}
+                    key={i}
+                    onClick={() => {
+                      setInfo({
+                        ...alert,
+                      });
+                    }}
+                  />
+                );
+              }
+            })}
           {info && (
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
