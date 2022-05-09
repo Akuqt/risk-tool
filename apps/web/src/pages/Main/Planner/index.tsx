@@ -33,6 +33,13 @@ const options = [
   { value: "option3", label: "Option 3" },
 ];
 
+const formatAddress = (address: string) => {
+  return address
+    .split(",")
+    .filter((u) => !/.*ntico$|.*lombia$/gi.test(u.trim()))
+    .join(", ");
+};
+
 export const Planner: React.FC = () => {
   const apiUrl = useApiUrl();
 
@@ -74,10 +81,7 @@ export const Planner: React.FC = () => {
         lat.toString(),
         lng.toString(),
       );
-      const address = (results[0].formatted_address as string)
-        .split(",")
-        .filter((u) => !/.*ntico$|.*lombia$/gi.test(u.trim()))
-        .join(", ");
+      const address = formatAddress(results[0].formatted_address as string);
       setAddress(address);
       setLoadingAddress(false);
     } catch (error) {
@@ -261,8 +265,8 @@ export const Planner: React.FC = () => {
               }>(apiUrl, "/path", {
                 points: [
                   {
-                    lat: 11.007100105286,
-                    lng: -74.809196472168,
+                    lat: company.lat,
+                    lng: company.lng,
                   },
                   {
                     lat: destination?.lat,
@@ -355,7 +359,7 @@ export const Planner: React.FC = () => {
           margin="5px 0px"
         >
           <Txt fs="16px" color="black">
-            {company.address}
+            {formatAddress(company.address)}
           </Txt>
         </Container>
       </Container>
@@ -365,7 +369,7 @@ export const Planner: React.FC = () => {
           markers={[
             { coords: destination, icon: destinationIcon },
             {
-              coords: { lat: 11.007100105286, lng: -74.809196472168 },
+              coords: { lat: company.lat, lng: company.lng },
               icon: originIcon,
             },
           ]}
