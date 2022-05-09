@@ -174,10 +174,19 @@ export interface RegisterState {
   password: string;
   username: string;
   address: string;
+  error: boolean;
+  coords: Coord;
 }
 
 export interface RegisterAction {
-  type: "setName" | "setPassword" | "setUsername" | "setAddress" | "clearAll";
+  type:
+    | "setName"
+    | "setPassword"
+    | "setUsername"
+    | "setAddress"
+    | "clearAll"
+    | "setError"
+    | "setCoords";
   payload?: any;
 }
 
