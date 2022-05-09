@@ -5,6 +5,11 @@ export const initialState: RegisterState = {
   address: "",
   password: "",
   username: "",
+  error: true,
+  coords: {
+    lat: NaN,
+    lng: NaN,
+  },
 };
 
 export const reducer = (
@@ -22,6 +27,10 @@ export const reducer = (
       return { ...state, password: action.payload };
     case "clearAll":
       return initialState;
+    case "setError":
+      return { ...state, error: action.payload };
+    case "setCoords":
+      return { ...state, coords: action.payload };
     default:
       return state;
   }
