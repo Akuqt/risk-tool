@@ -71,13 +71,6 @@ export const getBestRoutePath = (origin: Coord, destination: Coord) => {
       ...barranquilla.slice(destinationIndex + 1, barranquilla.length),
       ...path2,
     ];
-
-    if (
-      getPathDistanceAndTime(path2).distance <
-      getPathDistanceAndTime(path).distance
-    ) {
-      path = path2;
-    }
   } else {
     path = barranquilla.slice(destinationIndex, originIndex + 1);
     path2 = barranquilla.slice(0, destinationIndex);
@@ -85,16 +78,12 @@ export const getBestRoutePath = (origin: Coord, destination: Coord) => {
       ...barranquilla.slice(originIndex + 1, barranquilla.length),
       ...path2,
     ];
-
-    if (
-      getPathDistanceAndTime(path2).distance <
-      getPathDistanceAndTime(path).distance
-    ) {
-      path = path2;
-    }
   }
   return {
-    fixedPath: { coords: path, ...getPathDistanceAndTime(path) },
+    fixedPath: [
+      { coords: path, ...getPathDistanceAndTime(path) },
+      { coords: path2, ...getPathDistanceAndTime(path2) },
+    ],
     nextOrigin: barranquilla[originIndex],
     nextDestination: barranquilla[destinationIndex],
   };
