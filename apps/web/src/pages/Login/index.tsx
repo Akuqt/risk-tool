@@ -144,7 +144,7 @@ export const Login: React.FC = () => {
                   dispatcher({ type: "clearAll" });
                   navigation("/main/dashboard");
                 } else {
-                  console.log(res.data.error);
+                  // TODO: notify error
                 }
               }}
             >

@@ -63,13 +63,6 @@ export const getBestPath = async (req: Request, res: Response) => {
     destinationPath: destinationPath.alternatives.map(pathMap),
   };
 
-  for (const a of result.originPath) {
-    console.log(a.distance);
-  }
-  for (const a of result.destinationPath) {
-    console.log(a.distance);
-  }
-
   return res.status(200).json({
     ok: true,
     result,

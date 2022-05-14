@@ -28,10 +28,8 @@ export const Register: React.FC = () => {
       const res = await Geocode.fromAddress(address);
       const { lat, lng } = res.results[0].geometry.location;
       dispatcher({ type: "setError", payload: false });
-      console.log(lat, lng);
       dispatcher({ type: "setCoords", payload: { lat, lng } });
     } catch (err) {
-      console.log(err);
       dispatcher({ type: "setError", payload: true });
     }
   }, []);
@@ -199,7 +197,7 @@ export const Register: React.FC = () => {
                     dispatcher({ type: "clearAll" });
                     navigation("/main/dashboard");
                   } else {
-                    console.log(res.data.error);
+                    // TODO: notify error
                   }
                 }
               }}

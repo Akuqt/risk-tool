@@ -5,7 +5,6 @@ import { EventStack } from "../websocket";
 const stack = new EventStack();
 
 stack.push("ping", (socket, data) => {
-  console.log(data);
   socket.emit("pong", data);
 });
 

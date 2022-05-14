@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import config from "../config";
 import mongoose from "mongoose";
 import { initRoles } from "../lib";

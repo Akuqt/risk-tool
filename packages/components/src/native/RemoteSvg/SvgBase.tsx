@@ -18,7 +18,7 @@ export const SvgBase: React.FC<SvgProps> = (props) => {
           const raw = await res.text();
           setSvgData(raw);
         } catch (err) {
-          console.error("Something Went Wrong!", err);
+          // TODO: notify error
         }
       }
     }

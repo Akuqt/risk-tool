@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import config from "../config";
 import { ICompany, IDriver } from "types";
 import { CookieOptions } from "express";

@@ -53,7 +53,6 @@ export const Planner: React.FC = () => {
       dispatcher({ type: "setDestination", payload: { lat, lng } });
     } catch (error) {
       // TODO: Notify error
-      console.log(error);
     }
   }, []);
 
