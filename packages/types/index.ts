@@ -210,6 +210,7 @@ export interface PlannerState {
   fixedPath: BaseBestPath[];
   originPath: BaseBestPath[];
   destinationPath: BaseBestPath[];
+  fixedPathIndex: number;
   originIndex: number;
   destinationIndex: number;
 }
@@ -232,6 +233,7 @@ export interface PlannerAction {
     | "setDestinationPath"
     | "setOriginIndex"
     | "setDestinationIndex"
+    | "setFixedPathIndex"
     | "reset";
   payload?: any;
 }
