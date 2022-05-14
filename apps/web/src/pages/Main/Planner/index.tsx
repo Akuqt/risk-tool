@@ -36,6 +36,7 @@ export const Planner: React.FC = () => {
       originIndex,
       pathSelector,
       loadingAddress,
+      fixedPathIndex,
       destinationPath,
       destinationIndex,
     },
@@ -84,7 +85,7 @@ export const Planner: React.FC = () => {
       style={{ position: "relative", overflow: "hidden" }}
     >
       <Container
-        width="200px"
+        width="300px"
         align="center"
         justify="flex-start"
         style={{
@@ -100,6 +101,13 @@ export const Planner: React.FC = () => {
           length={originPath.length || 1}
           onChange={(i) => {
             dispatcher({ type: "setOriginIndex", payload: i });
+          }}
+        />
+        <RadioGroup
+          group="Fixed"
+          length={fixedPath.length || 1}
+          onChange={(i) => {
+            dispatcher({ type: "setFixedPathIndex", payload: i });
           }}
         />
         <RadioGroup
@@ -287,7 +295,7 @@ export const Planner: React.FC = () => {
                 });
                 dispatcher({
                   type: "setFixedPath",
-                  payload: [res.data.result.fixedPath],
+                  payload: res.data.result.fixedPath,
                 });
                 dispatcher({ type: "setPathSelector", payload: true });
               }
@@ -297,13 +305,13 @@ export const Planner: React.FC = () => {
             bg="#eb4242"
             padding="4px"
             margin="15px 0px"
-            label="Calculate Origin Side Risk"
+            label="Calculate Origin Risk"
           />
           <CustomBtn
             bg="#0094FF"
             padding="4px"
             margin="15px 0px"
-            label="Calculate Destination Side Risk"
+            label="Calculate Destination Risk"
           />
         </Container>
         <Container
@@ -322,7 +330,7 @@ export const Planner: React.FC = () => {
             <Txt fs="18px" color="black">
               Distance:{" "}
               {formatNumber(
-                ((fixedPath[0]?.distance || 0) +
+                ((fixedPath[fixedPathIndex]?.distance || 0) +
                   (originPath[originIndex]?.distance || 0) +
                   (destinationPath[destinationIndex]?.distance || 0)) /
                   1000,
@@ -340,7 +348,7 @@ export const Planner: React.FC = () => {
             <Txt fs="18px" color="black">
               Time:{" "}
               {formatNumber(
-                ((fixedPath[0]?.time || 0) +
+                ((fixedPath[fixedPathIndex]?.time || 0) +
                   (originPath[originIndex]?.time || 0) +
                   (destinationPath[destinationIndex]?.time || 0)) /
                   60,
@@ -397,7 +405,7 @@ export const Planner: React.FC = () => {
       <Container width="80%" heigh="100%" align="center" justify="center">
         <Map
           polys={[
-            { color: "tomato", path: fixedPath[0]?.coords || [] },
+            { color: "tomato", path: fixedPath[fixedPathIndex]?.coords || [] },
             { color: "red", path: originPath[originIndex]?.coords || [] },
             {
               color: "blue",
