@@ -4,3 +4,4 @@ export * from "./Modal";
 export * from "./CustomSelect";
 export * from "./CustomInput";
 export * from "./CustomBtn";
+export * from "./RadioGroup";
