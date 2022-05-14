@@ -50,7 +50,7 @@ export const getBestPath = async (req: Request, res: Response) => {
     destination,
   );
 
-  if (!fixedPath) {
+  if (fixedPath.length === 0) {
     return res.status(400).json({ ok: false, error: errors.generic });
   }
 
