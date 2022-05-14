@@ -190,6 +190,52 @@ export interface RegisterAction {
   payload?: any;
 }
 
+interface Option {
+  value: string;
+  label: string;
+}
+
+export interface PlannerState {
+  address: string;
+  material?: Option;
+  driver?: Option;
+  clickable: boolean;
+  loadingAddress: boolean;
+  destination: Coord | null;
+  settings: boolean;
+  pathSelector: boolean;
+  googleTL: boolean;
+  wazeTL: boolean;
+  wazeTA: boolean;
+  fixedPath: BaseBestPath[];
+  originPath: BaseBestPath[];
+  destinationPath: BaseBestPath[];
+  originIndex: number;
+  destinationIndex: number;
+}
+
+export interface PlannerAction {
+  type:
+    | "setAddress"
+    | "setMaterial"
+    | "setDriver"
+    | "setClickable"
+    | "setLoadingAddress"
+    | "setDestination"
+    | "setSettings"
+    | "setPathSelector"
+    | "setGoogleTL"
+    | "setWazeTL"
+    | "setWazeTA"
+    | "setFixedPath"
+    | "setOriginPath"
+    | "setDestinationPath"
+    | "setOriginIndex"
+    | "setDestinationIndex"
+    | "reset";
+  payload?: any;
+}
+
 export interface LoginState {
   password: string;
   username: string;
@@ -212,4 +258,18 @@ export interface JWTPayload {
   tokenVersion: number;
   iat: number;
   exp: number;
+}
+
+export interface BaseBestPath {
+  coords: Coord[];
+  distance: number;
+  time: number;
+}
+
+export interface BestPath {
+  result: {
+    fixedPath: BaseBestPath;
+    originPath: BaseBestPath[];
+    destinationPath: BaseBestPath[];
+  };
 }
