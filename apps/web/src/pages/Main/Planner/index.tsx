@@ -1,63 +1,46 @@
-import React, { useState, useEffect, useCallback } from "react";
-import { CustomInput, CustomSelect, CustomBtn } from "components";
+import React, { useEffect, useCallback, useReducer } from "react";
+import Geocode from "react-geocode";
+import { CustomInput, CustomSelect, CustomBtn, RadioGroup } from "components";
+import { debounce, formatAddress, formatNumber } from "../../../utils";
+import { destinationIcon, originIcon } from "assets";
 import { MdClear, MdSettingsSuggest } from "react-icons/md";
 import { Container, Btn, Txt, Check } from "components/src/Elements";
+import { initialState, reducer } from "./helper";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../redux";
+import { useApiUrl } from "../../../hooks";
+import { BestPath } from "types";
+import { Post } from "services";
 import { Map } from "../../../components";
 
-import Geocode from "react-geocode";
-
-import { destinationIcon, originIcon } from "assets";
-
-import { Coord, PolyPath } from "types";
-import { RootState } from "../../../redux";
-import { useSelector } from "react-redux";
-import { Post } from "services";
-import { useApiUrl } from "../../../hooks";
-
 Geocode.setApiKey(import.meta.env.VITE_GOOGLE_KEY);
-
 Geocode.setLanguage("en");
 Geocode.setRegion("co");
-
-const debounce = (cb: (...args: any) => void, delay = 1000) => {
-  let timeout: any;
-  return (...args: any) => {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => cb(...args), delay);
-  };
-};
-
-const options = [
-  { value: "option1", label: "Option 1" },
-  { value: "option2", label: "Option 2" },
-  { value: "option3", label: "Option 3" },
-];
-
-const formatAddress = (address: string) => {
-  return address
-    .split(",")
-    .filter((u) => !/.*ntico$|.*lombia$/gi.test(u.trim()))
-    .join(", ");
-};
 
 export const Planner: React.FC = () => {
   const apiUrl = useApiUrl();
 
-  const [address, setAddress] = useState("");
-  const [material, setMaterial] = useState<typeof options[0]>();
-  const [driver, setDriver] = useState<typeof options[0]>();
-  const [clickable, setClickable] = useState(false);
-  const [loadingAddress, setLoadingAddress] = useState(false);
-
-  const [destination, setDestination] = useState<Coord | null>(null);
-
-  const [settings, setSettings] = useState(false);
-
-  const [googleTL, setGoogleTL] = useState(false);
-  const [wazeTL, setWazeTL] = useState(false);
-  const [wazeTA, setWazeTA] = useState(false);
-
-  const [paths, setPaths] = useState<PolyPath[]>([]);
+  const [
+    {
+      wazeTA,
+      wazeTL,
+      driver,
+      address,
+      settings,
+      material,
+      googleTL,
+      clickable,
+      fixedPath,
+      originPath,
+      destination,
+      originIndex,
+      pathSelector,
+      loadingAddress,
+      destinationPath,
+      destinationIndex,
+    },
+    dispatcher,
+  ] = useReducer(reducer, initialState);
 
   const company = useSelector(
     (state: RootState) => state.companyReducer.company,
@@ -67,7 +50,7 @@ export const Planner: React.FC = () => {
     try {
       const res = await Geocode.fromAddress(address);
       const { lat, lng } = res.results[0].geometry.location;
-      setDestination({ lat, lng });
+      dispatcher({ type: "setDestination", payload: { lat, lng } });
     } catch (error) {
       // TODO: Notify error
       console.log(error);
@@ -76,16 +59,16 @@ export const Planner: React.FC = () => {
 
   const addressFromLatLng = useCallback(async (lat: number, lng: number) => {
     try {
-      setLoadingAddress(true);
+      dispatcher({ type: "setLoadingAddress", payload: true });
       const { results } = await Geocode.fromLatLng(
         lat.toString(),
         lng.toString(),
       );
       const address = formatAddress(results[0].formatted_address as string);
-      setAddress(address);
-      setLoadingAddress(false);
+      dispatcher({ type: "setAddress", payload: address });
+      dispatcher({ type: "setLoadingAddress", payload: false });
     } catch (error) {
-      setAddress("");
+      dispatcher({ type: "setAddress", payload: "" });
     }
   }, []);
 
@@ -101,6 +84,33 @@ export const Planner: React.FC = () => {
       heigh="calc(100% - 30px)"
       style={{ position: "relative", overflow: "hidden" }}
     >
+      <Container
+        width="200px"
+        align="center"
+        justify="flex-start"
+        style={{
+          position: "absolute",
+          top: pathSelector ? "2%" : "-5%",
+          left: "25%",
+          zIndex: 300,
+          transition: "top 0.3s",
+        }}
+      >
+        <RadioGroup
+          group="Origin"
+          length={originPath.length || 1}
+          onChange={(i) => {
+            dispatcher({ type: "setOriginIndex", payload: i });
+          }}
+        />
+        <RadioGroup
+          group="Destination"
+          length={destinationPath.length || 1}
+          onChange={(i) => {
+            dispatcher({ type: "setDestinationIndex", payload: i });
+          }}
+        />
+      </Container>
       <Container
         width="300px"
         padding="60px 10px 0px 10px"
@@ -130,7 +140,7 @@ export const Planner: React.FC = () => {
             inactiveColor="#eb4242"
             type="checkbox"
             checked={googleTL}
-            onChange={() => setGoogleTL(!googleTL)}
+            onChange={() => dispatcher({ type: "setGoogleTL" })}
           />
           <Txt fs="18px" color="black">
             Google Traffic Layer
@@ -148,7 +158,7 @@ export const Planner: React.FC = () => {
             inactiveColor="#eb4242"
             type="checkbox"
             checked={wazeTL}
-            onChange={() => setWazeTL(!wazeTL)}
+            onChange={() => dispatcher({ type: "setWazeTL" })}
           />
           <Txt fs="18px" color="black">
             Waze Traffic Layer
@@ -166,7 +176,7 @@ export const Planner: React.FC = () => {
             inactiveColor="#eb4242"
             type="checkbox"
             checked={wazeTA}
-            onChange={() => setWazeTA(!wazeTA)}
+            onChange={() => dispatcher({ type: "setWazeTA" })}
           />
           <Txt fs="18px" color="black">
             Waze Traffic Alerts
@@ -184,7 +194,7 @@ export const Planner: React.FC = () => {
           zIndex: 200,
         }}
       >
-        <Btn onClick={() => setSettings((c) => !c)}>
+        <Btn onClick={() => dispatcher({ type: "setSettings" })}>
           {settings ? (
             <MdClear size={35} color="black" />
           ) : (
@@ -194,15 +204,13 @@ export const Planner: React.FC = () => {
       </Container>
       <Container
         width="20%"
-        style={{
-          minWidth: "340px",
-        }}
         heigh="100%"
         align="center"
         justify="flex-start"
-        bg="#f3f3f3c9"
+        bg="#f3f3f3"
         padding="10px"
         direction="column"
+        style={{ zIndex: 310 }}
       >
         <Container
           width="100%"
@@ -213,17 +221,17 @@ export const Planner: React.FC = () => {
           <CustomInput
             loading={loadingAddress}
             value={address}
-            onChange={(e) => setAddress(e)}
+            onChange={(e) => dispatcher({ type: "setAddress", payload: e })}
             margin="12px 0px"
             placeholder="Destination"
             onClick={(e) => {
-              setClickable(e);
+              dispatcher({ type: "setClickable", payload: e });
             }}
           />
           <CustomSelect
             placeholder="Material"
             value={material}
-            onChange={(e) => setMaterial(e)}
+            onChange={(e) => dispatcher({ type: "setMaterial", payload: e })}
             options={company.materials.map((m) => ({
               label: m,
               value: m,
@@ -233,7 +241,7 @@ export const Planner: React.FC = () => {
           <CustomSelect
             placeholder="Driver"
             value={driver}
-            onChange={(e) => setDriver(e)}
+            onChange={(e) => dispatcher({ type: "setDriver", payload: e })}
             options={company.drivers.map((d) => ({
               label: d.name + " " + d.lastname,
               value: d.id,
@@ -253,29 +261,37 @@ export const Planner: React.FC = () => {
             padding="4px"
             margin="15px 0px"
             label="Calculate Paths"
-            // lock={
-            //   driver === undefined || material === undefined || address === ""
-            // }
-            lock={address === ""}
+            lock={
+              driver === undefined || material === undefined || address === ""
+            }
             onClick={async () => {
-              const res = await Post<{
-                distance: number;
-                time: number;
-                coords: Coord[];
-              }>(apiUrl, "/path", {
-                points: [
+              if (destination?.lat && destination.lng) {
+                dispatcher({ type: "reset" });
+                const res = await Post<{ ok: boolean } & BestPath>(
+                  apiUrl,
+                  "/path/best",
                   {
-                    lat: company.lat,
-                    lng: company.lng,
+                    origin: {
+                      lat: company.lat,
+                      lng: company.lng,
+                    },
+                    destination,
                   },
-                  {
-                    lat: destination?.lat,
-                    lng: destination?.lng,
-                  },
-                ],
-              });
-
-              setPaths([{ color: "tomato", path: res.data.coords }]);
+                );
+                dispatcher({
+                  type: "setOriginPath",
+                  payload: res.data.result.originPath,
+                });
+                dispatcher({
+                  type: "setDestinationPath",
+                  payload: res.data.result.destinationPath,
+                });
+                dispatcher({
+                  type: "setFixedPath",
+                  payload: [res.data.result.fixedPath],
+                });
+                dispatcher({ type: "setPathSelector", payload: true });
+              }
             }}
           />
           <CustomBtn
@@ -305,7 +321,15 @@ export const Planner: React.FC = () => {
             margin="10px 0px 5px 0px"
           >
             <Txt fs="18px" color="black">
-              Distance: -- km
+              Distance:{" "}
+              {formatNumber(
+                ((fixedPath[0]?.distance || 0) +
+                  (originPath[originIndex]?.distance || 0) +
+                  (destinationPath[destinationIndex]?.distance || 0)) /
+                  1000,
+                2,
+                "km",
+              )}
             </Txt>
           </Container>
           <Container
@@ -315,7 +339,15 @@ export const Planner: React.FC = () => {
             margin="5px 0px"
           >
             <Txt fs="18px" color="black">
-              Time: -- min
+              Time:{" "}
+              {formatNumber(
+                ((fixedPath[0]?.time || 0) +
+                  (originPath[originIndex]?.time || 0) +
+                  (destinationPath[destinationIndex]?.time || 0)) /
+                  60,
+                2,
+                "min",
+              )}
             </Txt>
           </Container>
           <Container
@@ -365,7 +397,14 @@ export const Planner: React.FC = () => {
       </Container>
       <Container width="80%" heigh="100%" align="center" justify="center">
         <Map
-          polys={paths}
+          polys={[
+            { color: "tomato", path: fixedPath[0]?.coords || [] },
+            { color: "red", path: originPath[originIndex]?.coords || [] },
+            {
+              color: "blue",
+              path: destinationPath[destinationIndex]?.coords || [],
+            },
+          ]}
           markers={[
             { coords: destination, icon: destinationIcon },
             {
@@ -376,7 +415,7 @@ export const Planner: React.FC = () => {
           canClick={clickable}
           onClick={({ lat, lng }) => {
             addressFromLatLng(lat, lng);
-            setClickable(false);
+            dispatcher({ type: "setClickable", payload: false });
           }}
           showWazeAlertsLayer={wazeTA}
           showWazeTrafficLayer={wazeTL}
