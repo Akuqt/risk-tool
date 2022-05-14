@@ -17,6 +17,7 @@ export const initialState: PlannerState = {
   destinationPath: [],
   originIndex: 0,
   destinationIndex: 0,
+  fixedPathIndex: 0,
 };
 
 export const reducer = (
@@ -56,15 +57,18 @@ export const reducer = (
       return { ...state, originIndex: action.payload };
     case "setDestinationIndex":
       return { ...state, destinationIndex: action.payload };
+    case "setFixedPathIndex":
+      return { ...state, fixedPathIndex: action.payload };
     case "reset":
       return {
         ...state,
-        pathSelector: false,
         fixedPath: [],
+        originPath: [],
         originIndex: 0,
+        fixedPathIndex: 0,
         destinationIndex: 0,
         destinationPath: [],
-        originPath: [],
+        pathSelector: false,
       };
     default:
       return state;
