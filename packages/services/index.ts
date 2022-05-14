@@ -9,7 +9,6 @@ export const Post = async <T>(
   return await axios
     .post(url, body, {
       withCredentials: true,
-      timeout: 2000,
       baseURL,
       headers: {
         Authorization: `bearer ${token}`,
@@ -29,7 +28,6 @@ export const Put = async <T>(
   return await axios
     .put(url, body, {
       withCredentials: true,
-      timeout: 2000,
       baseURL,
       headers: {
         Authorization: `bearer ${token}`,
@@ -48,7 +46,6 @@ export const Get = async <T>(
   return await axios
     .get(url, {
       withCredentials: true,
-      timeout: 2000,
       baseURL,
       headers: {
         Authorization: `bearer ${token}`,
