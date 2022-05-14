@@ -1,4 +1,5 @@
 import React, { useReducer, useEffect, useCallback } from "react";
+import Geocode from "react-geocode";
 import { Btn, Container, TextInput, Txt } from "components/src/Elements";
 import { initialState, reducer } from "./helper";
 import { FCompany, IError } from "types";
@@ -6,23 +7,14 @@ import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { saveCompany } from "../../redux";
 import { useApiUrl } from "../../hooks";
+import { debounce } from "../../utils";
 import { Navbar } from "components";
 import { truck } from "assets";
 import { Post } from "services";
 
-import Geocode from "react-geocode";
-
 Geocode.setApiKey(import.meta.env.VITE_GOOGLE_KEY);
 Geocode.setLanguage("en");
 Geocode.setRegion("co");
-
-const debounce = (cb: (...args: any) => void, delay = 1000) => {
-  let timeout: any;
-  return (...args: any) => {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => cb(...args), delay);
-  };
-};
 
 export const Register: React.FC = () => {
   const navigation = useNavigate();

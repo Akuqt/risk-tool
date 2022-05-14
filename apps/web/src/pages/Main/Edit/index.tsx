@@ -3,10 +3,11 @@ import Select, { MultiValue } from "react-select";
 import Geocode from "react-geocode";
 import { Container, Txt, TextInput, Btn } from "components/src/Elements";
 import { useDispatch, useSelector } from "react-redux";
-import { RootState, saveCompany } from "../../../redux";
 import { Coord, FCompany, IError } from "types";
+import { RootState, saveCompany } from "../../../redux";
 import { useNavigate } from "react-router-dom";
 import { useApiUrl } from "../../../hooks";
+import { debounce } from "../../../utils";
 import { Put } from "services";
 
 const options = [
@@ -26,14 +27,6 @@ interface ISelect {
 Geocode.setApiKey(import.meta.env.VITE_GOOGLE_KEY);
 Geocode.setLanguage("en");
 Geocode.setRegion("co");
-
-const debounce = (cb: (...args: any) => void, delay = 1000) => {
-  let timeout: any;
-  return (...args: any) => {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => cb(...args), delay);
-  };
-};
 
 export const Edit: React.FC = () => {
   const company = useSelector(
