@@ -216,6 +216,8 @@ export interface PlannerState {
   showOriginModal: boolean;
   showDestinationModal: boolean;
   mapLoading: boolean;
+  originRisk: number | null;
+  destinationRisk: number | null;
 }
 
 export interface PlannerAction {
@@ -240,6 +242,8 @@ export interface PlannerAction {
     | "setShowOriginModal"
     | "setShowDestinationModal"
     | "setMapLoading"
+    | "setOriginRisk"
+    | "setDestinationRisk"
     | "reset";
   payload?: any;
 }
