@@ -18,6 +18,9 @@ export const initialState: PlannerState = {
   originIndex: 0,
   destinationIndex: 0,
   fixedPathIndex: 0,
+  mapLoading: false,
+  showOriginModal: false,
+  showDestinationModal: false,
 };
 
 export const reducer = (
@@ -59,6 +62,12 @@ export const reducer = (
       return { ...state, destinationIndex: action.payload };
     case "setFixedPathIndex":
       return { ...state, fixedPathIndex: action.payload };
+    case "setMapLoading":
+      return { ...state, mapLoading: action.payload };
+    case "setShowOriginModal":
+      return { ...state, showOriginModal: !state.showOriginModal };
+    case "setShowDestinationModal":
+      return { ...state, showDestinationModal: !state.showDestinationModal };
     case "reset":
       return {
         ...state,
