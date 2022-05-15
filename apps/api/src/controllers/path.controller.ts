@@ -1,4 +1,5 @@
-import { errors, getBestRoutePath } from "../lib";
+import { errors, getBestRoutePath, getDistanceKm } from "../lib";
+import { CompanyModel, RouteModel } from "../models";
 import { Response, Request } from "express";
 import { WazeAPI } from "waze-api";
 import { Coord } from "types";
@@ -121,4 +122,98 @@ export const getPath = async (
     time,
     coords,
   });
+};
+
+export const addRoutePath = async (req: Request, res: Response) => {
+  const id = req.id;
+  const { fixed, origin, destination, risk, distance, time, material, driver } =
+    req.body as {
+      fixed: Coord[];
+      origin: Coord[];
+      destination: Coord[];
+      risk: number;
+      distance: number;
+      time: number;
+      material: string;
+      driver: string;
+    };
+
+  if (
+    !fixed ||
+    fixed.length === 0 ||
+    !origin ||
+    origin.length === 0 ||
+    !destination ||
+    destination.length === 0 ||
+    !risk ||
+    !distance ||
+    !time
+  ) {
+    return res.status(400).json({ ok: false, error: errors.badRequest });
+  }
+
+  let path: Coord[] = [];
+
+  if (
+    getDistanceKm(origin[origin.length - 1], fixed[fixed.length - 1]) >
+    getDistanceKm(origin[0], fixed[fixed.length - 1])
+  ) {
+    path = [...fixed, ...origin];
+  } else {
+    path = [...fixed, ...origin.reverse()];
+  }
+
+  if (
+    getDistanceKm(destination[destination.length - 1], path[0]) >
+    getDistanceKm(destination[0], path[0])
+  ) {
+    path = [...destination.reverse(), ...path];
+  } else {
+    path = [...destination, ...path];
+  }
+
+  const company = await CompanyModel.findById(id);
+
+  if (!company) {
+    return res.status(404).json({ ok: false, error: errors.invalidAuth });
+  }
+
+  const route = new RouteModel({
+    risk,
+    distance,
+    time,
+    coords: path.reverse(),
+    material,
+    driver,
+  });
+
+  company.routes.push(route);
+
+  await route.save();
+  await company.save();
+
+  res.json({ ok: true });
+};
+
+export const getRoutePaths = async (req: Request, res: Response) => {
+  const id = req.id;
+
+  const company = await CompanyModel.findById(id).populate("routes");
+
+  if (!company) {
+    return res.status(404).json({ ok: false, error: errors.invalidAuth });
+  }
+
+  const result = company.routes.map((route) => ({
+    risk: route.risk,
+    distance: route.distance,
+    time: route.time,
+    material: route.material,
+    driver: route.driver,
+    coords: route.coords,
+    createdAt: route.createdAt,
+    updateAt: route.updatedAt,
+  }));
+
+  res.json({ ok: true, result });
 };
