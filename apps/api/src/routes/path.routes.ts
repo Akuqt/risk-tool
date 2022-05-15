@@ -1,4 +1,10 @@
-import { getBestPath, getPath } from "../controllers";
+import {
+  addRoutePath,
+  getBestPath,
+  getPath,
+  getRoutePaths,
+} from "../controllers";
+import { validateToken } from "../middlewares";
 import { Router } from "express";
 
 const router = Router();
@@ -72,5 +78,9 @@ const router = Router();
 router.post("/", getPath);
 
 router.post("/best", getBestPath);
+
+router.post("/new", validateToken, addRoutePath);
+
+router.get("/all", validateToken, getRoutePaths);
 
 export default router;
