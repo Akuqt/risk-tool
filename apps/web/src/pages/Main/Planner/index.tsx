@@ -1,10 +1,9 @@
 import React, { useEffect, useCallback, useReducer } from "react";
 import Geocode from "react-geocode";
-import { CustomInput, CustomSelect, CustomBtn, RadioGroup } from "components";
 import { debounce, formatAddress, formatNumber } from "../../../utils";
 import { destinationIcon, originIcon } from "assets";
 import { MdClear, MdSettingsSuggest } from "react-icons/md";
-import { Container, Btn, Txt, Check } from "components/src/Elements";
+import { Container, Btn, Txt, Check, Spinner } from "components/src/Elements";
 import { initialState, reducer } from "./helper";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../redux";
@@ -12,6 +11,13 @@ import { useApiUrl } from "../../../hooks";
 import { BestPath } from "types";
 import { Post } from "services";
 import { Map } from "../../../components";
+import {
+  CustomBtn,
+  RadioGroup,
+  CustomModal,
+  CustomInput,
+  CustomSelect,
+} from "components";
 
 Geocode.setApiKey(import.meta.env.VITE_GOOGLE_KEY);
 Geocode.setLanguage("en");
@@ -32,13 +38,16 @@ export const Planner: React.FC = () => {
       clickable,
       fixedPath,
       originPath,
+      mapLoading,
       destination,
       originIndex,
       pathSelector,
       loadingAddress,
       fixedPathIndex,
+      showOriginModal,
       destinationPath,
       destinationIndex,
+      showDestinationModal,
     },
     dispatcher,
   ] = useReducer(reducer, initialState);
@@ -49,9 +58,11 @@ export const Planner: React.FC = () => {
 
   const latlngFromAddress = useCallback(async (address: string) => {
     try {
+      dispatcher({ type: "setMapLoading", payload: true });
       const res = await Geocode.fromAddress(address);
       const { lat, lng } = res.results[0].geometry.location;
       dispatcher({ type: "setDestination", payload: { lat, lng } });
+      dispatcher({ type: "setMapLoading", payload: false });
     } catch (error) {
       // TODO: Notify error
     }
@@ -84,6 +95,22 @@ export const Planner: React.FC = () => {
       heigh="calc(100% - 30px)"
       style={{ position: "relative", overflow: "hidden" }}
     >
+      <CustomModal
+        show={showOriginModal || showDestinationModal}
+        bg="#2c2c2cac"
+      >
+        <button
+          onClick={() => {
+            if (showOriginModal) {
+              dispatcher({ type: "setShowOriginModal" });
+            } else {
+              dispatcher({ type: "setShowDestinationModal" });
+            }
+          }}
+        >
+          X
+        </button>
+      </CustomModal>
       <Container
         width="300px"
         align="center"
@@ -274,6 +301,7 @@ export const Planner: React.FC = () => {
             onClick={async () => {
               if (destination?.lat && destination.lng) {
                 dispatcher({ type: "reset" });
+                dispatcher({ type: "setMapLoading", payload: true });
                 const res = await Post<{ ok: boolean } & BestPath>(
                   apiUrl,
                   "/path/best",
@@ -298,6 +326,7 @@ export const Planner: React.FC = () => {
                   payload: res.data.result.fixedPath,
                 });
                 dispatcher({ type: "setPathSelector", payload: true });
+                dispatcher({ type: "setMapLoading", payload: false });
               }
             }}
           />
@@ -306,12 +335,18 @@ export const Planner: React.FC = () => {
             padding="4px"
             margin="15px 0px"
             label="Calculate Origin Risk"
+            onClick={() => {
+              dispatcher({ type: "setShowOriginModal" });
+            }}
           />
           <CustomBtn
             bg="#0094FF"
             padding="4px"
             margin="15px 0px"
             label="Calculate Destination Risk"
+            onClick={() => {
+              dispatcher({ type: "setShowDestinationModal" });
+            }}
           />
         </Container>
         <Container
@@ -402,7 +437,16 @@ export const Planner: React.FC = () => {
           </Txt>
         </Container>
       </Container>
-      <Container width="80%" heigh="100%" align="center" justify="center">
+      <Container
+        width="80%"
+        heigh="100%"
+        align="center"
+        justify="center"
+        style={{ position: "absolute", left: "20%" }}
+      >
+        <CustomModal bg="#2c2c2cac" show={mapLoading}>
+          <Spinner radius="100px" borderHeight="8px" color="tomato" />
+        </CustomModal>
         <Map
           polys={[
             { color: "tomato", path: fixedPath[fixedPathIndex]?.coords || [] },
