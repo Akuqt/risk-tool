@@ -12,7 +12,6 @@ export const SocketProvider: React.FC = ({ children }) => {
   const [socket, setSocket] = useState<Socket | null>(null);
 
   const connect = useCallback(() => {
-    console.log(url);
     const socket_ = io(url, { path: "/api/v1/ws" });
     socket_.on("connect", () => {
       setSocket(socket_);

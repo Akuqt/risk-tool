@@ -99,6 +99,18 @@ export interface ILog extends Document {
   lng: number;
 }
 
+export interface IRoute extends Document {
+  _id?: mongoose.ObjectId;
+  coords: Coord[];
+  distance: number;
+  time: number;
+  risk: number;
+  material: string;
+  driver: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export interface ICompany extends Document {
   _id?: mongoose.ObjectId;
   name: string;
@@ -107,6 +119,7 @@ export interface ICompany extends Document {
   lat: number;
   lng: number;
   logs: ILog[];
+  routes: IRoute[];
   username: string;
   password: string;
   role: IRole;
@@ -174,10 +187,77 @@ export interface RegisterState {
   password: string;
   username: string;
   address: string;
+  error: boolean;
+  coords: Coord;
 }
 
 export interface RegisterAction {
-  type: "setName" | "setPassword" | "setUsername" | "setAddress" | "clearAll";
+  type:
+    | "setName"
+    | "setPassword"
+    | "setUsername"
+    | "setAddress"
+    | "clearAll"
+    | "setError"
+    | "setCoords";
+  payload?: any;
+}
+
+interface Option {
+  value: string;
+  label: string;
+}
+
+export interface PlannerState {
+  address: string;
+  material?: Option;
+  driver?: Option;
+  clickable: boolean;
+  loadingAddress: boolean;
+  destination: Coord | null;
+  settings: boolean;
+  pathSelector: boolean;
+  googleTL: boolean;
+  wazeTL: boolean;
+  wazeTA: boolean;
+  fixedPath: BaseBestPath[];
+  originPath: BaseBestPath[];
+  destinationPath: BaseBestPath[];
+  fixedPathIndex: number;
+  originIndex: number;
+  destinationIndex: number;
+  showOriginModal: boolean;
+  showDestinationModal: boolean;
+  mapLoading: boolean;
+  originRisk: number | null;
+  destinationRisk: number | null;
+}
+
+export interface PlannerAction {
+  type:
+    | "setAddress"
+    | "setMaterial"
+    | "setDriver"
+    | "setClickable"
+    | "setLoadingAddress"
+    | "setDestination"
+    | "setSettings"
+    | "setPathSelector"
+    | "setGoogleTL"
+    | "setWazeTL"
+    | "setWazeTA"
+    | "setFixedPath"
+    | "setOriginPath"
+    | "setDestinationPath"
+    | "setOriginIndex"
+    | "setDestinationIndex"
+    | "setFixedPathIndex"
+    | "setShowOriginModal"
+    | "setShowDestinationModal"
+    | "setMapLoading"
+    | "setOriginRisk"
+    | "setDestinationRisk"
+    | "reset";
   payload?: any;
 }
 
@@ -203,4 +283,22 @@ export interface JWTPayload {
   tokenVersion: number;
   iat: number;
   exp: number;
+}
+
+export interface BaseBestPath {
+  coords: Coord[];
+  distance: number;
+  time: number;
+}
+
+export interface BestRoute extends BaseBestPath {
+  risk: number;
+}
+
+export interface BestPath {
+  result: {
+    fixedPath: BaseBestPath;
+    originPath: BaseBestPath[];
+    destinationPath: BaseBestPath[];
+  };
 }

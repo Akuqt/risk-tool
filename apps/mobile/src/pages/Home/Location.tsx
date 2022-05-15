@@ -68,7 +68,7 @@ export const Location: React.FC<Props> = ({ navigation }) => {
       </ButtonsContainer>
       <UserCard
         img={`https://avatars.dicebear.com/api/${user.gender || "male"}/${
-          user.username || "driverU"
+          user.id || "driverU"
         }.svg`}
         name={user.name || "Name"}
         lastname={user.lastname || "Lastname"}

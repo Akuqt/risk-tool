@@ -1,30 +1,74 @@
-import React, { useState } from "react";
-import Select from "react-select";
+import React, { useCallback, useEffect, useState } from "react";
+import Select, { MultiValue } from "react-select";
+import Geocode from "react-geocode";
 import { Container, Txt, TextInput, Btn } from "components/src/Elements";
+import { useDispatch, useSelector } from "react-redux";
+import { Coord, FCompany, IError } from "types";
+import { RootState, saveCompany } from "../../../redux";
+import { useNavigate } from "react-router-dom";
+import { useApiUrl } from "../../../hooks";
+import { debounce } from "../../../utils";
+import { Put } from "services";
 
 const options = [
-  { value: "option1", label: "Option 1" },
-  { value: "option2", label: "Option 2" },
-  { value: "option3", label: "Option 3" },
-  { value: "option11", label: "Option 11" },
-  { value: "option21", label: "Option 21" },
-  { value: "option31", label: "Option 31" },
-  { value: "option12", label: "Option 12" },
-  { value: "option22", label: "Option 22" },
-  { value: "option32", label: "Option 32" },
-  { value: "option13", label: "Option 13" },
-  { value: "option23", label: "Option 23" },
-  { value: "option33", label: "Option 33" },
-  { value: "option14", label: "Option 14" },
-  { value: "option24", label: "Option 24" },
-  { value: "option34", label: "Option 34" },
+  { value: "Hexano", label: "Hexano" },
+  { value: "Acetona", label: "Acetona" },
+  { value: "Metanol", label: "Metanol" },
+  { value: "Tolueno", label: "Tolueno" },
+  { value: "Carbon disulfide", label: "Carbon disulfide" },
+  { value: "Acetato de etilo", label: "Acetato de etilo" },
 ];
 
+interface ISelect {
+  label: string;
+  value: string;
+}
+
+Geocode.setApiKey(import.meta.env.VITE_GOOGLE_KEY);
+Geocode.setLanguage("en");
+Geocode.setRegion("co");
+
 export const Edit: React.FC = () => {
-  const [value, setValue] = useState(null);
-  const onDropdownChange = (value: any) => {
-    setValue(value);
+  const company = useSelector(
+    (state: RootState) => state.companyReducer.company,
+  );
+
+  const [values, setValues] = useState<ISelect[]>(
+    company.materials.map((m) => ({ label: m, value: m })),
+  );
+
+  const [error, setError] = useState(false);
+  const [name, setName] = useState(company.name);
+  const [address, setAddress] = useState(company.address);
+  const [coords, setCoords] = useState<Coord>({
+    lat: company.lat,
+    lng: company.lng,
+  });
+
+  const onDropdownChange = (_values: MultiValue<ISelect>) => {
+    setValues(_values as ISelect[]);
   };
+
+  const dispatch = useDispatch();
+
+  const apiUrl = useApiUrl();
+
+  const navigation = useNavigate();
+
+  const latlngFromAddress = useCallback(async (address: string) => {
+    try {
+      const res = await Geocode.fromAddress(address);
+      const { lat, lng } = res.results[0].geometry.location;
+      setCoords({ lat, lng });
+      setError(false);
+    } catch (err) {
+      setError(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (address) debounce(() => latlngFromAddress(address))();
+  }, [address, latlngFromAddress]);
 
   return (
     <Container
@@ -71,6 +115,8 @@ export const Edit: React.FC = () => {
               fs="16px"
               width="99%"
               borderRadius="4px"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
             />
             <Txt fs="14px" bold color="#000000" margin="0px 0px 5px 0px">
               Address
@@ -84,13 +130,15 @@ export const Edit: React.FC = () => {
               fs="16px"
               width="99%"
               borderRadius="4px"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
             />
             <Txt fs="14px" bold color="#000000" margin="0px 0px 5px 0px">
               Materials
             </Txt>
             <div style={{ width: "99%", margin: "0px 0px 20px 0px" }}>
               <Select
-                value={value}
+                value={values}
                 options={options}
                 onChange={onDropdownChange}
                 isMulti
@@ -103,6 +151,33 @@ export const Edit: React.FC = () => {
               height="30px"
               borderRadius="4px"
               margin="20px 0px 0px 0px"
+              onClick={async () => {
+                if (!error) {
+                  const res = await Put<{
+                    ok: boolean;
+                    result: FCompany;
+                    error?: IError;
+                  }>(
+                    apiUrl,
+                    "/auth/edit-company",
+                    {
+                      name: name,
+                      address: address,
+                      materials: values.map((v) => v.value),
+                      lat: coords.lat,
+                      lng: coords.lng,
+                    },
+                    company.token,
+                  );
+                  if (res.data.ok) {
+                    dispatch(saveCompany(res.data.result));
+                    navigation("/main/dashboard");
+                  }
+                } else {
+                  // eslint-disable-next-line no-alert
+                  alert("Please enter a valid address");
+                }
+              }}
             >
               <Txt color="#000000" fs="16px" pointer>
                 Save Changes

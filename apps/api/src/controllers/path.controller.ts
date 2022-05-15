@@ -1,9 +1,74 @@
+import { errors, getBestRoutePath, getDistanceKm } from "../lib";
+import { CompanyModel, RouteModel } from "../models";
 import { Response, Request } from "express";
 import { WazeAPI } from "waze-api";
-import { errors } from "../lib";
 import { Coord } from "types";
 
 const waze = new WazeAPI();
+
+type WazeAlt = Awaited<ReturnType<typeof waze.getPaths>>["alternatives"][0];
+
+const pathMap = (alt: WazeAlt) => ({
+  coords: alt.coords.map((coord) => ({
+    lat: coord.y,
+    lng: coord.x,
+  })) as Coord[],
+  time: alt.response.totalSeconds,
+  distance: alt.response.totalLength,
+});
+
+const fetchPath = async (from: Coord, to: Coord, n = 1) => {
+  const path = await waze.getPaths({
+    from: {
+      y: from.lat,
+      x: from.lng,
+    },
+    to: {
+      y: to.lat,
+      x: to.lng,
+    },
+    nPaths: n,
+    interval: 15,
+    arriveAt: true,
+    useCase: "LIVEMAP_PLANNING",
+  });
+
+  return path;
+};
+
+export const getBestPath = async (req: Request, res: Response) => {
+  const { origin, destination } = req.body as {
+    origin: Coord;
+    destination: Coord;
+  };
+
+  if (!origin || !destination) {
+    return res.status(400).json({ ok: false, error: errors.badRequest });
+  }
+
+  const { fixedPath, nextDestination, nextOrigin } = getBestRoutePath(
+    origin,
+    destination,
+  );
+
+  if (fixedPath.length === 0) {
+    return res.status(400).json({ ok: false, error: errors.generic });
+  }
+
+  const originPath = await fetchPath(origin, nextOrigin, 3);
+  const destinationPath = await fetchPath(destination, nextDestination, 3);
+
+  const result = {
+    fixedPath,
+    originPath: originPath.alternatives.map(pathMap),
+    destinationPath: destinationPath.alternatives.map(pathMap),
+  };
+
+  return res.status(200).json({
+    ok: true,
+    result,
+  });
+};
 
 export const getPath = async (
   req: Request<any, any, { points: { lat: number; lng: number }[] }>,
@@ -57,4 +122,98 @@ export const getPath = async (
     time,
     coords,
   });
+};
+
+export const addRoutePath = async (req: Request, res: Response) => {
+  const id = req.id;
+  const { fixed, origin, destination, risk, distance, time, material, driver } =
+    req.body as {
+      fixed: Coord[];
+      origin: Coord[];
+      destination: Coord[];
+      risk: number;
+      distance: number;
+      time: number;
+      material: string;
+      driver: string;
+    };
+
+  if (
+    !fixed ||
+    fixed.length === 0 ||
+    !origin ||
+    origin.length === 0 ||
+    !destination ||
+    destination.length === 0 ||
+    !risk ||
+    !distance ||
+    !time
+  ) {
+    return res.status(400).json({ ok: false, error: errors.badRequest });
+  }
+
+  let path: Coord[] = [];
+
+  if (
+    getDistanceKm(origin[origin.length - 1], fixed[fixed.length - 1]) >
+    getDistanceKm(origin[0], fixed[fixed.length - 1])
+  ) {
+    path = [...fixed, ...origin];
+  } else {
+    path = [...fixed, ...origin.reverse()];
+  }
+
+  if (
+    getDistanceKm(destination[destination.length - 1], path[0]) >
+    getDistanceKm(destination[0], path[0])
+  ) {
+    path = [...destination.reverse(), ...path];
+  } else {
+    path = [...destination, ...path];
+  }
+
+  const company = await CompanyModel.findById(id);
+
+  if (!company) {
+    return res.status(404).json({ ok: false, error: errors.invalidAuth });
+  }
+
+  const route = new RouteModel({
+    risk,
+    distance,
+    time,
+    coords: path.reverse(),
+    material,
+    driver,
+  });
+
+  company.routes.push(route);
+
+  await route.save();
+  await company.save();
+
+  res.json({ ok: true });
+};
+
+export const getRoutePaths = async (req: Request, res: Response) => {
+  const id = req.id;
+
+  const company = await CompanyModel.findById(id).populate("routes");
+
+  if (!company) {
+    return res.status(404).json({ ok: false, error: errors.invalidAuth });
+  }
+
+  const result = company.routes.map((route) => ({
+    risk: route.risk,
+    distance: route.distance,
+    time: route.time,
+    material: route.material,
+    driver: route.driver,
+    coords: route.coords,
+    createdAt: route.createdAt,
+    updateAt: route.updatedAt,
+  }));
+
+  res.json({ ok: true, result });
 };

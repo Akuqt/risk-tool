@@ -37,6 +37,7 @@
     "curly": "off",
     "react/react-in-jsx-scope": "off",
     "no-shadow": "off",
-    "no-unused-vars": "error"
+    "no-unused-vars": "error",
+    "no-console": "error"
   }
 }

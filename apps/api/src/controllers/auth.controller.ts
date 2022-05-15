@@ -73,7 +73,7 @@ export const signIn = async (
     const _drivers: IDriver[] = await DriverModel.find()
       .populate("company")
       .where({
-        company: _company,
+        company: _company._id,
       });
 
     res.cookie("jid", createRefreshToken(_company), cookieConf);
@@ -224,4 +224,57 @@ export const signUp = async (
   }
 
   return res.status(401).json({ ok: false, error: errors.invalidAuth });
+};
+
+export const editCompany = async (
+  req: Request,
+  res: Response,
+): Promise<Response> => {
+  const { lat, lng, name, address, materials } = req.body;
+
+  const _company: ICompany | null = await CompanyModel.findById(req.id);
+
+  if (!_company) {
+    return res.status(401).json({ ok: false, error: errors.invalidAuth });
+  }
+
+  _company.lat = lat;
+  _company.lng = lng;
+  _company.name = name;
+  _company.address = address;
+  _company.materials = materials;
+
+  const company_ = await _company.save();
+
+  const _drivers: IDriver[] = await DriverModel.find()
+    .populate("company")
+    .where({
+      company: _company,
+    });
+
+  res.cookie("jid", createRefreshToken(company_), cookieConf);
+
+  return res.json({
+    ok: true,
+    result: {
+      name: company_.name,
+      id: company_._id,
+      username: company_.username,
+      lat: company_.lat,
+      lng: company_.lng,
+      address: company_.address,
+      materials: company_.materials,
+      role: company_.role.name,
+      drivers: _drivers.map((d) => ({
+        name: d.name,
+        lastname: d.lastname,
+        gender: d.gender,
+        id: d._id,
+        plate: d.plate,
+        lat: d.lat,
+        lng: d.lng,
+      })),
+      token: createAcessToken(company_),
+    },
+  });
 };

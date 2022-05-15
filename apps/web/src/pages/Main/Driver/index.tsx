@@ -9,62 +9,28 @@ import {
   TextInput,
   Container,
 } from "components/src/Elements";
-
-const driversBackend = [
-  {
-    name: "Laura",
-    lastname: "Arango",
-    plate: "AAA111",
-    gender: "Female",
-    username: "lmarangoc",
-  },
-  {
-    name: "Italo",
-    lastname: "Alfaro",
-    plate: "BBB222",
-    gender: "Male",
-    username: "ialfaro",
-  },
-  {
-    name: "Laura",
-    lastname: "Correa",
-    plate: "CCC333",
-    gender: "Female",
-    username: "lmcorrea",
-  },
-  {
-    name: "Carlos",
-    lastname: "Gonzalez",
-    plate: "AAD444",
-    gender: "Male",
-    username: "cgonzalez",
-  },
-  {
-    name: "Laura",
-    lastname: "Villegas",
-    plate: "EEE555",
-    gender: "Female",
-    username: "lvillegas",
-  },
-];
+import { Post } from "services";
+import { useApiUrl } from "../../../hooks";
+import { FDriver, IError } from "types";
+import { RootState, saveCompany } from "../../../redux";
+import { useDispatch, useSelector } from "react-redux";
 
 export const Driver: React.FC = () => {
   const [modalState, changeModalState] = useState(false);
-  const [drivers, setDrivers] = useState<typeof driversBackend>([]);
   const [search, setSearch] = useState("");
-  const [filterD, setFilterD] = useState(drivers);
 
-  useEffect(() => {
-    setDrivers(driversBackend);
-  }, []);
+  const company = useSelector(
+    (state: RootState) => state.companyReducer.company,
+  );
+  const [filterD, setFilterD] = useState(company.drivers);
 
   useEffect(() => {
     setFilterD(
-      drivers.filter((elemento) =>
+      company.drivers.filter((elemento) =>
         JSON.stringify(elemento).toLowerCase().includes(search.toLowerCase()),
       ),
     );
-  }, [search, drivers]);
+  }, [search, company.drivers]);
 
   return (
     <Container
@@ -128,21 +94,33 @@ export const Driver: React.FC = () => {
             <CardCtnr>
               {filterD?.map((drvr, index) => {
                 return (
-                  <Card key={index}>
-                    <Txt color="#000000" fs="16px">
-                      Name: {drvr?.name}
+                  <Card
+                    key={index}
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Txt
+                      color="#000000"
+                      fs="18px"
+                      bold
+                      margin="0px 0px 10px 0px"
+                    >
+                      {drvr?.name + " " + drvr?.lastname}
                     </Txt>
-                    <Txt color="#000000" fs="16px">
-                      Lastname: {drvr?.lastname}
-                    </Txt>
-                    <Txt color="#000000" fs="16px">
+
+                    <img
+                      style={{ width: "80%" }}
+                      src={`https://avatars.dicebear.com/api/${
+                        drvr.gender || "male"
+                      }/${drvr.id || "driverU"}.svg`}
+                      alt=""
+                    />
+                    <Txt color="#000000" fs="16px" margin="10px 0px">
                       Plate: {drvr?.plate}
-                    </Txt>
-                    <Txt color="#000000" fs="16px">
-                      Gender: {drvr?.gender}
-                    </Txt>
-                    <Txt color="#000000" fs="16px">
-                      Username: {drvr?.username}
                     </Txt>
                   </Card>
                 );
@@ -152,81 +130,78 @@ export const Driver: React.FC = () => {
         </Container>
       </Container>
       <Modal stt={modalState} changeState={changeModalState}>
-        <FormDriver
-          modalState
-          changeModalState={changeModalState}
-          listDrivers={drivers}
-          addDriver={setDrivers}
-        />
+        <FormDriver changeModalState={changeModalState} />
       </Modal>
     </Container>
   );
 };
 
 interface IState {
-  modalState: boolean;
   changeModalState: React.Dispatch<React.SetStateAction<boolean>>;
-  listDrivers: typeof driversBackend;
-  addDriver: React.Dispatch<React.SetStateAction<typeof driversBackend>>;
 }
 
-export const FormDriver: React.FC<IState> = ({
-  modalState,
-  changeModalState,
-}) => {
-  const initialState: DriverState = {
-    name: "",
-    lastname: "",
-    plate: "",
-    gender: "",
-    username: "",
-    password: "",
-  };
+const initialState: DriverState = {
+  name: "",
+  lastname: "",
+  plate: "",
+  gender: "",
+  username: "",
+  password: "",
+};
 
-  interface DriverState {
-    name: string;
-    lastname: string;
-    plate: string;
-    gender: string;
-    username: string;
-    password: string;
+interface DriverState {
+  name: string;
+  lastname: string;
+  plate: string;
+  gender: string;
+  username: string;
+  password: string;
+}
+
+interface DriverAction {
+  type:
+    | "setName"
+    | "setLastname"
+    | "setPlate"
+    | "setGender"
+    | "setUsername"
+    | "setPassword"
+    | "clearAll";
+  payload?: any;
+}
+
+const reducer = (state: DriverState, action: DriverAction): DriverState => {
+  switch (action.type) {
+    case "setName":
+      return { ...state, name: action.payload };
+    case "setLastname":
+      return { ...state, lastname: action.payload };
+    case "setPlate":
+      return { ...state, plate: action.payload };
+    case "setGender":
+      return { ...state, gender: action.payload };
+    case "setUsername":
+      return { ...state, username: action.payload };
+    case "setPassword":
+      return { ...state, password: action.payload };
+    case "clearAll":
+      return initialState;
+    default:
+      return state;
   }
+};
 
-  interface DriverAction {
-    type:
-      | "setName"
-      | "setLastname"
-      | "setPlate"
-      | "setGender"
-      | "setUsername"
-      | "setPassword"
-      | "clearAll";
-    payload?: any;
-  }
-
-  const reducer = (state: DriverState, action: DriverAction): DriverState => {
-    switch (action.type) {
-      case "setName":
-        return { ...state, name: action.payload };
-      case "setLastname":
-        return { ...state, lastname: action.payload };
-      case "setPlate":
-        return { ...state, plate: action.payload };
-      case "setGender":
-        return { ...state, gender: action.payload };
-      case "setUsername":
-        return { ...state, username: action.payload };
-      case "setPassword":
-        return { ...state, password: action.payload };
-      case "clearAll":
-        return initialState;
-      default:
-        return state;
-    }
-  };
-
+export const FormDriver: React.FC<IState> = ({ changeModalState }) => {
   const [{ name, lastname, plate, gender, username, password }, dispatcher] =
     useReducer(reducer, initialState);
+
+  const apiUrl = useApiUrl();
+
+  const dispatch = useDispatch();
+
+  const company = useSelector(
+    (state: RootState) => state.companyReducer.company,
+  );
 
   return (
     <Container
@@ -297,9 +272,9 @@ export const FormDriver: React.FC<IState> = ({
             dispatcher({ type: "setGender", payload: e.target.value })
           }
         >
-          <option>Gender</option>
-          <option>Male</option>
-          <option>Female</option>
+          <option value="gender">Gender</option>
+          <option value={"male"}>Male</option>
+          <option value={"female"}>Female</option>
         </Slct>
         <TextInput
           margin="20px 0px 5px 0px"
@@ -335,7 +310,46 @@ export const FormDriver: React.FC<IState> = ({
         />
         <Btn
           type="submit"
-          onClick={() => changeModalState(!modalState)}
+          onClick={async () => {
+            const res = await Post<{
+              ok: boolean;
+              result: FDriver;
+              error?: IError;
+            }>(apiUrl, "/auth/sign-up", {
+              name,
+              lastname,
+              plate,
+              username,
+              gender,
+              password,
+              material: "",
+              type: "driver",
+              company: company.name,
+            });
+
+            if (res.data.ok) {
+              const driver = res.data.result;
+              dispatch(
+                saveCompany({
+                  ...company,
+                  drivers: [
+                    ...company.drivers,
+                    {
+                      gender: driver.gender,
+                      id: driver.id,
+                      lastname: driver.lastname,
+                      name: driver.name,
+                      plate: driver.plate,
+                    },
+                  ],
+                }),
+              );
+              changeModalState((c) => !c);
+            } else {
+              // eslint-disable-next-line no-alert
+              alert(res.data.error?.message);
+            }
+          }}
           bg="#FF0000"
           width="100%"
           height="30px"

@@ -1,3 +1,4 @@
+/* eslint-disable indent */
 import styled from "styled-components";
 import { Align, Justify } from "types";
 
@@ -80,6 +81,7 @@ export const Btn = styled.button<{
   borderRadius?: string;
   margin?: string;
   padding?: string;
+  hover?: boolean;
 }>`
   height: ${(p) => p.height || "auto"};
   width: ${(p) => p.width || "fit-content"};
@@ -95,7 +97,8 @@ export const Btn = styled.button<{
   cursor: pointer;
 
   &:hover {
-    background-color: ${(p) => (p.bg ? p.bg + "c0" : "transparent")};
+    background-color: ${(p) =>
+      p.bg ? p.bg + (!p.hover ? "c0" : "ff") : "transparent"};
   }
 `;
 
@@ -144,4 +147,111 @@ export const CardCtnr = styled.div`
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
+`;
+
+export const AniRotation = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation: rotation 1s linear infinite reverse;
+  @keyframes rotation {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+`;
+
+export const Check = styled.input<{
+  bg: string;
+  activeColor: string;
+  inactiveColor: string;
+}>`
+  position: relative;
+  margin: 0px 5px;
+  appearance: none;
+  border: none;
+  cursor: pointer;
+  outline: none;
+  border: 1px solid black;
+  width: 40px;
+  height: 20px;
+  background-color: ${(p) => p.bg};
+  border-radius: 10px;
+  &:checked {
+    &::after {
+      transform: translateX(calc(200% - 6px));
+      background-color: ${(p) => p.activeColor};
+    }
+  }
+  &::after {
+    position: absolute;
+    content: "";
+    top: 3px;
+    left: 4px;
+    width: 12px;
+    height: 12px;
+    background-color: ${(p) => p.inactiveColor};
+    border-radius: 50%;
+    transition: transform 200ms ease-in-out, background-color 200ms ease-in-out;
+  }
+`;
+
+export const Spinner = styled.div<{
+  radius: string;
+  borderHeight: string;
+  color: string;
+}>`
+  border: ${(p) => p.borderHeight} solid rgba(0, 0, 0, 0.1);
+  width: ${(p) => p.radius};
+  height: ${(p) => p.radius};
+  border-radius: 50%;
+  border-left-color: ${(p) => p.color};
+
+  animation: spin 1s linear infinite;
+
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+`;
+
+export const Slider = styled.input<{ color: string }>`
+  appearance: none;
+  width: 100%;
+  height: 10px;
+  background: #d3d3d3;
+  border-radius: 4px;
+  outline: none;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+
+  &:hover {
+    opacity: 1;
+  }
+
+  &::-webkit-slider-thumb {
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: ${(p) => p.color};
+    cursor: pointer;
+  }
+
+  &::-moz-range-thumb {
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: ${(p) => p.color};
+    cursor: pointer;
+  }
 `;

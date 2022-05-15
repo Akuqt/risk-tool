@@ -43,8 +43,6 @@ export const Login: React.FC<Props> = ({ navigation }) => {
           bg="#FF6347"
           label="Sign In"
           onPress={async () => {
-            console.log(values);
-
             const res = await Post<{
               ok: boolean;
               result: FDriver;

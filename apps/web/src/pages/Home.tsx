@@ -1,16 +1,17 @@
 import React from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { clearCompany, RootState } from "../redux";
 import { Container, Txt } from "components/src/Elements";
 import { useNavigate } from "react-router-dom";
 import { truckDark } from "assets";
 import { Navbar } from "components";
-import { useSelector } from "react-redux";
-import { RootState } from "../redux";
 
 export const Home: React.FC = () => {
   const navigation = useNavigate();
   const company = useSelector(
     (state: RootState) => state.companyReducer.company,
   );
+  const dispatch = useDispatch();
   return (
     <Container
       width="100%"
@@ -137,6 +138,25 @@ export const Home: React.FC = () => {
             transport of hazardous chemical materials in the industrial
             corridors of Barranquilla and its metropolitan area
           </Txt>
+        </Container>
+        <Container
+          bg="#FFFFFF"
+          justify="center"
+          heigh="170px"
+          width="450px"
+          align="center"
+          borderRadius="8px"
+          padding="10px"
+          margin="0px 0px 20px 80px"
+          direction="column"
+        >
+          <button
+            onClick={() => {
+              dispatch(clearCompany());
+            }}
+          >
+            Log out
+          </button>
         </Container>
       </Container>
     </Container>
