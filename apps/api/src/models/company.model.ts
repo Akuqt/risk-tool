@@ -8,10 +8,18 @@ const companySchema = new Schema(
     lat: Number,
     lng: Number,
     materials: [String],
-    logs: {
-      ref: "Log",
-      type: Schema.Types.ObjectId,
-    },
+    logs: [
+      {
+        ref: "Log",
+        type: Schema.Types.ObjectId,
+      },
+    ],
+    routes: [
+      {
+        ref: "Route",
+        type: Schema.Types.ObjectId,
+      },
+    ],
     role: {
       ref: "Role",
       type: Schema.Types.ObjectId,
