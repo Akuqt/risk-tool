@@ -1,14 +1,27 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Container, Txt } from "./Elements";
 
 interface Props {
   group: string;
   length: number;
   onChange: (index: number) => void;
+  reset?: boolean;
 }
 
-export const RadioGroup: React.FC<Props> = ({ group, length, onChange }) => {
+export const RadioGroup: React.FC<Props> = ({
+  group,
+  length,
+  onChange,
+  reset,
+}) => {
   const [index, setIndex] = useState(0);
+
+  useEffect(() => {
+    if (reset) {
+      setIndex(0);
+    }
+  }, [reset]);
+
   return (
     <Container
       direction="column"
