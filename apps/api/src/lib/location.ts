@@ -5,19 +5,14 @@ const deg2rad = (deg: number) => {
   return deg * (Math.PI / 180);
 };
 
-const getDistanceKm = (
-  lat1: number,
-  lon1: number,
-  lat2: number,
-  lon2: number,
-) => {
+export const getDistanceKm = (origin: Coord, destination: Coord) => {
   const R = 6371;
-  const dLat = deg2rad(lat2 - lat1);
-  const dLon = deg2rad(lon2 - lon1);
+  const dLat = deg2rad(destination.lat - origin.lat);
+  const dLon = deg2rad(destination.lng - origin.lng);
   const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(deg2rad(lat1)) *
-      Math.cos(deg2rad(lat2)) *
+    Math.cos(deg2rad(origin.lat)) *
+      Math.cos(deg2rad(destination.lat)) *
       Math.sin(dLon / 2) *
       Math.sin(dLon / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
@@ -28,12 +23,7 @@ const getDistanceKm = (
 const getPathDistanceAndTime = (path: Coord[]) => {
   let distance = 0;
   for (let i = 0; i < path.length - 1; i++) {
-    distance += getDistanceKm(
-      path[i].lat,
-      path[i].lng,
-      path[i + 1].lat,
-      path[i + 1].lng,
-    );
+    distance += getDistanceKm(path[i], path[i + 1]);
   }
   return {
     distance: distance * 1000,
@@ -41,11 +31,11 @@ const getPathDistanceAndTime = (path: Coord[]) => {
   };
 };
 
-const getClosestIndex = (lat: number, lng: number, coords: Coord[]) => {
+const getClosestIndex = (origin: Coord, coords: Coord[]) => {
   let closest = 0;
-  let closestDistance = getDistanceKm(lat, lng, coords[0].lat, coords[0].lng);
+  let closestDistance = getDistanceKm(origin, coords[0]);
   for (let i = 1; i < coords.length; i++) {
-    const distance = getDistanceKm(lat, lng, coords[i].lat, coords[i].lng);
+    const distance = getDistanceKm(origin, coords[i]);
     if (distance < closestDistance) {
       closest = i;
       closestDistance = distance;
@@ -55,12 +45,8 @@ const getClosestIndex = (lat: number, lng: number, coords: Coord[]) => {
 };
 
 export const getBestRoutePath = (origin: Coord, destination: Coord) => {
-  const originIndex = getClosestIndex(origin.lat, origin.lng, barranquilla);
-  const destinationIndex = getClosestIndex(
-    destination.lat,
-    destination.lng,
-    barranquilla,
-  );
+  const originIndex = getClosestIndex(origin, barranquilla);
+  const destinationIndex = getClosestIndex(destination, barranquilla);
   let path: Coord[] = [];
   let path2: Coord[] = [];
 
@@ -82,7 +68,7 @@ export const getBestRoutePath = (origin: Coord, destination: Coord) => {
   return {
     fixedPath: [
       { coords: path, ...getPathDistanceAndTime(path) },
-      { coords: path2, ...getPathDistanceAndTime(path2) },
+      { coords: path2.reverse(), ...getPathDistanceAndTime(path2) },
     ],
     nextOrigin: barranquilla[originIndex],
     nextDestination: barranquilla[destinationIndex],
