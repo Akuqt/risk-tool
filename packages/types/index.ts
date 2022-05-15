@@ -213,6 +213,9 @@ export interface PlannerState {
   fixedPathIndex: number;
   originIndex: number;
   destinationIndex: number;
+  showOriginModal: boolean;
+  showDestinationModal: boolean;
+  mapLoading: boolean;
 }
 
 export interface PlannerAction {
@@ -234,6 +237,9 @@ export interface PlannerAction {
     | "setOriginIndex"
     | "setDestinationIndex"
     | "setFixedPathIndex"
+    | "setShowOriginModal"
+    | "setShowDestinationModal"
+    | "setMapLoading"
     | "reset";
   payload?: any;
 }
