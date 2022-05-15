@@ -18,10 +18,23 @@ import {
   CustomInput,
   CustomSelect,
 } from "components";
+import { Risk } from "./Risk";
 
 Geocode.setApiKey(import.meta.env.VITE_GOOGLE_KEY);
 Geocode.setLanguage("en");
 Geocode.setRegion("co");
+
+const fixedRisk = 65.64179104477611;
+const riskFormat = (
+  originRisk: number | null,
+  destinationRisk: number | null,
+) => {
+  return formatNumber(
+    (fixedRisk + (originRisk || 0) + (destinationRisk || 0)) / 3,
+    2,
+    "%",
+  );
+};
 
 export const Planner: React.FC = () => {
   const apiUrl = useApiUrl();
@@ -39,6 +52,7 @@ export const Planner: React.FC = () => {
       fixedPath,
       originPath,
       mapLoading,
+      originRisk,
       destination,
       originIndex,
       pathSelector,
@@ -46,6 +60,7 @@ export const Planner: React.FC = () => {
       fixedPathIndex,
       showOriginModal,
       destinationPath,
+      destinationRisk,
       destinationIndex,
       showDestinationModal,
     },
@@ -99,17 +114,18 @@ export const Planner: React.FC = () => {
         show={showOriginModal || showDestinationModal}
         bg="#2c2c2cac"
       >
-        <button
-          onClick={() => {
+        <Risk
+          url={apiUrl}
+          close={(risk) => {
             if (showOriginModal) {
               dispatcher({ type: "setShowOriginModal" });
+              dispatcher({ type: "setOriginRisk", payload: risk });
             } else {
               dispatcher({ type: "setShowDestinationModal" });
+              dispatcher({ type: "setDestinationRisk", payload: risk });
             }
           }}
-        >
-          X
-        </button>
+        />
       </CustomModal>
       <Container
         width="300px"
@@ -335,6 +351,7 @@ export const Planner: React.FC = () => {
             padding="4px"
             margin="15px 0px"
             label="Calculate Origin Risk"
+            lock={originPath.length === 0}
             onClick={() => {
               dispatcher({ type: "setShowOriginModal" });
             }}
@@ -344,6 +361,7 @@ export const Planner: React.FC = () => {
             padding="4px"
             margin="15px 0px"
             label="Calculate Destination Risk"
+            lock={destinationPath.length === 0}
             onClick={() => {
               dispatcher({ type: "setShowDestinationModal" });
             }}
@@ -399,7 +417,10 @@ export const Planner: React.FC = () => {
             margin="5px 0px"
           >
             <Txt fs="18px" color="black">
-              Risk: -- %
+              Risk:{" "}
+              {!originRisk || !destinationRisk
+                ? "-- %"
+                : riskFormat(originRisk, destinationRisk)}
             </Txt>
           </Container>
         </Container>
@@ -414,6 +435,7 @@ export const Planner: React.FC = () => {
             padding="4px"
             margin="10px 0px"
             label="Set Route"
+            lock={fixedPath.length === 0 || !originRisk || !destinationRisk}
           />
         </Container>
         <Container
