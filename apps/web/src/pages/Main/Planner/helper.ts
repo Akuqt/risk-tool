@@ -21,6 +21,8 @@ export const initialState: PlannerState = {
   mapLoading: false,
   showOriginModal: false,
   showDestinationModal: false,
+  destinationRisk: null,
+  originRisk: null,
 };
 
 export const reducer = (
@@ -68,6 +70,10 @@ export const reducer = (
       return { ...state, showOriginModal: !state.showOriginModal };
     case "setShowDestinationModal":
       return { ...state, showDestinationModal: !state.showDestinationModal };
+    case "setOriginRisk":
+      return { ...state, originRisk: action.payload };
+    case "setDestinationRisk":
+      return { ...state, destinationRisk: action.payload };
     case "reset":
       return {
         ...state,
