@@ -198,3 +198,27 @@ export const Check = styled.input<{
     transition: transform 200ms ease-in-out, background-color 200ms ease-in-out;
   }
 `;
+
+export const Spinner = styled.div<{
+  radius: string;
+  borderHeight: string;
+  color: string;
+}>`
+  border: ${(p) => p.borderHeight} solid rgba(0, 0, 0, 0.1);
+  width: ${(p) => p.radius};
+  height: ${(p) => p.radius};
+  border-radius: 50%;
+  border-left-color: ${(p) => p.color};
+
+  animation: spin 1s linear infinite;
+
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+`;
