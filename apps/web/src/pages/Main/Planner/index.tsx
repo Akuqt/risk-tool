@@ -1,14 +1,15 @@
 import React, { useEffect, useCallback, useReducer } from "react";
 import Geocode from "react-geocode";
 import { debounce, formatAddress, formatNumber } from "../../../utils";
+import { Container, Btn, Txt, Check, Spinner } from "components/src/Elements";
 import { destinationIcon, originIcon } from "assets";
 import { MdClear, MdSettingsSuggest } from "react-icons/md";
-import { Container, Btn, Txt, Check, Spinner } from "components/src/Elements";
 import { initialState, reducer } from "./helper";
+import { BestPath, Coord } from "types";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../redux";
 import { useApiUrl } from "../../../hooks";
-import { BestPath } from "types";
+import { Risk } from "./Risk";
 import { Post } from "services";
 import { Map } from "../../../components";
 import {
@@ -18,7 +19,6 @@ import {
   CustomInput,
   CustomSelect,
 } from "components";
-import { Risk } from "./Risk";
 
 Geocode.setApiKey(import.meta.env.VITE_GOOGLE_KEY);
 Geocode.setLanguage("en");
@@ -140,6 +140,7 @@ export const Planner: React.FC = () => {
         }}
       >
         <RadioGroup
+          reset={originIndex === 0}
           group="Origin"
           length={originPath.length || 1}
           onChange={(i) => {
@@ -147,6 +148,7 @@ export const Planner: React.FC = () => {
           }}
         />
         <RadioGroup
+          reset={fixedPathIndex === 0}
           group="Fixed"
           length={fixedPath.length || 1}
           onChange={(i) => {
@@ -154,6 +156,7 @@ export const Planner: React.FC = () => {
           }}
         />
         <RadioGroup
+          reset={destinationIndex === 0}
           group="Destination"
           length={destinationPath.length || 1}
           onChange={(i) => {
@@ -315,8 +318,8 @@ export const Planner: React.FC = () => {
               driver === undefined || material === undefined || address === ""
             }
             onClick={async () => {
+              dispatcher({ type: "reset" });
               if (destination?.lat && destination.lng) {
-                dispatcher({ type: "reset" });
                 dispatcher({ type: "setMapLoading", payload: true });
                 const res = await Post<{ ok: boolean } & BestPath>(
                   apiUrl,
@@ -436,6 +439,37 @@ export const Planner: React.FC = () => {
             margin="10px 0px"
             label="Set Route"
             lock={fixedPath.length === 0 || !originRisk || !destinationRisk}
+            onClick={async () => {
+              const fixed_ = fixedPath[fixedPathIndex];
+              const origin_ = originPath[originIndex];
+              const destination_ = destinationPath[destinationIndex];
+
+              const time = fixed_.time + origin_.time + destination_.time;
+              const distance =
+                fixed_.distance + origin_.distance + destination_.distance;
+              const risk =
+                ((originRisk || 0) + (destinationRisk || 0) + fixedRisk) / 3;
+
+              const res = await Post<{ ok: boolean; path: Coord[] }>(
+                apiUrl,
+                "/path/new",
+                {
+                  time,
+                  distance,
+                  risk,
+                  fixed: fixed_.coords,
+                  origin: origin_.coords,
+                  destination: destination_.coords,
+                  material: material?.value,
+                  driver: driver?.value,
+                },
+                company.token,
+              );
+
+              if (res.data.ok) {
+                // TODO: notify user
+              }
+            }}
           />
         </Container>
         <Container
