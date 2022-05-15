@@ -99,6 +99,18 @@ export interface ILog extends Document {
   lng: number;
 }
 
+export interface IRoute extends Document {
+  _id?: mongoose.ObjectId;
+  coords: Coord[];
+  distance: number;
+  time: number;
+  risk: number;
+  material: string;
+  driver: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export interface ICompany extends Document {
   _id?: mongoose.ObjectId;
   name: string;
@@ -107,6 +119,7 @@ export interface ICompany extends Document {
   lat: number;
   lng: number;
   logs: ILog[];
+  routes: IRoute[];
   username: string;
   password: string;
   role: IRole;
@@ -276,6 +289,10 @@ export interface BaseBestPath {
   coords: Coord[];
   distance: number;
   time: number;
+}
+
+export interface BestRoute extends BaseBestPath {
+  risk: number;
 }
 
 export interface BestPath {
