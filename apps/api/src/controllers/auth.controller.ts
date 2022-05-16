@@ -53,6 +53,7 @@ export const signIn = async (
           lng: _driver.company.lng,
         },
         token: createAcessToken(_driver),
+        route: _driver.route,
       },
     });
   }
@@ -97,6 +98,7 @@ export const signIn = async (
           plate: d.plate,
           lat: d.lat,
           lng: d.lng,
+          active: d.active,
         })),
         token: createAcessToken(_company),
       },
