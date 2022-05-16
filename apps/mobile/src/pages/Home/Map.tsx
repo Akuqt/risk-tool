@@ -4,8 +4,12 @@ import { RootState } from "../../redux";
 import { MapView } from "components/src/native";
 
 export const Map: React.FC = () => {
-  const location = useSelector(
-    (state: RootState) => state.locationReducer.data,
+  const route = useSelector((state: RootState) => state.userReducer.user.route);
+  return (
+    <MapView
+      polys={[
+        route.map((coord) => ({ latitude: coord.lat, longitude: coord.lng })),
+      ]}
+    />
   );
-  return <MapView location={location} />;
 };
