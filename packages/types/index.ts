@@ -41,6 +41,15 @@ export interface Coord {
 export interface PolyPath {
   path: Coord[];
   color: string;
+  clickable?: boolean;
+  info?: {
+    time: number;
+    distance: number;
+    material: string;
+    risk: number;
+    route?: string;
+    driver?: string;
+  };
 }
 
 export interface WazeTrafficInfo {
@@ -65,14 +74,24 @@ export interface WazeAlertInfo {
 
 export interface InfoWindowData {
   location: Coord;
-  description: string;
-  date: number;
-  street: string;
-  city: string;
+  description?: string;
+  date?: number;
+  street?: string;
+  city?: string;
   level?: number;
   speedKh?: number;
   type?: string;
   time?: number;
+
+  duration?: number;
+  distance?: number;
+  risk?: number;
+  material?: string;
+  route?: string;
+  driver?: string;
+
+  cName?: string;
+  dAddress?: string;
 }
 
 export interface WazePathResponse {
@@ -109,6 +128,7 @@ export interface IRoute extends Document {
   driver: string;
   createdAt: Date;
   updatedAt: Date;
+  address: string;
 }
 
 export interface ICompany extends Document {
@@ -140,6 +160,8 @@ export interface IDriver extends Document {
   material: string;
   role: IRole;
   tokenVersion: number;
+  active: boolean;
+  route: Coord[];
 }
 
 export interface FDriver {
@@ -161,6 +183,8 @@ export interface FDriver {
   material: string;
   role: string;
   token: string;
+  active: boolean;
+  route: Coord[];
 }
 
 export interface FCompany {
@@ -178,6 +202,7 @@ export interface FCompany {
     gender: string;
     id: string;
     plate: string;
+    active: boolean;
   }[];
   token: string;
 }
@@ -261,6 +286,39 @@ export interface PlannerAction {
   payload?: any;
 }
 
+export interface GeneralState {
+  settings: boolean;
+  googleTL: boolean;
+  wazeTL: boolean;
+  wazeTA: boolean;
+  mapLoading: boolean;
+  routes: BestRoute[];
+  destinations: {
+    coords: Coord;
+    svgColor: string;
+    svgPath: string;
+  }[];
+  drivers: {
+    name: string;
+    lastname: string;
+    plate: string;
+    coords: Coord;
+  }[];
+}
+
+export interface GeneralAction {
+  type:
+    | "setSettings"
+    | "setGoogleTL"
+    | "setWazeTL"
+    | "setWazeTA"
+    | "setMapLoading"
+    | "setRoutes"
+    | "setDestinations"
+    | "setDrivers";
+  payload?: any;
+}
+
 export interface LoginState {
   password: string;
   username: string;
@@ -293,6 +351,13 @@ export interface BaseBestPath {
 
 export interface BestRoute extends BaseBestPath {
   risk: number;
+  material: string;
+  driver: string;
+  createdAt: Date;
+  updatedAt: Date;
+  color: string;
+  id: string;
+  address: string;
 }
 
 export interface BestPath {
