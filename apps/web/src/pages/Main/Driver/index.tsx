@@ -340,6 +340,7 @@ export const FormDriver: React.FC<IState> = ({ changeModalState }) => {
                       lastname: driver.lastname,
                       name: driver.name,
                       plate: driver.plate,
+                      active: false,
                     },
                   ],
                 }),
