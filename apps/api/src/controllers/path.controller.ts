@@ -1,5 +1,6 @@
+import WebSocket from "../websocket";
 import { errors, getBestRoutePath, getDistanceKm } from "../lib";
-import { CompanyModel, RouteModel } from "../models";
+import { CompanyModel, RouteModel, DriverModel } from "../models";
 import { Response, Request } from "express";
 import { WazeAPI } from "waze-api";
 import { Coord } from "types";
@@ -35,6 +36,12 @@ const fetchPath = async (from: Coord, to: Coord, n = 1) => {
 
   return path;
 };
+
+const randomColor = () =>
+  "#" +
+  Math.floor(Math.random() * 16777215)
+    .toString(16)
+    .padEnd(6, "0");
 
 export const getBestPath = async (req: Request, res: Response) => {
   const { origin, destination } = req.body as {
@@ -126,17 +133,27 @@ export const getPath = async (
 
 export const addRoutePath = async (req: Request, res: Response) => {
   const id = req.id;
-  const { fixed, origin, destination, risk, distance, time, material, driver } =
-    req.body as {
-      fixed: Coord[];
-      origin: Coord[];
-      destination: Coord[];
-      risk: number;
-      distance: number;
-      time: number;
-      material: string;
-      driver: string;
-    };
+  const {
+    fixed,
+    origin,
+    destination,
+    risk,
+    distance,
+    time,
+    material,
+    driver,
+    address,
+  } = req.body as {
+    fixed: Coord[];
+    origin: Coord[];
+    destination: Coord[];
+    risk: number;
+    distance: number;
+    time: number;
+    material: string;
+    driver: string;
+    address: string;
+  };
 
   if (
     !fixed ||
@@ -147,7 +164,10 @@ export const addRoutePath = async (req: Request, res: Response) => {
     destination.length === 0 ||
     !risk ||
     !distance ||
-    !time
+    !time ||
+    !address ||
+    !material ||
+    !driver
   ) {
     return res.status(400).json({ ok: false, error: errors.badRequest });
   }
@@ -173,10 +193,17 @@ export const addRoutePath = async (req: Request, res: Response) => {
   }
 
   const company = await CompanyModel.findById(id);
+  const driver_ = await DriverModel.findById(driver);
 
-  if (!company) {
+  if (!company || !driver_) {
     return res.status(404).json({ ok: false, error: errors.invalidAuth });
   }
+
+  driver_.active = true;
+  driver_.lat = company.lat;
+  driver_.lng = company.lng;
+  driver_.material = material;
+  driver_.route = path;
 
   const route = new RouteModel({
     risk,
@@ -185,12 +212,16 @@ export const addRoutePath = async (req: Request, res: Response) => {
     coords: path.reverse(),
     material,
     driver,
+    address,
   });
 
   company.routes.push(route);
 
   await route.save();
+  await driver_.save();
   await company.save();
+
+  WebSocket.emit("driver:route", { id: driver, route: path });
 
   res.json({ ok: true });
 };
@@ -205,6 +236,7 @@ export const getRoutePaths = async (req: Request, res: Response) => {
   }
 
   const result = company.routes.map((route) => ({
+    color: randomColor(),
     risk: route.risk,
     distance: route.distance,
     time: route.time,
@@ -213,6 +245,8 @@ export const getRoutePaths = async (req: Request, res: Response) => {
     coords: route.coords,
     createdAt: route.createdAt,
     updateAt: route.updatedAt,
+    id: route._id,
+    address: route.address,
   }));
 
   res.json({ ok: true, result });
