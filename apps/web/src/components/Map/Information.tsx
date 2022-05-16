@@ -1,5 +1,6 @@
 import React from "react";
 import { InfoWindowData } from "types";
+import { formatNumber } from "../../utils";
 import { getTime } from "./helper";
 
 interface InfoProps {
@@ -24,7 +25,22 @@ export const Information: React.FC<InfoProps> = (props) => {
         <p>Driving time: {Math.round(props.info.time / 60)} mins</p>
       )}
       <br />
-      <p>{getTime(props.info.date)}</p>
+      <p>{props.info.date ? getTime(props.info.date) : ""}</p>
+      {props.info.driver && <p>Driver: {props.info.driver}</p>}
+      {props.info.route && <p>Route: {props.info.route}</p>}
+      {props.info.material && <p>Material: {props.info.material}</p>}
+      {props.info.distance && (
+        <p>
+          Distance: {formatNumber((props.info.distance || 0) / 1000, 2, "km")}
+        </p>
+      )}
+      {props.info.duration && (
+        <p>Time: {formatNumber((props.info.duration || 0) / 60, 2, "min")}</p>
+      )}
+      {props.info.cName && (
+        <p style={{ fontWeight: "bold" }}>{props.info.cName}</p>
+      )}
+      {props.info.dAddress && <p>Address: {props.info.dAddress}</p>}
     </div>
   );
 };

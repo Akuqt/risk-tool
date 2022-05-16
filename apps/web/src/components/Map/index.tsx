@@ -1,9 +1,9 @@
 import React, { useCallback, useState, useEffect, memo } from "react";
 import { containerStyle, initOptions, mapOptions } from "./helper";
 import { Container, UserLocation } from "./Elements";
-import { useLocation, useApiUrl } from "../../hooks";
 import { AiOutlineAim } from "react-icons/ai";
 import { Information } from "./Information";
+import { useApiUrl } from "../../hooks";
 import { Coord } from "types";
 import { Post } from "services";
 import {
@@ -21,6 +21,8 @@ import {
   useGoogleMap,
   useJsApiLoader,
 } from "@react-google-maps/api";
+import { RootState } from "../../redux";
+import { useSelector } from "react-redux";
 
 type MAP = ReturnType<typeof useGoogleMap>;
 
@@ -43,7 +45,17 @@ const getTimeColor = (t: number) => {
 
 interface Props {
   polys?: PolyPath[];
-  markers?: { icon: any; coords: Coord | null }[];
+  markers?: {
+    icon?: any;
+    coords: Coord | null;
+    clickable?: boolean;
+    svgPath?: string;
+    svgColor?: string;
+    info?: {
+      name?: string;
+      address?: string;
+    };
+  }[];
   showWazeAlertsLayer?: boolean;
   showWazeTrafficLayer?: boolean;
   showGoogleTrafficLayer?: boolean;
@@ -62,7 +74,6 @@ export const Map: React.FC<Props> = memo(
     showGoogleTrafficLayer,
   }) => {
     const apiUrl = useApiUrl();
-    const { location } = useLocation();
     const { isLoaded } = useJsApiLoader(initOptions);
     const [map, setMap] = useState<MAP>(null);
     const [wazeTrafficInfo, setWazeTrafficInfo] = useState<WazeTrafficInfo[]>(
@@ -76,6 +87,10 @@ export const Map: React.FC<Props> = memo(
     });
 
     const [init, setInit] = useState(true);
+
+    const company = useSelector(
+      (state: RootState) => state.companyReducer.company,
+    );
 
     const updateWazeInfo = useCallback(() => {
       if (map) {
@@ -92,11 +107,14 @@ export const Map: React.FC<Props> = memo(
     }, [apiUrl, map]);
 
     const panToUserLocation = useCallback(() => {
-      if (location) {
-        map?.panTo(location);
+      if (company && company.lat && company.lng) {
+        map?.panTo({
+          lat: company.lat,
+          lng: company.lng,
+        });
         map?.setZoom(14);
       }
-    }, [location, map]);
+    }, [company, map]);
 
     const onLoad = useCallback((map: MAP) => {
       setMap(map);
@@ -155,6 +173,22 @@ export const Map: React.FC<Props> = memo(
                   strokeColor: poly.color,
                   strokeWeight: 6,
                 }}
+                onClick={(e) => {
+                  if (poly.clickable) {
+                    setInfo({
+                      duration: poly.info?.time,
+                      distance: poly.info?.distance,
+                      risk: poly.info?.risk,
+                      material: poly.info?.material,
+                      route: poly.info?.route,
+                      driver: poly.info?.driver,
+                      location: {
+                        lat: e.latLng?.lat() || 0,
+                        lng: e.latLng?.lng() || 0,
+                      },
+                    });
+                  }
+                }}
               />
             ))}
           {showWazeTrafficLayer &&
@@ -183,6 +217,7 @@ export const Map: React.FC<Props> = memo(
             markers.length > 0 &&
             markers.map((marker, i) => {
               if (marker.coords) {
+                const Point = window.google.maps.Point;
                 return (
                   <Marker
                     key={i}
@@ -190,7 +225,27 @@ export const Map: React.FC<Props> = memo(
                       lat: marker.coords.lat,
                       lng: marker.coords.lng,
                     }}
-                    icon={{ url: marker.icon }}
+                    icon={{
+                      url: marker.icon,
+                      path: marker.svgPath,
+                      fillColor: marker.svgColor,
+                      fillOpacity: 1,
+                      strokeColor: "black",
+                      scale: 1.5,
+                      anchor: marker.svgPath ? new Point(5, 20) : undefined,
+                    }}
+                    onClick={(e) => {
+                      if (marker.clickable) {
+                        setInfo({
+                          location: {
+                            lat: e.latLng?.lat() || 0,
+                            lng: e.latLng?.lng() || 0,
+                          },
+                          cName: marker.info?.name,
+                          dAddress: marker.info?.address,
+                        });
+                      }
+                    }}
                   />
                 );
               }
