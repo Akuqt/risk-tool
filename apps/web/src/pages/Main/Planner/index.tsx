@@ -295,10 +295,12 @@ export const Planner: React.FC = () => {
             placeholder="Driver"
             value={driver}
             onChange={(e) => dispatcher({ type: "setDriver", payload: e })}
-            options={company.drivers.map((d) => ({
-              label: d.name + " " + d.lastname,
-              value: d.id,
-            }))}
+            options={company.drivers
+              .filter((d) => !d.active)
+              .map((d) => ({
+                label: d.name + " " + d.lastname,
+                value: d.id,
+              }))}
             margin="12px 0px"
           />
         </Container>
@@ -462,6 +464,7 @@ export const Planner: React.FC = () => {
                   destination: destination_.coords,
                   material: material?.value,
                   driver: driver?.value,
+                  address,
                 },
                 company.token,
               );
@@ -513,10 +516,22 @@ export const Planner: React.FC = () => {
             },
           ]}
           markers={[
-            { coords: destination, icon: destinationIcon },
+            {
+              coords: destination,
+              icon: destinationIcon,
+              info: {
+                address,
+              },
+              clickable: true,
+            },
             {
               coords: { lat: company.lat, lng: company.lng },
               icon: originIcon,
+              clickable: true,
+              info: {
+                name: company.name,
+                address: company.address,
+              },
             },
           ]}
           canClick={clickable}
