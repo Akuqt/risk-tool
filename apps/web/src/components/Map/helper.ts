@@ -1,4 +1,5 @@
 import styles from "./styles";
+import config from "../../config";
 import { Duration, DurationLikeObject } from "luxon";
 import { LoadScriptProps, useJsApiLoader } from "@react-google-maps/api";
 
@@ -43,7 +44,7 @@ export const containerStyle = {
 const libraries: LoadScriptProps["libraries"] = ["drawing"];
 
 export const initOptions: LoaderOpts = {
-  googleMapsApiKey: import.meta.env.VITE_GOOGLE_KEY,
+  googleMapsApiKey: config.apiKey,
   libraries,
   version: "3.48",
   language: "en",
