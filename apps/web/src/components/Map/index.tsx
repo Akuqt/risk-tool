@@ -1,8 +1,11 @@
 import React, { useCallback, useState, useEffect, memo } from "react";
+import { getAlertIcon, getClosestIndex, getTimeColor } from "../../utils";
 import { containerStyle, initOptions, mapOptions } from "./helper";
 import { Container, UserLocation } from "./Elements";
 import { AiOutlineAim } from "react-icons/ai";
 import { Information } from "./Information";
+import { useSelector } from "react-redux";
+import { RootState } from "../../redux";
 import { useApiUrl } from "../../hooks";
 import { Coord } from "types";
 import { Post } from "services";
@@ -21,27 +24,8 @@ import {
   useGoogleMap,
   useJsApiLoader,
 } from "@react-google-maps/api";
-import { RootState } from "../../redux";
-import { useSelector } from "react-redux";
 
 type MAP = ReturnType<typeof useGoogleMap>;
-
-const getAlertIcon = (alert: WazeAlertInfo) => {
-  switch (alert.type) {
-    case "ACCIDENT":
-      return "https://www.waze.com/livemap/assets/accident-major-e4499a78307739ab9e04b2c57eb65feb.svg";
-    case "POLICE":
-      return "https://www.waze.com/livemap/assets/police-987e7deeb8893a0e088fbf5aac5082f7.svg";
-    case "ROAD_CLOSED":
-      return "https://www.waze.com/livemap/assets/closure-d85b532570fa89f0cc951f5f3ef1e387.svg";
-    default:
-      return "https://www.waze.com/livemap/assets/hazard-02e4ae89da4f6b5a88a7bc5e4725f2e5.svg";
-  }
-};
-
-const getTimeColor = (t: number) => {
-  return t > 0 && t < 5 ? "green" : t > 5 && t < 10 ? "orange" : "red";
-};
 
 interface Props {
   polys?: PolyPath[];
@@ -175,18 +159,30 @@ export const Map: React.FC<Props> = memo(
                 }}
                 onClick={(e) => {
                   if (poly.clickable) {
-                    setInfo({
-                      duration: poly.info?.time,
-                      distance: poly.info?.distance,
-                      risk: poly.info?.risk,
-                      material: poly.info?.material,
-                      route: poly.info?.route,
-                      driver: poly.info?.driver,
-                      location: {
-                        lat: e.latLng?.lat() || 0,
-                        lng: e.latLng?.lng() || 0,
-                      },
-                    });
+                    if (poly.onClick) {
+                      poly.onClick(
+                        getClosestIndex(
+                          {
+                            lat: e.latLng?.lat() || 0,
+                            lng: e.latLng?.lng() || 0,
+                          },
+                          poly.path,
+                        ),
+                      );
+                    } else {
+                      setInfo({
+                        duration: poly.info?.time,
+                        distance: poly.info?.distance,
+                        risk: poly.info?.risk,
+                        material: poly.info?.material,
+                        route: poly.info?.route,
+                        driver: poly.info?.driver,
+                        location: {
+                          lat: e.latLng?.lat() || 0,
+                          lng: e.latLng?.lng() || 0,
+                        },
+                      });
+                    }
                   }
                 }}
               />
