@@ -43,13 +43,14 @@ export interface PolyPath {
   color: string;
   clickable?: boolean;
   info?: {
-    time: number;
-    distance: number;
-    material: string;
-    risk: number;
+    time?: number;
+    distance?: number;
+    material?: string;
+    risk?: number;
     route?: string;
     driver?: string;
   };
+  onClick?: (i: number) => void;
 }
 
 export interface WazeTrafficInfo {
@@ -246,16 +247,14 @@ export interface PlannerState {
   wazeTL: boolean;
   wazeTA: boolean;
   fixedPath: BaseBestPath[];
-  originPath: BaseBestPath[];
-  destinationPath: BaseBestPath[];
   fixedPathIndex: number;
-  originIndex: number;
-  destinationIndex: number;
-  showOriginModal: boolean;
-  showDestinationModal: boolean;
   mapLoading: boolean;
-  originRisk: number | null;
-  destinationRisk: number | null;
+  riskCalculation: boolean;
+  risk: number;
+  riskPaths: { path: Coord[]; color: string; risk: number }[];
+  currentIndex: number;
+  newIndex: number;
+  showModal: boolean;
 }
 
 export interface PlannerAction {
@@ -272,17 +271,16 @@ export interface PlannerAction {
     | "setWazeTL"
     | "setWazeTA"
     | "setFixedPath"
-    | "setOriginPath"
-    | "setDestinationPath"
-    | "setOriginIndex"
-    | "setDestinationIndex"
     | "setFixedPathIndex"
-    | "setShowOriginModal"
-    | "setShowDestinationModal"
     | "setMapLoading"
-    | "setOriginRisk"
-    | "setDestinationRisk"
-    | "reset";
+    | "setRiskCalculation"
+    | "setRisk"
+    | "setRiskPaths"
+    | "setCurrentIndex"
+    | "setNewIndex"
+    | "setShowModal"
+    | "reset"
+    | "resetRisk";
   payload?: any;
 }
 
@@ -361,9 +359,5 @@ export interface BestRoute extends BaseBestPath {
 }
 
 export interface BestPath {
-  result: {
-    fixedPath: BaseBestPath;
-    originPath: BaseBestPath[];
-    destinationPath: BaseBestPath[];
-  };
+  result: BaseBestPath[];
 }
