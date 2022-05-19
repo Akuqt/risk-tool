@@ -13,16 +13,14 @@ export const initialState: PlannerState = {
   wazeTL: false,
   wazeTA: false,
   fixedPath: [],
-  originPath: [],
-  destinationPath: [],
-  originIndex: 0,
-  destinationIndex: 0,
   fixedPathIndex: 0,
   mapLoading: false,
-  showOriginModal: false,
-  showDestinationModal: false,
-  destinationRisk: null,
-  originRisk: null,
+  riskCalculation: false,
+  risk: 0,
+  riskPaths: [],
+  currentIndex: 0,
+  newIndex: 0,
+  showModal: false,
 };
 
 export const reducer = (
@@ -54,36 +52,42 @@ export const reducer = (
       return { ...state, wazeTA: !state.wazeTA };
     case "setFixedPath":
       return { ...state, fixedPath: action.payload };
-    case "setOriginPath":
-      return { ...state, originPath: action.payload };
-    case "setDestinationPath":
-      return { ...state, destinationPath: action.payload };
-    case "setOriginIndex":
-      return { ...state, originIndex: action.payload };
-    case "setDestinationIndex":
-      return { ...state, destinationIndex: action.payload };
     case "setFixedPathIndex":
       return { ...state, fixedPathIndex: action.payload };
     case "setMapLoading":
       return { ...state, mapLoading: action.payload };
-    case "setShowOriginModal":
-      return { ...state, showOriginModal: !state.showOriginModal };
-    case "setShowDestinationModal":
-      return { ...state, showDestinationModal: !state.showDestinationModal };
-    case "setOriginRisk":
-      return { ...state, originRisk: action.payload };
-    case "setDestinationRisk":
-      return { ...state, destinationRisk: action.payload };
+    case "setRiskCalculation":
+      return { ...state, riskCalculation: action.payload };
+    case "setRisk":
+      return { ...state, risk: action.payload };
+    case "setRiskPaths":
+      return { ...state, riskPaths: [...state.riskPaths, action.payload] };
+    case "setCurrentIndex":
+      return { ...state, currentIndex: action.payload };
+    case "setNewIndex":
+      return { ...state, newIndex: action.payload };
+    case "setShowModal":
+      return { ...state, showModal: !state.showModal };
     case "reset":
       return {
         ...state,
         fixedPath: [],
-        originPath: [],
-        originIndex: 0,
         fixedPathIndex: 0,
-        destinationIndex: 0,
-        destinationPath: [],
         pathSelector: false,
+        risk: 0,
+        riskPaths: [],
+        currentIndex: 0,
+        newIndex: 0,
+        riskCalculation: false,
+      };
+    case "resetRisk":
+      return {
+        ...state,
+        risk: 0,
+        riskPaths: [],
+        currentIndex: 0,
+        newIndex: 0,
+        riskCalculation: false,
       };
     default:
       return state;
