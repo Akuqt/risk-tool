@@ -22,9 +22,11 @@ export const Information: React.FC<InfoProps> = (props) => {
       </p>
       {props.info.speedKh && <p>Average speed: {props.info.speedKh} km/h</p>}
       {props.info.time && (
-        <p>Driving time: {Math.round(props.info.time / 60)} mins</p>
+        <>
+          <p>Driving time: {Math.round(props.info.time / 60)} mins</p>
+          <br />
+        </>
       )}
-      <br />
       <p>{props.info.date ? getTime(props.info.date) : ""}</p>
       {props.info.driver && <p>Driver: {props.info.driver}</p>}
       {props.info.route && <p>Route: {props.info.route}</p>}
@@ -41,6 +43,7 @@ export const Information: React.FC<InfoProps> = (props) => {
         <p style={{ fontWeight: "bold" }}>{props.info.cName}</p>
       )}
       {props.info.dAddress && <p>Address: {props.info.dAddress}</p>}
+      {props.info.risk && <p>Risk: {formatNumber(props.info.risk, 2, "%")}</p>}
     </div>
   );
 };
