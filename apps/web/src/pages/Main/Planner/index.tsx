@@ -1,6 +1,6 @@
 import React, { useEffect, useCallback, useReducer } from "react";
 import Geocode from "react-geocode";
-import { debounce, formatAddress, formatNumber } from "../../../utils";
+import config from "../../../config";
 import { Container, Btn, Txt, Check, Spinner } from "components/src/Elements";
 import { destinationIcon, originIcon } from "assets";
 import { MdClear, MdSettingsSuggest } from "react-icons/md";
@@ -19,50 +19,43 @@ import {
   CustomInput,
   CustomSelect,
 } from "components";
+import {
+  debounce,
+  randomColor,
+  riskPathMap,
+  formatNumber,
+  formatAddress,
+} from "../../../utils";
 
-Geocode.setApiKey(import.meta.env.VITE_GOOGLE_KEY);
+Geocode.setApiKey(config.apiKey);
 Geocode.setLanguage("en");
 Geocode.setRegion("co");
-
-const fixedRisk = 65.64179104477611;
-const riskFormat = (
-  originRisk: number | null,
-  destinationRisk: number | null,
-) => {
-  return formatNumber(
-    (fixedRisk + (originRisk || 0) + (destinationRisk || 0)) / 3,
-    2,
-    "%",
-  );
-};
 
 export const Planner: React.FC = () => {
   const apiUrl = useApiUrl();
 
   const [
     {
+      risk,
       wazeTA,
       wazeTL,
       driver,
       address,
       settings,
+      newIndex,
       material,
       googleTL,
       clickable,
+      showModal,
       fixedPath,
-      originPath,
+      riskPaths,
       mapLoading,
-      originRisk,
       destination,
-      originIndex,
+      currentIndex,
       pathSelector,
       loadingAddress,
       fixedPathIndex,
-      showOriginModal,
-      destinationPath,
-      destinationRisk,
-      destinationIndex,
-      showDestinationModal,
+      riskCalculation,
     },
     dispatcher,
   ] = useReducer(reducer, initialState);
@@ -110,57 +103,48 @@ export const Planner: React.FC = () => {
       heigh="calc(100% - 30px)"
       style={{ position: "relative", overflow: "hidden" }}
     >
-      <CustomModal
-        show={showOriginModal || showDestinationModal}
-        bg="#2c2c2cac"
-      >
+      <CustomModal show={showModal && riskCalculation} bg="#2c2c2cac">
         <Risk
           url={apiUrl}
-          close={(risk) => {
-            if (showOriginModal) {
-              dispatcher({ type: "setShowOriginModal" });
-              dispatcher({ type: "setOriginRisk", payload: risk });
+          close={(risk_) => {
+            if (risk_) {
+              dispatcher({
+                type: "setRiskPaths",
+                payload: {
+                  path: fixedPath[fixedPathIndex].coords.slice(
+                    currentIndex > 0 ? currentIndex - 1 : 0,
+                    newIndex,
+                  ),
+                  color: randomColor(),
+                  risk: risk_,
+                },
+              });
+              dispatcher({ type: "setCurrentIndex", payload: newIndex });
+              dispatcher({ type: "setShowModal", payload: false });
             } else {
-              dispatcher({ type: "setShowDestinationModal" });
-              dispatcher({ type: "setDestinationRisk", payload: risk });
+              // TODO: Notify error
             }
           }}
         />
       </CustomModal>
       <Container
-        width="300px"
+        width="fit-content"
         align="center"
         justify="flex-start"
         style={{
           position: "absolute",
-          top: pathSelector ? "2%" : "-5%",
+          top: pathSelector && !riskCalculation ? "2%" : "-10%",
           left: "25%",
           zIndex: 300,
           transition: "top 0.3s",
         }}
       >
         <RadioGroup
-          reset={originIndex === 0}
-          group="Origin"
-          length={originPath.length || 1}
-          onChange={(i) => {
-            dispatcher({ type: "setOriginIndex", payload: i });
-          }}
-        />
-        <RadioGroup
           reset={fixedPathIndex === 0}
-          group="Fixed"
+          group="Alternatives"
           length={fixedPath.length || 1}
           onChange={(i) => {
             dispatcher({ type: "setFixedPathIndex", payload: i });
-          }}
-        />
-        <RadioGroup
-          reset={destinationIndex === 0}
-          group="Destination"
-          length={destinationPath.length || 1}
-          onChange={(i) => {
-            dispatcher({ type: "setDestinationIndex", payload: i });
           }}
         />
       </Container>
@@ -335,16 +319,8 @@ export const Planner: React.FC = () => {
                   },
                 );
                 dispatcher({
-                  type: "setOriginPath",
-                  payload: res.data.result.originPath,
-                });
-                dispatcher({
-                  type: "setDestinationPath",
-                  payload: res.data.result.destinationPath,
-                });
-                dispatcher({
                   type: "setFixedPath",
-                  payload: res.data.result.fixedPath,
+                  payload: res.data.result,
                 });
                 dispatcher({ type: "setPathSelector", payload: true });
                 dispatcher({ type: "setMapLoading", payload: false });
@@ -355,20 +331,29 @@ export const Planner: React.FC = () => {
             bg="#eb4242"
             padding="4px"
             margin="15px 0px"
-            label="Calculate Origin Risk"
-            lock={originPath.length === 0}
+            label={(() => {
+              if (riskPaths.length === 0) return "Set Risk Points";
+              if (risk > 0) return "Reset Risk Points";
+              return "Calculate Risk";
+            })()}
+            lock={fixedPath.length === 0}
             onClick={() => {
-              dispatcher({ type: "setShowOriginModal" });
-            }}
-          />
-          <CustomBtn
-            bg="#0094FF"
-            padding="4px"
-            margin="15px 0px"
-            label="Calculate Destination Risk"
-            lock={destinationPath.length === 0}
-            onClick={() => {
-              dispatcher({ type: "setShowDestinationModal" });
+              if (risk > 0) {
+                dispatcher({ type: "resetRisk" });
+                return;
+              }
+              if (riskPaths.length > 0) {
+                const risk_ = riskPaths.reduce(
+                  (acc, curr) => acc + curr.risk,
+                  0,
+                );
+                dispatcher({
+                  type: "setRisk",
+                  payload: risk_ / riskPaths.length,
+                });
+                return;
+              }
+              dispatcher({ type: "setRiskCalculation", payload: true });
             }}
           />
         </Container>
@@ -388,10 +373,7 @@ export const Planner: React.FC = () => {
             <Txt fs="18px" color="black">
               Distance:{" "}
               {formatNumber(
-                ((fixedPath[fixedPathIndex]?.distance || 0) +
-                  (originPath[originIndex]?.distance || 0) +
-                  (destinationPath[destinationIndex]?.distance || 0)) /
-                  1000,
+                (fixedPath[fixedPathIndex]?.distance || 0) / 1000,
                 2,
                 "km",
               )}
@@ -406,10 +388,7 @@ export const Planner: React.FC = () => {
             <Txt fs="18px" color="black">
               Time:{" "}
               {formatNumber(
-                ((fixedPath[fixedPathIndex]?.time || 0) +
-                  (originPath[originIndex]?.time || 0) +
-                  (destinationPath[destinationIndex]?.time || 0)) /
-                  60,
+                (fixedPath[fixedPathIndex]?.time || 0) / 60,
                 2,
                 "min",
               )}
@@ -422,10 +401,7 @@ export const Planner: React.FC = () => {
             margin="5px 0px"
           >
             <Txt fs="18px" color="black">
-              Risk:{" "}
-              {!originRisk || !destinationRisk
-                ? "-- %"
-                : riskFormat(originRisk, destinationRisk)}
+              Risk: {formatNumber(risk, 2, "%") || "-- %"}
             </Txt>
           </Container>
         </Container>
@@ -436,35 +412,23 @@ export const Planner: React.FC = () => {
           margin="40px 0px"
         >
           <CustomBtn
-            bg="#0ca82e"
+            bg="#0094FF"
             padding="4px"
             margin="10px 0px"
             label="Set Route"
-            lock={fixedPath.length === 0 || !originRisk || !destinationRisk}
+            lock={fixedPath.length === 0 || risk === 0}
             onClick={async () => {
-              const fixed_ = fixedPath[fixedPathIndex];
-              const origin_ = originPath[originIndex];
-              const destination_ = destinationPath[destinationIndex];
-
-              const time = fixed_.time + origin_.time + destination_.time;
-              const distance =
-                fixed_.distance + origin_.distance + destination_.distance;
-              const risk =
-                ((originRisk || 0) + (destinationRisk || 0) + fixedRisk) / 3;
-
               const res = await Post<{ ok: boolean; path: Coord[] }>(
                 apiUrl,
                 "/path/new",
                 {
-                  time,
-                  distance,
                   risk,
-                  fixed: fixed_.coords,
-                  origin: origin_.coords,
-                  destination: destination_.coords,
-                  material: material?.value,
-                  driver: driver?.value,
                   address,
+                  driver: driver?.value,
+                  material: material?.value,
+                  time: fixedPath[fixedPathIndex].time,
+                  fixed: fixedPath[fixedPathIndex].coords,
+                  distance: fixedPath[fixedPathIndex].distance,
                 },
                 company.token,
               );
@@ -508,12 +472,18 @@ export const Planner: React.FC = () => {
         </CustomModal>
         <Map
           polys={[
-            { color: "tomato", path: fixedPath[fixedPathIndex]?.coords || [] },
-            { color: "red", path: originPath[originIndex]?.coords || [] },
             {
-              color: "blue",
-              path: destinationPath[destinationIndex]?.coords || [],
+              color: "tomato",
+              path: fixedPath[fixedPathIndex]?.coords || [],
+              clickable: riskCalculation && risk === 0,
+              onClick: (i) => {
+                if (i > currentIndex) {
+                  dispatcher({ type: "setNewIndex", payload: i });
+                  dispatcher({ type: "setShowModal" });
+                }
+              },
             },
+            ...riskPaths.map(riskPathMap),
           ]}
           markers={[
             {
