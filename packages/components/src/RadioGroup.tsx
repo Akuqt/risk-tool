@@ -46,6 +46,7 @@ export const RadioGroup: React.FC<Props> = ({
             value={i}
             style={{
               margin: "4px",
+              cursor: "pointer",
             }}
             checked={i === index}
             onChange={() => {
