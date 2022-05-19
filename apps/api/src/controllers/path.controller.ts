@@ -1,13 +1,37 @@
 import WebSocket from "../websocket";
 import { errors, getBestRoutePath, getDistanceKm } from "../lib";
 import { CompanyModel, RouteModel, DriverModel } from "../models";
+import { Coord, BaseBestPath } from "types";
 import { Response, Request } from "express";
 import { WazeAPI } from "waze-api";
-import { Coord } from "types";
 
 const waze = new WazeAPI();
 
 type WazeAlt = Awaited<ReturnType<typeof waze.getPaths>>["alternatives"][0];
+
+const createRoute = (fixed: Coord[], origin: Coord[], destination: Coord[]) => {
+  let path: Coord[] = [];
+
+  if (
+    getDistanceKm(origin[origin.length - 1], fixed[fixed.length - 1]) >
+    getDistanceKm(origin[0], fixed[fixed.length - 1])
+  ) {
+    path = [...fixed, ...origin];
+  } else {
+    path = [...fixed, ...origin.reverse()];
+  }
+
+  if (
+    getDistanceKm(destination[destination.length - 1], path[0]) >
+    getDistanceKm(destination[0], path[0])
+  ) {
+    path = [...destination.reverse(), ...path];
+  } else {
+    path = [...destination, ...path];
+  }
+
+  return path.reverse();
+};
 
 const pathMap = (alt: WazeAlt) => ({
   coords: alt.coords.map((coord) => ({
@@ -65,15 +89,31 @@ export const getBestPath = async (req: Request, res: Response) => {
   const originPath = await fetchPath(origin, nextOrigin, 3);
   const destinationPath = await fetchPath(destination, nextDestination, 3);
 
+  const alternatives: BaseBestPath[] = [];
+
   const result = {
     fixedPath,
     originPath: originPath.alternatives.map(pathMap),
     destinationPath: destinationPath.alternatives.map(pathMap),
   };
 
+  for (const fixed of result.fixedPath) {
+    for (const org of result.originPath) {
+      for (const dest of result.destinationPath) {
+        alternatives.push({
+          coords: createRoute(fixed.coords, org.coords, dest.coords),
+          time: org.time + dest.time + fixed.time,
+          distance: org.distance + dest.distance + fixed.distance,
+        });
+      }
+    }
+  }
+
   return res.status(200).json({
     ok: true,
-    result,
+    result: alternatives.sort(
+      (a, b) => a.time + a.distance - b.time - b.distance,
+    ),
   });
 };
 
@@ -133,35 +173,20 @@ export const getPath = async (
 
 export const addRoutePath = async (req: Request, res: Response) => {
   const id = req.id;
-  const {
-    fixed,
-    origin,
-    destination,
-    risk,
-    distance,
-    time,
-    material,
-    driver,
-    address,
-  } = req.body as {
-    fixed: Coord[];
-    origin: Coord[];
-    destination: Coord[];
-    risk: number;
-    distance: number;
-    time: number;
-    material: string;
-    driver: string;
-    address: string;
-  };
+  const { fixed, risk, distance, time, material, driver, address } =
+    req.body as {
+      time: number;
+      distance: number;
+      risk: number;
+      fixed: Coord[];
+      material: string;
+      driver: string;
+      address: string;
+    };
 
   if (
     !fixed ||
     fixed.length === 0 ||
-    !origin ||
-    origin.length === 0 ||
-    !destination ||
-    destination.length === 0 ||
     !risk ||
     !distance ||
     !time ||
@@ -171,27 +196,6 @@ export const addRoutePath = async (req: Request, res: Response) => {
   ) {
     return res.status(400).json({ ok: false, error: errors.badRequest });
   }
-
-  let path: Coord[] = [];
-
-  if (
-    getDistanceKm(origin[origin.length - 1], fixed[fixed.length - 1]) >
-    getDistanceKm(origin[0], fixed[fixed.length - 1])
-  ) {
-    path = [...fixed, ...origin];
-  } else {
-    path = [...fixed, ...origin.reverse()];
-  }
-
-  if (
-    getDistanceKm(destination[destination.length - 1], path[0]) >
-    getDistanceKm(destination[0], path[0])
-  ) {
-    path = [...destination.reverse(), ...path];
-  } else {
-    path = [...destination, ...path];
-  }
-
   const company = await CompanyModel.findById(id);
   const driver_ = await DriverModel.findById(driver);
 
@@ -203,13 +207,13 @@ export const addRoutePath = async (req: Request, res: Response) => {
   driver_.lat = company.lat;
   driver_.lng = company.lng;
   driver_.material = material;
-  driver_.route = path;
+  driver_.route = fixed;
 
   const route = new RouteModel({
     risk,
     distance,
     time,
-    coords: path.reverse(),
+    coords: fixed,
     material,
     driver,
     address,
@@ -221,7 +225,7 @@ export const addRoutePath = async (req: Request, res: Response) => {
   await driver_.save();
   await company.save();
 
-  WebSocket.emit("driver:route", { id: driver, route: path });
+  WebSocket.emit("driver:route", { id: driver, route: fixed });
 
   res.json({ ok: true });
 };
