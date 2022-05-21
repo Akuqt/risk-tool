@@ -221,7 +221,7 @@ export interface FCompany {
   lastRoutes: {
     risk: number;
     date: Date;
-  };
+  }[];
 }
 
 export interface RegisterState {
