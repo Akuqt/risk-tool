@@ -93,6 +93,7 @@ export const signIn = async (
         drivers: _drivers.map((d) => ({
           name: d.name,
           lastname: d.lastname,
+          user: d.username,
           gender: d.gender,
           id: d._id,
           plate: d.plate,
