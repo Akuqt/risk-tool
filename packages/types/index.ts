@@ -204,6 +204,9 @@ export interface FCompany {
     id: string;
     plate: string;
     active: boolean;
+    user: string;
+    lat: number;
+    lng: number;
   }[];
   token: string;
 }
