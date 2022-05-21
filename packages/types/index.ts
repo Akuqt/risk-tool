@@ -110,13 +110,21 @@ export interface IRole extends Document {
   name: string;
 }
 
-export interface ILog extends Document {
-  _id?: mongoose.ObjectId;
-  event: string;
+export interface FLog {
+  alert: {
+    reason: string;
+    description: string;
+  };
   action: string;
-  timestamp: number;
+  driver: string;
   lat: number;
   lng: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface ILog extends Document, FLog {
+  _id?: mongoose.ObjectId;
 }
 
 export interface IRoute extends Document {
@@ -209,6 +217,11 @@ export interface FCompany {
     lng: number;
   }[];
   token: string;
+  logs: FLog[];
+  lastRoutes: {
+    risk: number;
+    date: Date;
+  };
 }
 
 export interface RegisterState {
@@ -294,6 +307,7 @@ export interface GeneralState {
   wazeTA: boolean;
   mapLoading: boolean;
   routes: BestRoute[];
+  currentRoute?: Option;
   destinations: {
     coords: Coord;
     svgColor: string;
@@ -316,6 +330,7 @@ export interface GeneralAction {
     | "setMapLoading"
     | "setRoutes"
     | "setDestinations"
+    | "setCurrentRoute"
     | "setDrivers";
   payload?: any;
 }
