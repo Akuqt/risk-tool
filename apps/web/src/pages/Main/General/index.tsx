@@ -1,13 +1,13 @@
 import React, { useReducer, useEffect } from "react";
-import { destinationIcon, initialState, reducer } from "./helper";
+import { destinationIcon, driverIcon, initialState, reducer } from "./helper";
 import { Btn, Check, Container, Spinner, Txt } from "components/src/Elements";
 import { MdClear, MdSettingsSuggest } from "react-icons/md";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState, saveCompany } from "../../../redux";
+import { useApiUrl, useSocket } from "../../../hooks";
 import { BestRoute, FCompany } from "types";
 import { CustomModal } from "components";
-import { useSelector } from "react-redux";
 import { originIcon } from "assets";
-import { useApiUrl } from "../../../hooks";
-import { RootState } from "../../../redux";
 import { Map } from "../../../components";
 import { Get } from "services";
 
@@ -17,9 +17,24 @@ const getDriver = (id: string, drivers: FCompany["drivers"]) => {
 
 export const General: React.FC = () => {
   const apiUrl = useApiUrl();
+  const socket = useSocket();
+  const dispatch = useDispatch();
   const company = useSelector(
     (state: RootState) => state.companyReducer.company,
   );
+
+  useEffect(() => {
+    socket?.on("update:driver", (d) => {
+      const newDrivers = [...company.drivers].map((k) => {
+        if (k.id === d.id) {
+          return { ...k, ...d };
+        }
+        return k;
+      });
+      dispatch(saveCompany({ ...company, drivers: newDrivers }));
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [socket, dispatch]);
 
   useEffect(() => {
     Get<{ ok: boolean; result: BestRoute[] }>(
@@ -179,6 +194,14 @@ export const General: React.FC = () => {
               clickable: true,
             },
             ...destinations,
+            ...company.drivers.map((k, i) => ({
+              coords: {
+                lat: k.lat,
+                lng: k.lng,
+              },
+              svgColor: destinations[i]?.svgColor || "",
+              svgPath: driverIcon,
+            })),
           ]}
           showWazeAlertsLayer={wazeTA}
           showWazeTrafficLayer={wazeTL}
