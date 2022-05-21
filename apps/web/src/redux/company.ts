@@ -17,6 +17,8 @@ const initialState: Init = {
     role: "",
     token: "",
     username: "",
+    lastRoutes: [],
+    logs: [],
   },
 };
 

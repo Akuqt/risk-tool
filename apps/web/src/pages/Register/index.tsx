@@ -1,5 +1,6 @@
 import React, { useReducer, useEffect, useCallback } from "react";
 import Geocode from "react-geocode";
+import config from "../../config";
 import { Btn, Container, TextInput, Txt } from "components/src/Elements";
 import { initialState, reducer } from "./helper";
 import { FCompany, IError } from "types";
@@ -12,7 +13,7 @@ import { Navbar } from "components";
 import { truck } from "assets";
 import { Post } from "services";
 
-Geocode.setApiKey(import.meta.env.VITE_GOOGLE_KEY);
+Geocode.setApiKey(config.apiKey);
 Geocode.setLanguage("en");
 Geocode.setRegion("co");
 

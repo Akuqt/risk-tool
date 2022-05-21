@@ -1,5 +1,10 @@
 import React, { useEffect, useState, useReducer } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState, saveCompany } from "../../../redux";
+import { FDriver, IError } from "types";
+import { useApiUrl } from "../../../hooks";
 import { Modal } from "components";
+import { Post } from "services";
 import {
   Txt,
   Btn,
@@ -9,11 +14,6 @@ import {
   TextInput,
   Container,
 } from "components/src/Elements";
-import { Post } from "services";
-import { useApiUrl } from "../../../hooks";
-import { FDriver, IError } from "types";
-import { RootState, saveCompany } from "../../../redux";
-import { useDispatch, useSelector } from "react-redux";
 
 export const Driver: React.FC = () => {
   const [modalState, changeModalState] = useState(false);
@@ -121,6 +121,9 @@ export const Driver: React.FC = () => {
                     />
                     <Txt color="#000000" fs="16px" margin="10px 0px">
                       Plate: {drvr?.plate}
+                    </Txt>
+                    <Txt color="#000000" fs="16px" margin="10px 0px">
+                      User: {drvr?.user}
                     </Txt>
                   </Card>
                 );
@@ -340,6 +343,10 @@ export const FormDriver: React.FC<IState> = ({ changeModalState }) => {
                       lastname: driver.lastname,
                       name: driver.name,
                       plate: driver.plate,
+                      active: false,
+                      user: driver.username,
+                      lat: driver.lat,
+                      lng: driver.lng,
                     },
                   ],
                 }),

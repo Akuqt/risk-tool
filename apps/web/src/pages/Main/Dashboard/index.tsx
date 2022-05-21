@@ -1,15 +1,25 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { BsPencil, BsBoxArrowUpRight } from "react-icons/bs";
 import { Btn, Container, Txt } from "components/src/Elements";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../redux";
+import { useSocket } from "../../../hooks";
 
 export const Dashboard: React.FC = () => {
   const company = useSelector(
     (state: RootState) => state.companyReducer.company,
   );
   const navigation = useNavigate();
+  const socket = useSocket();
+
+  useEffect(() => {
+    socket?.on("company:newAlert", (data) => {
+      if (data.company === company.id) {
+        company.logs.push(data.log);
+      }
+    });
+  }, [socket, company]);
 
   return (
     <Container

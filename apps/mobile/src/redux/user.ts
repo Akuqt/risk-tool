@@ -7,6 +7,7 @@ interface Init {
 
 const initialState: Init = {
   user: {
+    active: false,
     token: "",
     name: "",
     lastname: "",
@@ -25,6 +26,7 @@ const initialState: Init = {
       lng: NaN,
       name: "",
     },
+    route: [],
   },
 };
 

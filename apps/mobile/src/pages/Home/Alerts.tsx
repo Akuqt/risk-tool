@@ -103,12 +103,13 @@ export const Alerts: React.FC = () => {
               if (reason.length > 0) {
                 const res = await Post<any>(
                   "http://10.0.2.2:4000/api/v1",
-                  "/alerts",
+                  "/alerts/new",
                   {
                     reason,
                     description,
-                    driver: driver.id,
                     company: driver.company.id,
+                    lat: driver.lat,
+                    lng: driver.lng,
                   },
                   driver.token,
                 );

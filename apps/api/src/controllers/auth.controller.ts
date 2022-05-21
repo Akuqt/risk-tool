@@ -53,6 +53,7 @@ export const signIn = async (
           lng: _driver.company.lng,
         },
         token: createAcessToken(_driver),
+        route: _driver.route,
       },
     });
   }
@@ -60,7 +61,10 @@ export const signIn = async (
   if (type === "company") {
     const _company: ICompany | null = await CompanyModel.findOne({
       username,
-    }).populate("role");
+    })
+      .populate("role")
+      .populate("logs")
+      .populate("routes");
 
     if (!_company)
       return res.status(401).json({ ok: false, error: errors.invalidLogin });
@@ -89,14 +93,21 @@ export const signIn = async (
         address: _company.address,
         materials: _company.materials,
         role: _company.role.name,
+        logs: _company.logs,
+        lastRoutes: _company.routes.map((route) => ({
+          risk: route.risk,
+          date: route.updatedAt,
+        })),
         drivers: _drivers.map((d) => ({
           name: d.name,
           lastname: d.lastname,
+          user: d.username,
           gender: d.gender,
           id: d._id,
           plate: d.plate,
           lat: d.lat,
           lng: d.lng,
+          active: d.active,
         })),
         token: createAcessToken(_company),
       },

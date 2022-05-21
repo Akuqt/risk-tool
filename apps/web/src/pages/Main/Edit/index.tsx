@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import Select, { MultiValue } from "react-select";
 import Geocode from "react-geocode";
+import config from "../../../config";
 import { Container, Txt, TextInput, Btn } from "components/src/Elements";
 import { useDispatch, useSelector } from "react-redux";
 import { Coord, FCompany, IError } from "types";
@@ -24,7 +25,7 @@ interface ISelect {
   value: string;
 }
 
-Geocode.setApiKey(import.meta.env.VITE_GOOGLE_KEY);
+Geocode.setApiKey(config.apiKey);
 Geocode.setLanguage("en");
 Geocode.setRegion("co");
 

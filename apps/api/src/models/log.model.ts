@@ -3,11 +3,14 @@ import { ILog } from "types";
 
 const logSchema = new Schema(
   {
-    event: String,
+    alert: {
+      reason: String,
+      description: String,
+    },
     action: String,
-    timestamp: Number,
     lat: Number,
     lng: Number,
+    driver: String,
   },
   {
     timestamps: false,
