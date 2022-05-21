@@ -4,6 +4,7 @@ import risk from "./risk.routes";
 import report from "./report.routes";
 import path from "./path.routes";
 import auth from "./auth.routes";
+import alerts from "./alerts.routes";
 
 const router = Router();
 
@@ -40,5 +41,7 @@ router.use("/report", report);
 router.use("/path", path);
 
 router.use("/auth", auth);
+
+router.use("/alerts", alerts);
 
 export default router;
