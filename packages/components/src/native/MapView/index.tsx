@@ -25,7 +25,7 @@ interface Props {
 export const getAlertIcon = (alert: WazeAlertInfo) => {
   switch (alert.type) {
     case "ACCIDENT":
-      return require("./crash.svg");
+      return "https://www.waze.com/livemap/assets/accident-major-e4499a78307739ab9e04b2c57eb65feb.svg";
     case "POLICE":
       return "https://www.waze.com/livemap/assets/police-987e7deeb8893a0e088fbf5aac5082f7.svg";
     case "ROAD_CLOSED":
