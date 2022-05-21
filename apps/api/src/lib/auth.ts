@@ -16,7 +16,7 @@ export const createAcessToken = (user: IDriver | ICompany): string => {
     },
     config.JWT.ACCESS,
     {
-      expiresIn: "1d",
+      expiresIn: "1y",
     },
   );
 };
@@ -31,7 +31,7 @@ export const createRefreshToken = (user: IDriver | ICompany): string => {
     },
     config.JWT.REFRESH,
     {
-      expiresIn: "1d",
+      expiresIn: "1y",
     },
   );
 };
