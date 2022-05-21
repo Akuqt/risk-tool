@@ -2,18 +2,21 @@ import React, { useReducer, useEffect } from "react";
 import { destinationIcon, driverIcon, initialState, reducer } from "./helper";
 import { Btn, Check, Container, Spinner, Txt } from "components/src/Elements";
 import { MdClear, MdSettingsSuggest } from "react-icons/md";
+import { CustomModal, CustomSelect } from "components";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState, saveCompany } from "../../../redux";
 import { useApiUrl, useSocket } from "../../../hooks";
-import { BestRoute, FCompany } from "types";
-import { CustomModal } from "components";
 import { originIcon } from "assets";
+import { BestRoute } from "types";
 import { Map } from "../../../components";
 import { Get } from "services";
-
-const getDriver = (id: string, drivers: FCompany["drivers"]) => {
-  return drivers.find((d) => d.id === id);
-};
+import {
+  getDriver,
+  getRoutes,
+  getDrivers,
+  formatNumber,
+  getDestinations,
+} from "../../../utils";
 
 export const General: React.FC = () => {
   const apiUrl = useApiUrl();
@@ -53,13 +56,23 @@ export const General: React.FC = () => {
             address: r.address,
           },
         }));
+
         dispatcher({ type: "setDestinations", payload: destinations });
       }
     });
   }, [company.token, apiUrl]);
 
   const [
-    { wazeTA, wazeTL, settings, googleTL, mapLoading, routes, destinations },
+    {
+      routes,
+      wazeTA,
+      wazeTL,
+      settings,
+      googleTL,
+      mapLoading,
+      currentRoute,
+      destinations,
+    },
     dispatcher,
   ] = useReducer(reducer, initialState);
   return (
@@ -87,6 +100,16 @@ export const General: React.FC = () => {
           transition: "left 0.3s",
         }}
       >
+        <Container
+          width="100%"
+          align="center"
+          justify="flex-start"
+          margin="10px 0px"
+        >
+          <Txt fs="18px" color="black" bold>
+            Traffic
+          </Txt>
+        </Container>
         <Container
           width="100%"
           align="center"
@@ -141,6 +164,53 @@ export const General: React.FC = () => {
             Waze Traffic Alerts
           </Txt>
         </Container>
+        <Container
+          width="100%"
+          align="center"
+          justify="flex-start"
+          margin="10px 0px"
+        >
+          <Txt fs="18px" color="black" bold>
+            Routes
+          </Txt>
+        </Container>
+        <Container
+          width="100%"
+          align="center"
+          justify="flex-start"
+          margin="0px 10px 10px 0px"
+        >
+          <CustomSelect
+            placeholder="All Routes"
+            value={currentRoute}
+            onChange={(e) =>
+              dispatcher({ type: "setCurrentRoute", payload: e })
+            }
+            options={[
+              {
+                value: "idk",
+                label: "All Routes",
+              },
+              ...routes.map((r) => ({
+                label: (() => {
+                  const driver_ = getDriver(r.driver, company.drivers);
+                  return `${driver_?.name} ${
+                    driver_?.lastname
+                  } - ${formatNumber(r.risk, 2, "%")} risk`;
+                })(),
+                value: (() => {
+                  const std = JSON.stringify({
+                    lat: r.coords[r.coords.length - 1].lat,
+                    lng: r.coords[r.coords.length - 1].lng,
+                  });
+                  const res = `${r.id}*${r.driver}*${r.color}*${std}`;
+                  return res;
+                })(),
+              })),
+            ]}
+            margin="12px 0px"
+          />
+        </Container>
       </Container>
       <Container
         width="fit-content"
@@ -167,22 +237,24 @@ export const General: React.FC = () => {
           <Spinner radius="100px" borderHeight="8px" color="tomato" />
         </CustomModal>
         <Map
-          polys={routes.map((r) => ({
-            color: r.color,
-            path: r.coords,
-            clickable: true,
-            info: {
-              distance: r.distance,
-              material: r.material,
-              risk: r.risk,
-              time: r.time,
-              route: r.id,
-              driver: (() => {
-                const d = getDriver(r.driver, company.drivers);
-                return d?.name + " " + d?.lastname;
-              })(),
-            },
-          }))}
+          polys={getRoutes(currentRoute?.value.split("*")[0] || "", routes).map(
+            (r) => ({
+              color: r.color,
+              path: r.coords,
+              clickable: true,
+              info: {
+                distance: r.distance,
+                material: r.material,
+                risk: r.risk,
+                time: r.time,
+                route: r.id,
+                driver: (() => {
+                  const d = getDriver(r.driver, company.drivers);
+                  return d?.name + " " + d?.lastname;
+                })(),
+              },
+            }),
+          )}
           markers={[
             {
               coords: { lat: company.lat, lng: company.lng },
@@ -193,13 +265,23 @@ export const General: React.FC = () => {
               },
               clickable: true,
             },
-            ...destinations,
-            ...company.drivers.map((k, i) => ({
+            ...getDestinations(
+              currentRoute?.value.split("*")[3] || "",
+              destinations,
+              currentRoute?.value.split("*")[2] || "",
+            ),
+            ...getDrivers(
+              currentRoute?.value.split("*")[1] || "",
+              company.drivers,
+            ).map((k, i) => ({
               coords: {
                 lat: k.lat,
                 lng: k.lng,
               },
-              svgColor: destinations[i]?.svgColor || "",
+              svgColor:
+                currentRoute?.value.split("*")[2] ||
+                destinations[i]?.svgColor ||
+                "",
               svgPath: driverIcon,
             })),
           ]}

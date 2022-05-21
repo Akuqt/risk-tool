@@ -9,6 +9,7 @@ export const initialState: GeneralState = {
   routes: [],
   drivers: [],
   destinations: [],
+  currentRoute: undefined,
 };
 
 export const reducer = (
@@ -32,6 +33,8 @@ export const reducer = (
       return { ...state, drivers: action.payload };
     case "setDestinations":
       return { ...state, destinations: action.payload };
+    case "setCurrentRoute":
+      return { ...state, currentRoute: action.payload };
     default:
       return state;
   }
