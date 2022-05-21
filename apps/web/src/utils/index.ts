@@ -1,4 +1,4 @@
-import { Coord, PolyPath, WazeAlertInfo } from "types";
+import { BestRoute, Coord, FCompany, PolyPath, WazeAlertInfo } from "types";
 
 export const debounce = (cb: (...args: any) => void, delay = 1000) => {
   let timeout: any;
@@ -88,4 +88,38 @@ export const riskPathMap = (p: {
       risk: p.risk,
     },
   };
+};
+
+export const getDriver = (id: string, drivers: FCompany["drivers"]) => {
+  return drivers.find((d) => d.id === id);
+};
+
+export const getRoutes = (id: string, routes: BestRoute[]) => {
+  const route = routes.find((r) => r.id === id);
+  return route ? [route] : routes;
+};
+
+export const getDrivers = (id: string, drivers: FCompany["drivers"]) => {
+  const driver = drivers.find((d) => d.id === id);
+  return driver ? [driver] : drivers;
+};
+
+export const getDestinations = (
+  latlng: string,
+  destinations: {
+    coords: Coord;
+    svgColor: string;
+    svgPath: string;
+  }[],
+  color: string,
+) => {
+  try {
+    const { lat, lng } = JSON.parse(latlng);
+    const destination = destinations.find(
+      ({ coords }) => coords.lat === lat && coords.lng === lng,
+    );
+    return destination ? [{ ...destination, svgColor: color }] : destinations;
+  } catch (error) {
+    return destinations;
+  }
 };
