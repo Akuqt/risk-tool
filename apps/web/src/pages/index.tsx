@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
+import { addLog, RootState, updateDriverState2 } from "../redux";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { addLog, RootState } from "../redux";
 import { useSocket } from "../hooks";
 import { NotFound } from "./NotFound";
 import { Register } from "./Register";
@@ -22,7 +22,19 @@ export const Pages: React.FC = () => {
         dispatch(addLog(data.log));
       }
     });
-  }, [socket, company.id, dispatch]);
+    socket?.on("disable:route", (data) => {
+      if (data.company === company.id) {
+        dispatch(
+          updateDriverState2({
+            id: data.driver,
+            active: false,
+            lat: company.lat,
+            lng: company.lng,
+          }),
+        );
+      }
+    });
+  }, [socket, company.id, company.lat, company.lng, dispatch]);
 
   return (
     <BrowserRouter>
