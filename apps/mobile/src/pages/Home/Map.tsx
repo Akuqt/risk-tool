@@ -1,20 +1,19 @@
 import React, { useState } from "react";
+import Ionicons from "react-native-vector-icons/Ionicons";
 import { destinationIcon, originIcon } from "assets";
-import {
-  View,
-  TouchableOpacity,
-  Text,
-  useWindowDimensions,
-  Switch,
-} from "react-native";
 import { useSelector } from "react-redux";
 import { RootState } from "../../redux";
 import { MapView } from "components/src/native";
-import Ionicons from "react-native-vector-icons/Ionicons";
+import {
+  Text,
+  View,
+  Switch,
+  TouchableOpacity,
+  useWindowDimensions,
+} from "react-native";
 
 export const Map: React.FC = () => {
   const user = useSelector((state: RootState) => state.userReducer.user);
-
   const [settings, setSettings] = useState(false);
   const [googleTL, setGoogleTL] = useState(false);
   const [wazeTL, setWazeTL] = useState(false);
@@ -132,28 +131,28 @@ export const Map: React.FC = () => {
         markers={[
           {
             coords: {
-              latitude: user?.company.lat,
-              longitude: user?.company.lng,
+              latitude: user?.company?.lat || 0,
+              longitude: user?.company?.lng || 0,
             },
             info: {
-              address: user?.company.address,
-              name: user?.company.name,
+              address: user?.company?.address || "",
+              name: user?.company?.name || "",
             },
             icon: originIcon,
           },
           {
             coords: {
-              latitude: user?.route[user?.route.length - 1].lat,
-              longitude: user?.route[user?.route.length - 1].lng,
+              latitude: user?.route[user?.route.length - 1]?.lat || 0,
+              longitude: user?.route[user?.route.length - 1]?.lng || 0,
             },
             info: {
-              address: user?.company.address,
+              address: user?.address || "",
             },
             icon: destinationIcon,
           },
         ]}
         polys={[
-          user?.route.map((coord) => ({
+          user?.route?.map((coord) => ({
             latitude: coord.lat,
             longitude: coord.lng,
           })),
