@@ -14,6 +14,7 @@ interface SelectProps {
   placeholder?: string;
   options: Option[];
   margin?: string;
+  disabled?: boolean;
 }
 
 export const CustomSelect: React.FC<SelectProps> = (props) => {
@@ -26,6 +27,7 @@ export const CustomSelect: React.FC<SelectProps> = (props) => {
       justify="center"
     >
       <Select
+        isDisabled={props.disabled}
         placeholder={props.placeholder}
         onMenuOpen={() => setOpen(true)}
         onMenuClose={() => setOpen(false)}
