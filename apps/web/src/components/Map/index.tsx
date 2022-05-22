@@ -38,6 +38,7 @@ interface Props {
     info?: {
       name?: string;
       address?: string;
+      description?: string;
     };
   }[];
   showWazeAlertsLayer?: boolean;
@@ -239,6 +240,7 @@ export const Map: React.FC<Props> = memo(
                           },
                           cName: marker.info?.name,
                           dAddress: marker.info?.address,
+                          description: marker.info?.description,
                         });
                       }
                     }}

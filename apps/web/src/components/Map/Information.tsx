@@ -16,6 +16,9 @@ export const Information: React.FC<InfoProps> = (props) => {
       {props.info.type === "ACCIDENT" && (
         <p style={{ fontWeight: "bold" }}>Crash</p>
       )}
+      {props.info.cName && (
+        <p style={{ fontWeight: "bold", fontSize: 20 }}>{props.info.cName}</p>
+      )}
       <p style={{ fontWeight: "bold" }}>{props.info.description}</p>
       <p>
         {props.info.street ? props.info.street + "," : ""} {props.info.city}
@@ -38,9 +41,6 @@ export const Information: React.FC<InfoProps> = (props) => {
       )}
       {props.info.duration && (
         <p>Time: {formatNumber((props.info.duration || 0) / 60, 2, "min")}</p>
-      )}
-      {props.info.cName && (
-        <p style={{ fontWeight: "bold" }}>{props.info.cName}</p>
       )}
       {props.info.dAddress && <p>Address: {props.info.dAddress}</p>}
       {props.info.risk && <p>Risk: {formatNumber(props.info.risk, 2, "%")}</p>}
