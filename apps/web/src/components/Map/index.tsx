@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useEffect, memo } from "react";
+import React, { useCallback, useState, useEffect, memo, useRef } from "react";
 import { getAlertIcon, getClosestIndex, getTimeColor } from "../../utils";
 import { containerStyle, initOptions, mapOptions } from "./helper";
 import { Container, UserLocation } from "./Elements";
@@ -39,6 +39,10 @@ interface Props {
       name?: string;
       address?: string;
       description?: string;
+      recalculate?: {
+        label: string;
+        action: () => void;
+      };
     };
   }[];
   showWazeAlertsLayer?: boolean;
@@ -58,6 +62,7 @@ export const Map: React.FC<Props> = memo(
     showWazeTrafficLayer,
     showGoogleTrafficLayer,
   }) => {
+    const mounted = useRef(false);
     const apiUrl = useApiUrl();
     const { isLoaded } = useJsApiLoader(initOptions);
     const [map, setMap] = useState<MAP>(null);
@@ -82,12 +87,20 @@ export const Map: React.FC<Props> = memo(
         Post<{ result: WazeTrafficInfo[] }>(apiUrl, "/report/traffic", {
           lat: map.getCenter()?.lat(),
           lng: map.getCenter()?.lng(),
-        }).then(({ data: { result } }) => setWazeTrafficInfo(result));
+        }).then(({ data: { result } }) => {
+          if (mounted.current) {
+            setWazeTrafficInfo(result);
+          }
+        });
 
         Post<{ result: WazeAlertInfo[] }>(apiUrl, "/report/alerts", {
           lat: map.getCenter()?.lat(),
           lng: map.getCenter()?.lng(),
-        }).then(({ data: { result } }) => setWazeAlertInfo(result));
+        }).then(({ data: { result } }) => {
+          if (mounted.current) {
+            setWazeAlertInfo(result);
+          }
+        });
       }
     }, [apiUrl, map]);
 
@@ -102,21 +115,29 @@ export const Map: React.FC<Props> = memo(
     }, [company, map]);
 
     const onLoad = useCallback((map: MAP) => {
-      setMap(map);
+      if (mounted.current) {
+        setMap(map);
+      }
     }, []);
 
     const onUnmount = useCallback(() => {
-      setMap(null);
+      if (mounted.current) {
+        setMap(null);
+      }
     }, []);
 
     useEffect(() => {
       const condition = map && (showWazeAlertsLayer || showWazeTrafficLayer);
       if (init && map) {
-        updateWazeInfo();
-        setInit(false);
+        if (mounted.current) {
+          updateWazeInfo();
+          setInit(false);
+        }
       } else if (condition) {
         const interval = setInterval(() => {
-          updateWazeInfo();
+          if (mounted.current) {
+            updateWazeInfo();
+          }
         }, 6 * 1000 * 60);
         return () => clearInterval(interval);
       }
@@ -128,6 +149,13 @@ export const Map: React.FC<Props> = memo(
       showWazeAlertsLayer,
       showWazeTrafficLayer,
     ]);
+
+    useEffect(() => {
+      mounted.current = true;
+      return () => {
+        mounted.current = false;
+      };
+    }, []);
 
     return isLoaded ? (
       <Container>
@@ -241,6 +269,7 @@ export const Map: React.FC<Props> = memo(
                           cName: marker.info?.name,
                           dAddress: marker.info?.address,
                           description: marker.info?.description,
+                          recalculate: marker.info?.recalculate,
                         });
                       }
                     }}
