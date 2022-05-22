@@ -93,6 +93,11 @@ export interface InfoWindowData {
 
   cName?: string;
   dAddress?: string;
+
+  recalculate?: {
+    action: () => void;
+    label: string;
+  };
 }
 
 export interface WazePathResponse {
@@ -119,8 +124,14 @@ export interface FLog {
   driver: string;
   lat: number;
   lng: number;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
+  material: string;
+  destination: {
+    lat: number;
+    lng: number;
+    address: string;
+  };
 }
 
 export interface ILog extends Document, FLog {
@@ -139,9 +150,10 @@ export interface IRoute extends Document {
   risk: number;
   material: string;
   driver: string;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
   address: string;
+  active: boolean;
 }
 
 export interface ICompany extends Document {
@@ -175,6 +187,9 @@ export interface IDriver extends Document {
   tokenVersion: number;
   active: boolean;
   route: Coord[];
+  address: string;
+  dlat: number | null;
+  dlng: number | null;
 }
 
 export interface FDriver {
@@ -194,6 +209,9 @@ export interface FDriver {
   lat: number;
   lng: number;
   material: string;
+  address: string;
+  dlat: number;
+  dlng: number;
   role: string;
   token: string;
   active: boolean;
@@ -226,7 +244,7 @@ export interface FCompany {
   logs: FLog2[];
   lastRoutes: {
     risk: number;
-    date: Date;
+    date: string;
   }[];
 }
 
@@ -277,6 +295,7 @@ export interface PlannerState {
   currentIndex: number;
   newIndex: number;
   showModal: boolean;
+  logMarker: { coords: Coord; svgPath: string; svgColor: string } | null;
 }
 
 export interface PlannerAction {
@@ -301,6 +320,7 @@ export interface PlannerAction {
     | "setCurrentIndex"
     | "setNewIndex"
     | "setShowModal"
+    | "setLogMarker"
     | "reset"
     | "resetRisk";
   payload?: any;
@@ -376,11 +396,12 @@ export interface BestRoute extends BaseBestPath {
   risk: number;
   material: string;
   driver: string;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
   color: string;
   id: string;
   address: string;
+  active: boolean;
 }
 
 export interface BestPath {
