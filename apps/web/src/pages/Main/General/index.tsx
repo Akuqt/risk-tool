@@ -13,17 +13,16 @@ import { Get } from "services";
 import {
   getDriver,
   getRoutes,
+  logFilter,
   getDrivers,
   formatNumber,
   getDestinations,
-  logFilter,
 } from "../../../utils";
 
-import { useLocation, Location } from "react-router-dom";
+import { useLocation, Location, useNavigate } from "react-router-dom";
 
 export const General: React.FC = () => {
   const mounted = useRef(false);
-
   const apiUrl = useApiUrl();
   const socket = useSocket();
   const dispatch = useDispatch();
@@ -34,6 +33,8 @@ export const General: React.FC = () => {
   const { state: logState } = useLocation() as Location & {
     state?: { log: FLog2 & { address: string } };
   };
+
+  const navigate = useNavigate();
 
   const [
     {
@@ -62,6 +63,30 @@ export const General: React.FC = () => {
         dispatch(saveCompany({ ...company, drivers: newDrivers }));
       }
     });
+    socket?.on("disable:route", (r) => {
+      if (mounted.current) {
+        const coords = { lat: 0, lng: 0 };
+        dispatcher({
+          type: "setRoutes",
+          payload: routes.map((k) => {
+            if (k.id === r.id) {
+              coords.lat = k.coords[k.coords.length - 1].lat;
+              coords.lng = k.coords[k.coords.length - 1].lng;
+              return { ...k, active: false };
+            }
+            return k;
+          }),
+        });
+        dispatcher({
+          type: "setDestinations",
+          payload: destinations.map((k) => {
+            if (k.coords.lat !== coords.lat && k.coords.lng !== coords.lng) {
+              return k;
+            }
+          }),
+        });
+      }
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [socket, dispatch]);
 
@@ -88,9 +113,9 @@ export const General: React.FC = () => {
     ).then((res) => {
       if (res.data.ok) {
         if (mounted.current) {
-          const routes_ = res.data.result.filter((r) =>
-            logFilter(logState?.log || null, r.driver),
-          );
+          const routes_ = res.data.result
+            .filter((r) => logFilter(logState?.log || null, r.driver))
+            .filter((r) => r.active);
           dispatcher({
             type: "setRoutes",
             payload: routes_,
@@ -336,6 +361,16 @@ export const General: React.FC = () => {
                 name: logMarker?.reason,
                 address: logMarker?.address,
                 description: logMarker?.description,
+                recalculate: {
+                  label: "Recalculate",
+                  action: () => {
+                    navigate("/main/planner", {
+                      state: {
+                        log: { ...logState?.log },
+                      },
+                    });
+                  },
+                },
               },
               clickable: true,
             },
