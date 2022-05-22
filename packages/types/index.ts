@@ -127,6 +127,10 @@ export interface ILog extends Document, FLog {
   _id?: mongoose.ObjectId;
 }
 
+export interface FLog2 extends FLog {
+  id: string;
+}
+
 export interface IRoute extends Document {
   _id?: mongoose.ObjectId;
   coords: Coord[];
@@ -196,6 +200,18 @@ export interface FDriver {
   route: Coord[];
 }
 
+export interface FDriver2 {
+  name: string;
+  lastname: string;
+  gender: string;
+  id: string;
+  plate: string;
+  active: boolean;
+  user: string;
+  lat: number;
+  lng: number;
+}
+
 export interface FCompany {
   id: string;
   name: string;
@@ -205,19 +221,9 @@ export interface FCompany {
   lng: number;
   materials: string[];
   role: string;
-  drivers: {
-    name: string;
-    lastname: string;
-    gender: string;
-    id: string;
-    plate: string;
-    active: boolean;
-    user: string;
-    lat: number;
-    lng: number;
-  }[];
+  drivers: FDriver2[];
   token: string;
-  logs: FLog[];
+  logs: FLog2[];
   lastRoutes: {
     risk: number;
     date: Date;
@@ -313,12 +319,13 @@ export interface GeneralState {
     svgColor: string;
     svgPath: string;
   }[];
-  drivers: {
-    name: string;
-    lastname: string;
-    plate: string;
+  logMarker?: {
     coords: Coord;
-  }[];
+    icon: any;
+    address: string;
+    reason: string;
+    description: string;
+  };
 }
 
 export interface GeneralAction {
@@ -331,7 +338,7 @@ export interface GeneralAction {
     | "setRoutes"
     | "setDestinations"
     | "setCurrentRoute"
-    | "setDrivers";
+    | "setLogMarker";
   payload?: any;
 }
 
