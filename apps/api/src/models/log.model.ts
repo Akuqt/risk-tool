@@ -13,7 +13,7 @@ const logSchema = new Schema(
     driver: String,
   },
   {
-    timestamps: false,
+    timestamps: true,
     versionKey: false,
   },
 );
