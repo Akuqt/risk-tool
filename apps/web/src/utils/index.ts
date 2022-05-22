@@ -1,4 +1,11 @@
-import { BestRoute, Coord, FCompany, PolyPath, WazeAlertInfo } from "types";
+import {
+  BestRoute,
+  Coord,
+  FCompany,
+  FLog2,
+  PolyPath,
+  WazeAlertInfo,
+} from "types";
 
 export const debounce = (cb: (...args: any) => void, delay = 1000) => {
   let timeout: any;
@@ -122,4 +129,9 @@ export const getDestinations = (
   } catch (error) {
     return destinations;
   }
+};
+
+export const logFilter = (log: FLog2 | null, id: string) => {
+  if (log === null) return true;
+  return id === log.driver;
 };
