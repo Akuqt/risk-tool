@@ -173,7 +173,7 @@ export const getPath = async (
 
 export const addRoutePath = async (req: Request, res: Response) => {
   const id = req.id;
-  const { fixed, risk, distance, time, material, driver, address } =
+  const { fixed, risk, distance, time, material, driver, address, dlat, dlng } =
     req.body as {
       time: number;
       distance: number;
@@ -182,6 +182,8 @@ export const addRoutePath = async (req: Request, res: Response) => {
       material: string;
       driver: string;
       address: string;
+      dlat: number;
+      dlng: number;
     };
 
   if (
@@ -192,12 +194,24 @@ export const addRoutePath = async (req: Request, res: Response) => {
     !time ||
     !address ||
     !material ||
-    !driver
+    !driver ||
+    !dlat ||
+    !dlng
   ) {
     return res.status(400).json({ ok: false, error: errors.badRequest });
   }
   const company = await CompanyModel.findById(id);
   const driver_ = await DriverModel.findById(driver);
+  const routes_ = await RouteModel.find({ driver })
+    .where("active")
+    .equals(true);
+
+  if (routes_.length > 0) {
+    for (const r of routes_) {
+      r.active = false;
+      await r.save();
+    }
+  }
 
   if (!company || !driver_) {
     return res.status(404).json({ ok: false, error: errors.invalidAuth });
@@ -208,6 +222,9 @@ export const addRoutePath = async (req: Request, res: Response) => {
   driver_.lng = company.lng;
   driver_.material = material;
   driver_.route = fixed;
+  driver_.address = address;
+  driver_.dlat = dlat;
+  driver_.dlng = dlng;
 
   const route = new RouteModel({
     risk,
@@ -217,6 +234,7 @@ export const addRoutePath = async (req: Request, res: Response) => {
     material,
     driver,
     address,
+    active: true,
   });
 
   company.routes.push(route);
@@ -225,7 +243,10 @@ export const addRoutePath = async (req: Request, res: Response) => {
   await driver_.save();
   await company.save();
 
-  WebSocket.emit("driver:route", { id: driver, route: fixed });
+  WebSocket.emit("driver:route", {
+    id: driver,
+    data: { route: route.coords, material, address, dlat, dlng },
+  });
 
   res.json({ ok: true });
 };
@@ -251,7 +272,62 @@ export const getRoutePaths = async (req: Request, res: Response) => {
     updateAt: route.updatedAt,
     id: route._id,
     address: route.address,
+    active: route.active,
   }));
 
   res.json({ ok: true, result });
+};
+
+export const endRoute = async (req: Request, res: Response) => {
+  const id = req.id;
+  const { current, destination } = req.body as {
+    current: Coord;
+    destination: Coord;
+  };
+
+  if (!current || !destination) {
+    return res.status(400).json({ ok: false, error: errors.badRequest });
+  }
+  const distance = getDistanceKm(current, destination);
+
+  if (distance > 10) {
+    return res.status(400).json({ ok: false, error: errors.invalidEndOfRoute });
+  }
+  const driver = await DriverModel.findById(id).populate("company");
+
+  const route = await RouteModel.findOne({
+    driver: id,
+  })
+    .where("active")
+    .equals(true);
+
+  if (!driver || !route) {
+    return res.status(401).json({ ok: false, error: errors.invalidAuth });
+  }
+  const company = await CompanyModel.findById(driver.company._id);
+
+  if (!company) {
+    return res.status(401).json({ ok: false, error: errors.invalidAuth });
+  }
+
+  route.active = false;
+  driver.active = false;
+  driver.dlng = null;
+  driver.dlat = null;
+  driver.lat = company.lat;
+  driver.lng = company.lng;
+  driver.route = [];
+  driver.material = "";
+  driver.address = "";
+
+  await route.save();
+  await driver.save();
+
+  WebSocket.emit("disable:route", {
+    route: route.id,
+    driver: id,
+    company: company.id,
+  });
+
+  res.json({ ok: true });
 };

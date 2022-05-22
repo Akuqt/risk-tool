@@ -1,11 +1,12 @@
-import {
-  addRoutePath,
-  getBestPath,
-  getPath,
-  getRoutePaths,
-} from "../controllers";
 import { validateToken } from "../middlewares";
 import { Router } from "express";
+import {
+  getPath,
+  endRoute,
+  getBestPath,
+  addRoutePath,
+  getRoutePaths,
+} from "../controllers";
 
 const router = Router();
 
@@ -80,6 +81,8 @@ router.post("/", getPath);
 router.post("/best", getBestPath);
 
 router.post("/new", validateToken, addRoutePath);
+
+router.post("/end", validateToken, endRoute);
 
 router.get("/all", validateToken, getRoutePaths);
 
