@@ -255,3 +255,40 @@ export const Slider = styled.input<{ color: string }>`
     cursor: pointer;
   }
 `;
+
+export const CTable = styled.table`
+  width: 100%;
+  border-collapse: collapse;
+  border-spacing: 0;
+  border: 1px solid #cacacae2;
+  overflow: hidden;
+  background-color: #ffffff;
+`;
+
+export const CThead = styled.thead`
+  background-color: #f5f5f5;
+  border-bottom: 1px solid #cacacae2;
+`;
+
+export const CTh = styled.th`
+  padding: 4px;
+  border-right: 1px solid #cacacae2;
+`;
+
+export const CTd = styled.th`
+  padding: 4px;
+  border-right: 1px solid #cacacae2;
+  border-bottom: 1px solid #cacacae2;
+`;
+
+export const TxtBtn = styled.button<{
+  color: string;
+  margin?: string;
+}>`
+  color: ${(p) => p.color};
+  margin: ${(p) => p.margin || "0px"};
+  background-color: transparent;
+  border: none;
+  outline: none;
+  cursor: pointer;
+`;
