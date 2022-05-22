@@ -54,6 +54,11 @@ export const signIn = async (
         },
         token: createAcessToken(_driver),
         route: _driver.route,
+        active: _driver.active,
+        address: _driver.address,
+        dlat: _driver.dlat,
+        dlng: _driver.dlng,
+        material: _driver.material,
       },
     });
   }
