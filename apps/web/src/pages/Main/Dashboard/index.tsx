@@ -1,5 +1,4 @@
 import React, { useState, useCallback, useEffect, useRef } from "react";
-import { filterLogs, RootState, saveLogs } from "../../../redux";
 import { BsPencil, BsBoxArrowUpRight } from "react-icons/bs";
 import { useDispatch, useSelector } from "react-redux";
 import { Btn, Container, Txt } from "components/src/Elements";
@@ -22,6 +21,12 @@ import {
   CategoryScale,
   Chart as ChartJS,
 } from "chart.js";
+import {
+  saveLogs,
+  RootState,
+  filterLogs,
+  updateDriverState,
+} from "../../../redux";
 
 ChartJS.register(
   CategoryScale,
@@ -119,7 +124,17 @@ export const Dashboard: React.FC = () => {
               }
             },
             recalculate: () => {
-              //TODO
+              if (mounted.current) {
+                setShowModal(false);
+                dispatch(
+                  updateDriverState({ id: alert?.driver || "", active: false }),
+                );
+                navigation("/main/planner", {
+                  state: {
+                    log: { ...alert },
+                  },
+                });
+              }
             },
             close: () => {
               if (mounted.current) {
