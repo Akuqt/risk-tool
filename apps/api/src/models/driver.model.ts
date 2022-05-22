@@ -12,7 +12,10 @@ const driverSchema = new Schema(
     },
     lat: Number,
     lng: Number,
+    dlat: Number,
+    dlng: Number,
     material: String,
+    address: String,
     gender: String,
     active: {
       type: Boolean,

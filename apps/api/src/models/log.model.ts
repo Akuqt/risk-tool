@@ -11,6 +11,12 @@ const logSchema = new Schema(
     lat: Number,
     lng: Number,
     driver: String,
+    material: String,
+    destination: {
+      lat: Number,
+      lng: Number,
+      address: String,
+    },
   },
   {
     timestamps: true,
