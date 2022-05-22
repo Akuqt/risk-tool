@@ -37,7 +37,9 @@ export const companySlice = createSlice({
     },
     addLog: (state, action: PayloadAction<FLog2>) => {
       if (state.company.logs.find((l) => l.id === action.payload.id)) return;
-      state.company.logs.unshift(action.payload);
+      state.company.logs.unshift({
+        ...action.payload,
+      });
     },
     filterLogs: (state, action: PayloadAction<string>) => {
       state.company.logs = state.company.logs.filter(
@@ -51,6 +53,7 @@ export const companySlice = createSlice({
       state,
       action: PayloadAction<{ risk: number; id?: string }>,
     ) => {
+      const date = new Date().toLocaleString();
       state.company.drivers = state.company.drivers.map((d) => {
         if (d.id === action.payload.id) {
           return { ...d, active: true };
@@ -59,19 +62,65 @@ export const companySlice = createSlice({
       });
       state.company.lastRoutes.push({
         risk: action.payload.risk,
-        date: new Date(),
+        date,
+      });
+    },
+    updateDriverState: (
+      state,
+      action: PayloadAction<{ id: string; active: boolean }>,
+    ) => {
+      state.company.drivers = state.company.drivers.map((d) => {
+        if (d.id === action.payload.id) {
+          return { ...d, active: action.payload.active };
+        }
+        return d;
+      });
+    },
+    updateDriverState2: (
+      state,
+      action: PayloadAction<{
+        id: string;
+        active: boolean;
+        lat: number;
+        lng: number;
+      }>,
+    ) => {
+      state.company.drivers = state.company.drivers.map((d) => {
+        if (d.id === action.payload.id) {
+          return {
+            ...d,
+            active: action.payload.active,
+            lat: action.payload.lat,
+            lng: action.payload.lng,
+          };
+        }
+        return d;
+      });
+    },
+    updateLogState: (
+      state,
+      action: PayloadAction<{ id: string; action: string }>,
+    ) => {
+      state.company.logs = state.company.logs.map((l) => {
+        if (l.id === action.payload.id) {
+          return { ...l, action: action.payload.action };
+        }
+        return l;
       });
     },
   },
 });
 
 export const {
-  clearCompany,
-  saveCompany,
   addLog,
   saveLogs,
-  filterLogs,
   addDriver,
+  filterLogs,
+  saveCompany,
+  clearCompany,
+  updateLogState,
+  updateDriverState,
+  updateDriverState2,
   updateDriverAndLogs,
 } = companySlice.actions;
 
