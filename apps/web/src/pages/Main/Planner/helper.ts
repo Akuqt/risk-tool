@@ -21,6 +21,7 @@ export const initialState: PlannerState = {
   currentIndex: 0,
   newIndex: 0,
   showModal: false,
+  logMarker: null,
 };
 
 export const reducer = (
@@ -68,6 +69,8 @@ export const reducer = (
       return { ...state, newIndex: action.payload };
     case "setShowModal":
       return { ...state, showModal: !state.showModal };
+    case "setLogMarker":
+      return { ...state, logMarker: action.payload };
     case "reset":
       return {
         ...state,
