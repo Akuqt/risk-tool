@@ -2,6 +2,7 @@ import React from "react";
 import { InfoWindowData } from "types";
 import { formatNumber } from "../../utils";
 import { getTime } from "./helper";
+import { TxtBtn } from "components/src/Elements";
 
 interface InfoProps {
   info: InfoWindowData;
@@ -44,6 +45,15 @@ export const Information: React.FC<InfoProps> = (props) => {
       )}
       {props.info.dAddress && <p>Address: {props.info.dAddress}</p>}
       {props.info.risk && <p>Risk: {formatNumber(props.info.risk, 2, "%")}</p>}
+      {props.info.recalculate && (
+        <TxtBtn
+          color="#0094FF"
+          onClick={props.info.recalculate.action}
+          margin="10px 0px"
+        >
+          {props.info.recalculate.label}
+        </TxtBtn>
+      )}
     </div>
   );
 };
