@@ -6,6 +6,7 @@ import { RootState } from "../redux";
 import { Profile } from "./Profile";
 import { Login } from "./Login";
 import { Home } from "./Home";
+import { Logs } from "./Loggings";
 
 const Stack = createNativeStackNavigator();
 
@@ -23,6 +24,7 @@ export const Pages: React.FC = () => {
         <Stack.Screen name="Login" component={Login} />
         <Stack.Screen name="Home" component={Home} />
         <Stack.Screen name="Profile" component={Profile} />
+        <Stack.Screen name="Logs" component={Logs} />
       </Stack.Navigator>
     </NavigationContainer>
   );
