@@ -8,7 +8,8 @@ export const newAlert = async (
   res: Response,
 ): Promise<Response> => {
   const id = req.id;
-  const { reason, description, company, lat, lng } = req.body;
+  const { reason, description, company, lat, lng, material, destination } =
+    req.body;
   const driver_ = await DriverModel.findById(id);
   const company_ = await CompanyModel.findById(company);
   if (!driver_ || !company_) {
@@ -23,6 +24,8 @@ export const newAlert = async (
     lat,
     lng,
     driver: id,
+    material,
+    destination,
   });
   company_.logs.push(log);
   const log_ = await log.save();
@@ -40,6 +43,8 @@ export const newAlert = async (
       createdAt: log_.createdAt,
       updatedAt: log_.updatedAt,
       id: log_._id,
+      material,
+      destination,
     },
     company,
   });
@@ -70,6 +75,8 @@ export const getCompanyAlerts = async (
       driver: l.driver,
       createdAt: l.createdAt,
       updatedAt: l.updatedAt,
+      material: l.material,
+      destination: l.destination,
     })),
   });
 };
@@ -88,4 +95,34 @@ export const setLogAction = async (
   log_.action = action;
   await log_.save();
   return res.status(200).json({ ok: true });
+};
+
+export const getDriverLogs = async (
+  req: Request,
+  res: Response,
+): Promise<Response> => {
+  const id = req.id;
+  const logs_ = await LogModel.find({ driver: id });
+  if (!logs_) {
+    return res.status(400).json({ ok: false, msg: errors.badRequest });
+  }
+
+  return res.status(200).json({
+    ok: true,
+    result: logs_.reverse().map((l) => ({
+      id: l._id,
+      alert: {
+        reason: l.alert.reason,
+        description: l.alert.description,
+      },
+      action: l.action,
+      lat: l.lat,
+      lng: l.lng,
+      driver: l.driver,
+      createdAt: l.createdAt,
+      updatedAt: l.updatedAt,
+      material: l.material,
+      destination: l.destination,
+    })),
+  });
 };
