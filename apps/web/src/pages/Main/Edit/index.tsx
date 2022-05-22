@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import Select, { MultiValue } from "react-select";
 import Geocode from "react-geocode";
 import config from "../../../config";
@@ -30,6 +30,8 @@ Geocode.setLanguage("en");
 Geocode.setRegion("co");
 
 export const Edit: React.FC = () => {
+  const mounted = useRef(false);
+
   const company = useSelector(
     (state: RootState) => state.companyReducer.company,
   );
@@ -60,16 +62,27 @@ export const Edit: React.FC = () => {
     try {
       const res = await Geocode.fromAddress(address);
       const { lat, lng } = res.results[0].geometry.location;
-      setCoords({ lat, lng });
-      setError(false);
+      if (mounted.current) {
+        setCoords({ lat, lng });
+        setError(false);
+      }
     } catch (err) {
-      setError(true);
+      if (mounted.current) {
+        setError(true);
+      }
     }
   }, []);
 
   useEffect(() => {
     if (address) debounce(() => latlngFromAddress(address))();
   }, [address, latlngFromAddress]);
+
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
 
   return (
     <Container
@@ -171,8 +184,10 @@ export const Edit: React.FC = () => {
                     company.token,
                   );
                   if (res.data.ok) {
-                    dispatch(saveCompany(res.data.result));
-                    navigation("/main/dashboard");
+                    if (mounted.current) {
+                      dispatch(saveCompany(res.data.result));
+                      navigation("/main/dashboard");
+                    }
                   }
                 } else {
                   // eslint-disable-next-line no-alert

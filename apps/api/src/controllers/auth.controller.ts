@@ -54,6 +54,11 @@ export const signIn = async (
         },
         token: createAcessToken(_driver),
         route: _driver.route,
+        active: _driver.active,
+        address: _driver.address,
+        dlat: _driver.dlat,
+        dlng: _driver.dlng,
+        material: _driver.material,
       },
     });
   }
@@ -93,7 +98,19 @@ export const signIn = async (
         address: _company.address,
         materials: _company.materials,
         role: _company.role.name,
-        logs: _company.logs,
+        logs: _company.logs.reverse().map((log) => ({
+          id: log._id,
+          alert: {
+            reason: log.alert.reason,
+            description: log.alert.description,
+          },
+          action: log.action,
+          driver: log.driver,
+          lat: log.lat,
+          lng: log.lng,
+          createdAt: log.createdAt,
+          updatedAt: log.updatedAt,
+        })),
         lastRoutes: _company.routes.map((route) => ({
           risk: route.risk,
           date: route.updatedAt,
@@ -243,7 +260,10 @@ export const editCompany = async (
 ): Promise<Response> => {
   const { lat, lng, name, address, materials } = req.body;
 
-  const _company: ICompany | null = await CompanyModel.findById(req.id);
+  const _company: ICompany | null = await CompanyModel.findById(req.id)
+    .populate("logs")
+    .populate("routes")
+    .populate("role");
 
   if (!_company) {
     return res.status(401).json({ ok: false, error: errors.invalidAuth });
@@ -257,35 +277,52 @@ export const editCompany = async (
 
   const company_ = await _company.save();
 
-  const _drivers: IDriver[] = await DriverModel.find()
-    .populate("company")
-    .where({
-      company: _company,
-    });
+  const _drivers: IDriver[] = await DriverModel.find().populate("role").where({
+    company: _company,
+  });
 
   res.cookie("jid", createRefreshToken(company_), cookieConf);
 
   return res.json({
     ok: true,
     result: {
-      name: company_.name,
-      id: company_._id,
-      username: company_.username,
-      lat: company_.lat,
-      lng: company_.lng,
-      address: company_.address,
-      materials: company_.materials,
-      role: company_.role.name,
+      name: _company.name,
+      id: _company._id,
+      username: _company.username,
+      lat: _company.lat,
+      lng: _company.lng,
+      address: _company.address,
+      materials: _company.materials,
+      role: _company.role.name,
+      logs: _company.logs.reverse().map((log) => ({
+        id: log._id,
+        alert: {
+          reason: log.alert.reason,
+          description: log.alert.description,
+        },
+        action: log.action,
+        driver: log.driver,
+        lat: log.lat,
+        lng: log.lng,
+        createdAt: log.createdAt,
+        updatedAt: log.updatedAt,
+      })),
+      lastRoutes: _company.routes.map((route) => ({
+        risk: route.risk,
+        date: route.updatedAt,
+      })),
       drivers: _drivers.map((d) => ({
         name: d.name,
         lastname: d.lastname,
+        user: d.username,
         gender: d.gender,
         id: d._id,
         plate: d.plate,
         lat: d.lat,
         lng: d.lng,
+        active: d.active,
       })),
-      token: createAcessToken(company_),
+      token: createAcessToken(_company),
     },
   });
 };

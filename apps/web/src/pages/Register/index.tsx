@@ -1,4 +1,4 @@
-import React, { useReducer, useEffect, useCallback } from "react";
+import React, { useReducer, useEffect, useCallback, useRef } from "react";
 import Geocode from "react-geocode";
 import config from "../../config";
 import { Btn, Container, TextInput, Txt } from "components/src/Elements";
@@ -18,6 +18,7 @@ Geocode.setLanguage("en");
 Geocode.setRegion("co");
 
 export const Register: React.FC = () => {
+  const mounted = useRef(false);
   const navigation = useNavigate();
   const apiUrl = useApiUrl();
   const [{ address, name, password, username, error, coords }, dispatcher] =
@@ -27,17 +28,28 @@ export const Register: React.FC = () => {
   const latlngFromAddress = useCallback(async (address: string) => {
     try {
       const res = await Geocode.fromAddress(address);
-      const { lat, lng } = res.results[0].geometry.location;
-      dispatcher({ type: "setError", payload: false });
-      dispatcher({ type: "setCoords", payload: { lat, lng } });
+      if (mounted.current) {
+        const { lat, lng } = res.results[0].geometry.location;
+        dispatcher({ type: "setError", payload: false });
+        dispatcher({ type: "setCoords", payload: { lat, lng } });
+      }
     } catch (err) {
-      dispatcher({ type: "setError", payload: true });
+      if (mounted.current) {
+        dispatcher({ type: "setError", payload: true });
+      }
     }
   }, []);
 
   useEffect(() => {
     if (address) debounce(() => latlngFromAddress(address))();
   }, [address, latlngFromAddress]);
+
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
 
   return (
     <Container
@@ -194,9 +206,11 @@ export const Register: React.FC = () => {
                     materials: [],
                   });
                   if (res.data.ok) {
-                    dispatch(saveCompany(res.data.result));
-                    dispatcher({ type: "clearAll" });
-                    navigation("/main/dashboard");
+                    if (mounted.current) {
+                      dispatch(saveCompany(res.data.result));
+                      dispatcher({ type: "clearAll" });
+                      navigation("/main/dashboard");
+                    }
                   } else {
                     // TODO: notify error
                   }

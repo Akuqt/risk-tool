@@ -1,4 +1,4 @@
-import React, { useReducer } from "react";
+import React, { useReducer, useRef } from "react";
 import { Container, Txt, TextInput, Btn } from "components/src/Elements";
 import { initialState, reducer } from "./helper";
 import { FCompany, IError } from "types";
@@ -9,8 +9,10 @@ import { useApiUrl } from "../../hooks";
 import { Navbar } from "components";
 import { truck } from "assets";
 import { Post } from "services";
+import { useEffect } from "react";
 
 export const Login: React.FC = () => {
+  const mounted = useRef(false);
   const navigation = useNavigate();
   const apiUrl = useApiUrl();
   const [{ password, username }, dispatcher] = useReducer(
@@ -18,6 +20,13 @@ export const Login: React.FC = () => {
     initialState,
   );
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
   return (
     <Container
       width="100%"
@@ -140,9 +149,11 @@ export const Login: React.FC = () => {
                   username,
                 });
                 if (res.data.ok) {
-                  dispatch(saveCompany(res.data.result));
-                  dispatcher({ type: "clearAll" });
-                  navigation("/main/dashboard");
+                  if (mounted.current) {
+                    dispatch(saveCompany(res.data.result));
+                    dispatcher({ type: "clearAll" });
+                    navigation("/main/dashboard");
+                  }
                 } else {
                   // TODO: notify error
                 }

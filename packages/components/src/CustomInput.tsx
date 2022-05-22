@@ -9,6 +9,7 @@ interface Props {
   loading?: boolean;
   onClick?: (c: boolean) => void;
   placeholder?: string;
+  disabled?: boolean;
 }
 
 export const CustomInput: React.FC<Props> = (props) => {
@@ -42,6 +43,7 @@ export const CustomInput: React.FC<Props> = (props) => {
         }}
       >
         <Btn
+          disabled={props.disabled}
           onClick={() => {
             if (click) {
               props.onChange("");
@@ -62,9 +64,10 @@ export const CustomInput: React.FC<Props> = (props) => {
         </Btn>
       </Container>
       <TextInput
+        disabled={props.disabled}
         padding="6px 10px"
         placeholder={props.placeholder}
-        color="black"
+        color={props.disabled ? "gray" : "black"}
         fs="18px"
         width="100%"
         borderBottom

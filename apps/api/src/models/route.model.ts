@@ -9,6 +9,7 @@ const routeSchema = new Schema(
     time: Number,
     risk: Number,
     address: String,
+    active: Boolean,
     coords: [
       {
         lat: Number,

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import Ionicons from "react-native-vector-icons/Ionicons";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useSelector } from "react-redux";
 import { RootState } from "../../redux";
 import { Select } from "components/src/native";
@@ -12,13 +13,24 @@ import {
   ToastAndroid,
   TouchableOpacity,
 } from "react-native";
+import { IError } from "types";
 
-export const Alerts: React.FC = () => {
+type Props = NativeStackScreenProps<
+  {
+    Logs: undefined;
+  },
+  "Logs"
+>;
+
+export const Alerts: React.FC<Props> = ({ navigation }) => {
   const [reason, setReason] = useState("");
   const [reset, setReset] = useState(false);
   const [description, setDescription] = useState("");
 
   const driver = useSelector((state: RootState) => state.userReducer.user);
+  const location = useSelector(
+    (state: RootState) => state.locationReducer.data,
+  );
 
   return (
     <ScrollView
@@ -100,31 +112,44 @@ export const Alerts: React.FC = () => {
         >
           <TouchableOpacity
             onPress={async () => {
-              if (reason.length > 0) {
-                const res = await Post<any>(
-                  "http://10.0.2.2:4000/api/v1",
-                  "/alerts/new",
-                  {
-                    reason,
-                    description,
-                    company: driver.company.id,
-                    lat: driver.lat,
-                    lng: driver.lng,
-                  },
-                  driver.token,
-                );
-                if (res.data.ok) {
-                  ToastAndroid.show("The alert was sent", ToastAndroid.SHORT);
-                  setReset(true);
-                  setDescription("");
+              if (driver.active) {
+                if (reason.length > 0) {
+                  const res = await Post<{ ok: boolean; error?: IError }>(
+                    "http://10.0.2.2:4000/api/v1",
+                    "/alerts/new",
+                    {
+                      reason,
+                      description,
+                      company: driver.company.id,
+                      lat: location.lat,
+                      lng: location.lng,
+                      material: driver.material,
+                      destination: {
+                        lat: driver.dlat,
+                        lng: driver.dlng,
+                        address: driver.address,
+                      },
+                    },
+                    driver.token,
+                  );
+                  if (res.data.ok) {
+                    setReset(true);
+                    setDescription("");
+                    ToastAndroid.show("The alert was sent", ToastAndroid.SHORT);
+                  } else {
+                    ToastAndroid.show(
+                      `[${res.data.error?.code}]: ${res.data.error?.message}`,
+                      ToastAndroid.SHORT,
+                    );
+                  }
                 } else {
                   ToastAndroid.show(
-                    "Something went wrong!",
+                    "Please select a reason",
                     ToastAndroid.SHORT,
                   );
                 }
               } else {
-                ToastAndroid.show("Please select a reason", ToastAndroid.SHORT);
+                ToastAndroid.show("You need to be active!", ToastAndroid.SHORT);
               }
             }}
             style={{
@@ -158,6 +183,9 @@ export const Alerts: React.FC = () => {
           flexDirection: "row",
           justifyContent: "space-between",
           alignItems: "center",
+        }}
+        onPress={() => {
+          navigation.navigate("Logs");
         }}
       >
         <Text

@@ -1,16 +1,16 @@
-import React, { useEffect, useCallback, useReducer } from "react";
+import React, { useEffect, useCallback, useReducer, useRef } from "react";
 import Geocode from "react-geocode";
 import config from "../../../config";
 import { Container, Btn, Txt, Check, Spinner } from "components/src/Elements";
+import { RootState, updateDriverAndLogs, updateLogState } from "../../../redux";
 import { destinationIcon, originIcon } from "assets";
 import { MdClear, MdSettingsSuggest } from "react-icons/md";
+import { useDispatch, useSelector } from "react-redux";
 import { initialState, reducer } from "./helper";
-import { BestPath, Coord } from "types";
-import { useSelector } from "react-redux";
-import { RootState } from "../../../redux";
+import { BestPath, Coord, FLog2 } from "types";
 import { useApiUrl } from "../../../hooks";
 import { Risk } from "./Risk";
-import { Post } from "services";
+import { Post, Put } from "services";
 import { Map } from "../../../components";
 import {
   CustomBtn,
@@ -25,13 +25,18 @@ import {
   riskPathMap,
   formatNumber,
   formatAddress,
+  getDriver,
 } from "../../../utils";
+
+import { useLocation, Location } from "react-router-dom";
+import { driverIcon } from "../General/helper";
 
 Geocode.setApiKey(config.apiKey);
 Geocode.setLanguage("en");
 Geocode.setRegion("co");
 
 export const Planner: React.FC = () => {
+  const mounted = useRef(false);
   const apiUrl = useApiUrl();
 
   const [
@@ -49,6 +54,7 @@ export const Planner: React.FC = () => {
       showModal,
       fixedPath,
       riskPaths,
+      logMarker,
       mapLoading,
       destination,
       currentIndex,
@@ -63,14 +69,23 @@ export const Planner: React.FC = () => {
   const company = useSelector(
     (state: RootState) => state.companyReducer.company,
   );
+  const dispatch = useDispatch();
+
+  const { state: logState } = useLocation() as Location & {
+    state?: { log: FLog2 };
+  };
 
   const latlngFromAddress = useCallback(async (address: string) => {
     try {
-      dispatcher({ type: "setMapLoading", payload: true });
+      if (mounted.current) {
+        dispatcher({ type: "setMapLoading", payload: true });
+      }
       const res = await Geocode.fromAddress(address);
-      const { lat, lng } = res.results[0].geometry.location;
-      dispatcher({ type: "setDestination", payload: { lat, lng } });
-      dispatcher({ type: "setMapLoading", payload: false });
+      if (mounted.current) {
+        const { lat, lng } = res.results[0].geometry.location;
+        dispatcher({ type: "setDestination", payload: { lat, lng } });
+        dispatcher({ type: "setMapLoading", payload: false });
+      }
     } catch (error) {
       // TODO: Notify error
     }
@@ -78,22 +93,65 @@ export const Planner: React.FC = () => {
 
   const addressFromLatLng = useCallback(async (lat: number, lng: number) => {
     try {
-      dispatcher({ type: "setLoadingAddress", payload: true });
+      if (mounted.current) {
+        dispatcher({ type: "setLoadingAddress", payload: true });
+      }
       const { results } = await Geocode.fromLatLng(
         lat.toString(),
         lng.toString(),
       );
-      const address = formatAddress(results[0].formatted_address as string);
-      dispatcher({ type: "setAddress", payload: address });
-      dispatcher({ type: "setLoadingAddress", payload: false });
+      if (mounted.current) {
+        const address = formatAddress(results[0].formatted_address as string);
+        dispatcher({ type: "setAddress", payload: address });
+        dispatcher({ type: "setLoadingAddress", payload: false });
+      }
     } catch (error) {
-      dispatcher({ type: "setAddress", payload: "" });
+      if (mounted.current) {
+        dispatcher({ type: "setAddress", payload: "" });
+      }
     }
   }, []);
 
   useEffect(() => {
     if (address) debounce(() => latlngFromAddress(address))();
   }, [address, latlngFromAddress]);
+
+  useEffect(() => {
+    mounted.current = true;
+
+    if (logState?.log) {
+      dispatcher({
+        type: "setAddress",
+        payload: logState.log.destination.address,
+      });
+      dispatcher({
+        type: "setMaterial",
+        payload: { label: logState.log.material, value: logState.log.material },
+      });
+      dispatcher({
+        type: "setDriver",
+        payload: {
+          label: (() => {
+            const driver = getDriver(logState.log.driver, company.drivers);
+            return driver?.name + " " + driver?.lastname;
+          })(),
+          value: logState.log.driver,
+        },
+      });
+      dispatcher({
+        type: "setLogMarker",
+        payload: {
+          coords: { lat: logState.log.lat, lng: logState.log.lng },
+          svgPath: driverIcon,
+          svgColor: "tomato",
+        },
+      });
+    }
+
+    return () => {
+      mounted.current = false;
+    };
+  }, [logState?.log, company.drivers]);
 
   return (
     <Container
@@ -108,19 +166,21 @@ export const Planner: React.FC = () => {
           url={apiUrl}
           close={(risk_) => {
             if (risk_) {
-              dispatcher({
-                type: "setRiskPaths",
-                payload: {
-                  path: fixedPath[fixedPathIndex].coords.slice(
-                    currentIndex > 0 ? currentIndex - 1 : 0,
-                    newIndex,
-                  ),
-                  color: randomColor(),
-                  risk: risk_,
-                },
-              });
-              dispatcher({ type: "setCurrentIndex", payload: newIndex });
-              dispatcher({ type: "setShowModal", payload: false });
+              if (mounted.current) {
+                dispatcher({
+                  type: "setRiskPaths",
+                  payload: {
+                    path: fixedPath[fixedPathIndex].coords.slice(
+                      currentIndex > 0 ? currentIndex - 1 : 0,
+                      newIndex,
+                    ),
+                    color: randomColor(),
+                    risk: risk_,
+                  },
+                });
+                dispatcher({ type: "setCurrentIndex", payload: newIndex });
+                dispatcher({ type: "setShowModal", payload: false });
+              }
             } else {
               // TODO: Notify error
             }
@@ -256,6 +316,7 @@ export const Planner: React.FC = () => {
           direction="column"
         >
           <CustomInput
+            disabled={!!logState?.log}
             loading={loadingAddress}
             value={address}
             onChange={(e) => dispatcher({ type: "setAddress", payload: e })}
@@ -266,6 +327,7 @@ export const Planner: React.FC = () => {
             }}
           />
           <CustomSelect
+            disabled={!!logState?.log}
             placeholder="Material"
             value={material}
             onChange={(e) => dispatcher({ type: "setMaterial", payload: e })}
@@ -276,6 +338,7 @@ export const Planner: React.FC = () => {
             margin="12px 0px"
           />
           <CustomSelect
+            disabled={!!logState?.log}
             placeholder="Driver"
             value={driver}
             onChange={(e) => dispatcher({ type: "setDriver", payload: e })}
@@ -307,23 +370,27 @@ export const Planner: React.FC = () => {
               dispatcher({ type: "reset" });
               if (destination?.lat && destination.lng) {
                 dispatcher({ type: "setMapLoading", payload: true });
+                const origin_ = logState?.log
+                  ? { lat: logState.log.lat, lng: logState.log.lng }
+                  : { lat: company.lat, lng: company.lng };
                 const res = await Post<{ ok: boolean } & BestPath>(
                   apiUrl,
                   "/path/best",
                   {
-                    origin: {
-                      lat: company.lat,
-                      lng: company.lng,
-                    },
+                    origin: origin_,
                     destination,
                   },
                 );
-                dispatcher({
-                  type: "setFixedPath",
-                  payload: res.data.result,
-                });
-                dispatcher({ type: "setPathSelector", payload: true });
-                dispatcher({ type: "setMapLoading", payload: false });
+                if (res.data.ok) {
+                  if (mounted.current) {
+                    dispatcher({
+                      type: "setFixedPath",
+                      payload: res.data.result,
+                    });
+                    dispatcher({ type: "setPathSelector", payload: true });
+                    dispatcher({ type: "setMapLoading", payload: false });
+                  }
+                }
               }
             }}
           />
@@ -429,12 +496,33 @@ export const Planner: React.FC = () => {
                   time: fixedPath[fixedPathIndex].time,
                   fixed: fixedPath[fixedPathIndex].coords,
                   distance: fixedPath[fixedPathIndex].distance,
+                  dlat: destination?.lat,
+                  dlng: destination?.lng,
                 },
                 company.token,
               );
 
               if (res.data.ok) {
-                // TODO: notify user
+                if (mounted.current) {
+                  dispatch(updateDriverAndLogs({ risk, id: driver?.value }));
+                  if (logState?.log) {
+                    const res = await Put<{ ok: boolean }>(
+                      apiUrl,
+                      "/alerts/edit",
+                      { action: "Recalculate", log: logState.log.id },
+                      company.token,
+                    );
+                    if (res.data.ok) {
+                      dispatch(
+                        updateLogState({
+                          id: logState.log.id,
+                          action: "Recalculate",
+                        }),
+                      );
+                    }
+                  }
+                  // TODO: notify user
+                }
               }
             }}
           />
@@ -503,10 +591,15 @@ export const Planner: React.FC = () => {
                 address: company.address,
               },
             },
+            {
+              coords: logMarker?.coords || null,
+              svgPath: logMarker?.svgPath,
+              svgColor: logMarker?.svgColor,
+            },
           ]}
           canClick={clickable}
-          onClick={({ lat, lng }) => {
-            addressFromLatLng(lat, lng);
+          onClick={async ({ lat, lng }) => {
+            await addressFromLatLng(lat, lng);
             dispatcher({ type: "setClickable", payload: false });
           }}
           showWazeAlertsLayer={wazeTA}

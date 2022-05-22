@@ -1,27 +1,25 @@
 import React, { useEffect } from "react";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { useDispatch, useSelector } from "react-redux";
 import { useSocket } from "../../hooks";
+import { RootState } from "../../redux";
 import { Location } from "./Location";
+import { saveRMA } from "../../redux/user";
 import { Alerts } from "./Alerts";
 import { Map } from "./Map";
-import { RootState } from "../../redux";
-import { useDispatch, useSelector } from "react-redux";
-import { saveUser } from "../../redux/user";
 
 const Tab = createBottomTabNavigator();
 
 export const Home: React.FC = () => {
   const socket = useSocket();
-
   const driver = useSelector((state: RootState) => state.userReducer.user);
-
   const dispatch = useDispatch();
 
   useEffect(() => {
-    socket?.on("driver:route", ({ id, route }) => {
+    socket?.on("driver:route", ({ id, data }) => {
       if (driver.id === id) {
-        dispatch(saveUser({ ...driver, route }));
+        dispatch(saveRMA({ ...data }));
       }
     });
   }, [driver, socket, dispatch]);

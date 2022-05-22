@@ -24,4 +24,8 @@ export const errors = {
     message: "Invalid auth token.",
     code: 9091,
   },
+  invalidEndOfRoute: {
+    message: "You need to end the route correctly.",
+    code: 9091,
+  },
 };

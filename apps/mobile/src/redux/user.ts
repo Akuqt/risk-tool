@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { FDriver } from "types";
+import { Coord, FDriver } from "types";
 
 interface Init {
   user: FDriver;
@@ -17,6 +17,7 @@ const initialState: Init = {
     lat: NaN,
     lng: NaN,
     material: "",
+    address: "",
     plate: "",
     username: "",
     company: {
@@ -27,6 +28,8 @@ const initialState: Init = {
       name: "",
     },
     route: [],
+    dlat: NaN,
+    dlng: NaN,
   },
 };
 
@@ -40,9 +43,34 @@ export const userSlide = createSlice({
     clearUser: (state) => {
       state.user = initialState.user;
     },
+    saveRMA: (
+      state,
+      action: PayloadAction<{
+        material: string;
+        address: string;
+        route: Coord[];
+        dlat: number;
+        dlng: number;
+      }>,
+    ) => {
+      state.user.material = action.payload.material;
+      state.user.address = action.payload.address;
+      state.user.route = action.payload.route;
+      state.user.dlat = action.payload.dlat;
+      state.user.dlng = action.payload.dlng;
+      state.user.active = true;
+    },
+    clearRoute: (state) => {
+      state.user.route = [];
+      state.user.address = "";
+      state.user.dlat = NaN;
+      state.user.dlng = NaN;
+      state.user.active = false;
+      state.user.material = "";
+    },
   },
 });
 
-export const { saveUser, clearUser } = userSlide.actions;
+export const { saveUser, clearUser, saveRMA, clearRoute } = userSlide.actions;
 
 export default userSlide.reducer;
