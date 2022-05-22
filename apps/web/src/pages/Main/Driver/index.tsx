@@ -1,6 +1,6 @@
-import React, { useEffect, useState, useReducer } from "react";
+import React, { useEffect, useState, useReducer, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { RootState, saveCompany } from "../../../redux";
+import { addDriver, RootState } from "../../../redux";
 import { FDriver, IError } from "types";
 import { useApiUrl } from "../../../hooks";
 import { Modal } from "components";
@@ -16,6 +16,7 @@ import {
 } from "components/src/Elements";
 
 export const Driver: React.FC = () => {
+  const mounted = useRef(false);
   const [modalState, changeModalState] = useState(false);
   const [search, setSearch] = useState("");
 
@@ -31,6 +32,13 @@ export const Driver: React.FC = () => {
       ),
     );
   }, [search, company.drivers]);
+
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
 
   return (
     <Container
@@ -66,7 +74,7 @@ export const Driver: React.FC = () => {
             placeholder="Search"
           />
           <Btn
-            onClick={() => changeModalState(!modalState)}
+            onClick={() => changeModalState((c) => !c)}
             type="submit"
             bg="#FF6347"
             width="15%"
@@ -124,6 +132,9 @@ export const Driver: React.FC = () => {
                     </Txt>
                     <Txt color="#000000" fs="16px" margin="10px 0px">
                       User: {drvr?.user}
+                    </Txt>
+                    <Txt color="#000000" fs="16px" margin="10px 0px">
+                      State: {drvr?.active ? "Active" : "Inactive"}
                     </Txt>
                   </Card>
                 );
@@ -195,6 +206,8 @@ const reducer = (state: DriverState, action: DriverAction): DriverState => {
 };
 
 export const FormDriver: React.FC<IState> = ({ changeModalState }) => {
+  const mounted = useRef(false);
+
   const [{ name, lastname, plate, gender, username, password }, dispatcher] =
     useReducer(reducer, initialState);
 
@@ -205,6 +218,13 @@ export const FormDriver: React.FC<IState> = ({ changeModalState }) => {
   const company = useSelector(
     (state: RootState) => state.companyReducer.company,
   );
+
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
 
   return (
     <Container
@@ -331,27 +351,23 @@ export const FormDriver: React.FC<IState> = ({ changeModalState }) => {
             });
 
             if (res.data.ok) {
-              const driver = res.data.result;
-              dispatch(
-                saveCompany({
-                  ...company,
-                  drivers: [
-                    ...company.drivers,
-                    {
-                      gender: driver.gender,
-                      id: driver.id,
-                      lastname: driver.lastname,
-                      name: driver.name,
-                      plate: driver.plate,
-                      active: false,
-                      user: driver.username,
-                      lat: driver.lat,
-                      lng: driver.lng,
-                    },
-                  ],
-                }),
-              );
-              changeModalState((c) => !c);
+              if (mounted.current) {
+                const driver = res.data.result;
+                dispatch(
+                  addDriver({
+                    gender: driver.gender,
+                    id: driver.id,
+                    lastname: driver.lastname,
+                    name: driver.name,
+                    plate: driver.plate,
+                    active: false,
+                    user: driver.username,
+                    lat: driver.lat,
+                    lng: driver.lng,
+                  }),
+                );
+                changeModalState((c) => !c);
+              }
             } else {
               // eslint-disable-next-line no-alert
               alert(res.data.error?.message);

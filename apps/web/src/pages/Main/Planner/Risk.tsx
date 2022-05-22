@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Btn, Container, Txt, Spinner } from "components/src/Elements";
 import { CustomSlider } from "components";
 import { MdClose } from "react-icons/md";
@@ -10,6 +10,7 @@ interface Props {
 }
 
 export const Risk: React.FC<Props> = ({ close, url }) => {
+  const mounted = useRef(false);
   const [risk, setRisk] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [values, setValues] = useState({
@@ -25,6 +26,13 @@ export const Risk: React.FC<Props> = ({ close, url }) => {
     roadWorks: "0",
     separator: "0",
   });
+
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
 
   return (
     <Container
@@ -169,8 +177,10 @@ export const Risk: React.FC<Props> = ({ close, url }) => {
           const res = await Post<{ result: number | null }>(url, "/risk", {
             values: Object.values(values),
           });
-          setRisk(res.data.result);
-          setLoading(false);
+          if (mounted.current) {
+            setRisk(res.data.result);
+            setLoading(false);
+          }
         }}
       >
         <Container
