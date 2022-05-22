@@ -132,28 +132,28 @@ export const Map: React.FC = () => {
         markers={[
           {
             coords: {
-              latitude: user.company.lat,
-              longitude: user.company.lng,
+              latitude: user?.company.lat,
+              longitude: user?.company.lng,
             },
             info: {
-              address: user.company.address,
-              name: user.company.name,
+              address: user?.company.address,
+              name: user?.company.name,
             },
             icon: originIcon,
           },
           {
             coords: {
-              latitude: user.route[user.route.length - 1].lat,
-              longitude: user.route[user.route.length - 1].lng,
+              latitude: user?.route[user?.route.length - 1].lat,
+              longitude: user?.route[user?.route.length - 1].lng,
             },
             info: {
-              address: user.company.address,
+              address: user?.company.address,
             },
             icon: destinationIcon,
           },
         ]}
         polys={[
-          user.route.map((coord) => ({
+          user?.route.map((coord) => ({
             latitude: coord.lat,
             longitude: coord.lng,
           })),

@@ -19,6 +19,9 @@ export const Alerts: React.FC = () => {
   const [description, setDescription] = useState("");
 
   const driver = useSelector((state: RootState) => state.userReducer.user);
+  const location = useSelector(
+    (state: RootState) => state.locationReducer.data,
+  );
 
   return (
     <ScrollView
@@ -108,8 +111,8 @@ export const Alerts: React.FC = () => {
                     reason,
                     description,
                     company: driver.company.id,
-                    lat: driver.lat,
-                    lng: driver.lng,
+                    lat: location.lat,
+                    lng: location.lng,
                   },
                   driver.token,
                 );
