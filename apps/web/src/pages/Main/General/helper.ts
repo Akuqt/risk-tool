@@ -7,9 +7,9 @@ export const initialState: GeneralState = {
   wazeTA: false,
   mapLoading: false,
   routes: [],
-  drivers: [],
   destinations: [],
   currentRoute: undefined,
+  logMarker: undefined,
 };
 
 export const reducer = (
@@ -29,12 +29,12 @@ export const reducer = (
       return { ...state, mapLoading: action.payload };
     case "setRoutes":
       return { ...state, routes: action.payload };
-    case "setDrivers":
-      return { ...state, drivers: action.payload };
     case "setDestinations":
       return { ...state, destinations: action.payload };
     case "setCurrentRoute":
       return { ...state, currentRoute: action.payload };
+    case "setLogMarker":
+      return { ...state, logMarker: action.payload };
     default:
       return state;
   }

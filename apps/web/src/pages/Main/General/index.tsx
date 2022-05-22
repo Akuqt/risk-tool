@@ -1,4 +1,4 @@
-import React, { useReducer, useEffect } from "react";
+import React, { useReducer, useEffect, useRef } from "react";
 import { destinationIcon, driverIcon, initialState, reducer } from "./helper";
 import { Btn, Check, Container, Spinner, Txt } from "components/src/Elements";
 import { MdClear, MdSettingsSuggest } from "react-icons/md";
@@ -6,8 +6,8 @@ import { CustomModal, CustomSelect } from "components";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState, saveCompany } from "../../../redux";
 import { useApiUrl, useSocket } from "../../../hooks";
-import { originIcon } from "assets";
-import { BestRoute } from "types";
+import { originIcon, alertIcon } from "assets";
+import { BestRoute, FLog2 } from "types";
 import { Map } from "../../../components";
 import { Get } from "services";
 import {
@@ -16,15 +16,39 @@ import {
   getDrivers,
   formatNumber,
   getDestinations,
+  logFilter,
 } from "../../../utils";
 
+import { useLocation, Location } from "react-router-dom";
+
 export const General: React.FC = () => {
+  const mounted = useRef(false);
+
   const apiUrl = useApiUrl();
   const socket = useSocket();
   const dispatch = useDispatch();
   const company = useSelector(
     (state: RootState) => state.companyReducer.company,
   );
+
+  const { state: logState } = useLocation() as Location & {
+    state?: { log: FLog2 & { address: string } };
+  };
+
+  const [
+    {
+      routes,
+      wazeTA,
+      wazeTL,
+      settings,
+      googleTL,
+      logMarker,
+      mapLoading,
+      currentRoute,
+      destinations,
+    },
+    dispatcher,
+  ] = useReducer(reducer, initialState);
 
   useEffect(() => {
     socket?.on("update:driver", (d) => {
@@ -34,47 +58,66 @@ export const General: React.FC = () => {
         }
         return k;
       });
-      dispatch(saveCompany({ ...company, drivers: newDrivers }));
+      if (mounted.current) {
+        dispatch(saveCompany({ ...company, drivers: newDrivers }));
+      }
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [socket, dispatch]);
 
   useEffect(() => {
+    if (logState?.log) {
+      dispatcher({
+        type: "setLogMarker",
+        payload: {
+          address: logState.log.address,
+          coords: {
+            lat: logState.log.lat,
+            lng: logState.log.lng,
+          },
+          icon: alertIcon,
+          reason: logState.log.alert.reason,
+          description: logState.log.alert.description,
+        },
+      });
+    }
     Get<{ ok: boolean; result: BestRoute[] }>(
       apiUrl,
       "/path/all",
       company.token,
     ).then((res) => {
       if (res.data.ok) {
-        dispatcher({ type: "setRoutes", payload: res.data.result });
-        const destinations = res.data.result.map((r) => ({
-          coords: r.coords[r.coords.length - 1],
-          svgColor: r.color,
-          svgPath: destinationIcon,
-          clickable: true,
-          info: {
-            address: r.address,
-          },
-        }));
+        if (mounted.current) {
+          const routes_ = res.data.result.filter((r) =>
+            logFilter(logState?.log || null, r.driver),
+          );
+          dispatcher({
+            type: "setRoutes",
+            payload: routes_,
+          });
+          const destinations = routes_.map((r) => ({
+            coords: r.coords[r.coords.length - 1],
+            svgColor: r.color,
+            svgPath: destinationIcon,
+            clickable: true,
+            info: {
+              address: r.address,
+            },
+          }));
 
-        dispatcher({ type: "setDestinations", payload: destinations });
+          dispatcher({ type: "setDestinations", payload: destinations });
+        }
       }
     });
-  }, [company.token, apiUrl]);
+  }, [company.token, apiUrl, logState]);
 
-  const [
-    {
-      routes,
-      wazeTA,
-      wazeTL,
-      settings,
-      googleTL,
-      mapLoading,
-      currentRoute,
-      destinations,
-    },
-    dispatcher,
-  ] = useReducer(reducer, initialState);
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
+
   return (
     <Container
       width="100%"
@@ -273,17 +316,29 @@ export const General: React.FC = () => {
             ...getDrivers(
               currentRoute?.value.split("*")[1] || "",
               company.drivers,
-            ).map((k, i) => ({
-              coords: {
-                lat: k.lat,
-                lng: k.lng,
+            )
+              .filter((d) => logFilter(logState?.log || null, d.id))
+              .map((k, i) => ({
+                coords: {
+                  lat: k.lat,
+                  lng: k.lng,
+                },
+                svgColor:
+                  currentRoute?.value.split("*")[2] ||
+                  destinations[i]?.svgColor ||
+                  "",
+                svgPath: driverIcon,
+              })),
+            {
+              coords: logMarker?.coords || null,
+              icon: logMarker?.icon,
+              info: {
+                name: logMarker?.reason,
+                address: logMarker?.address,
+                description: logMarker?.description,
               },
-              svgColor:
-                currentRoute?.value.split("*")[2] ||
-                destinations[i]?.svgColor ||
-                "",
-              svgPath: driverIcon,
-            })),
+              clickable: true,
+            },
           ]}
           showWazeAlertsLayer={wazeTA}
           showWazeTrafficLayer={wazeTL}
