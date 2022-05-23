@@ -1,9 +1,10 @@
 import React, { useState, useCallback, useEffect, useRef } from "react";
 import { BsPencil, BsBoxArrowUpRight } from "react-icons/bs";
 import { useDispatch, useSelector } from "react-redux";
-import { Btn, Container, Txt } from "components/src/Elements";
+import { Btn, Container, Txt, TxtBtn } from "components/src/Elements";
 import { useNavigate } from "react-router-dom";
 import { CustomModal } from "components";
+import { IoIosLogOut } from "react-icons/io";
 import { useApiUrl } from "../../../hooks";
 import { getDriver } from "../../../utils";
 import { Put, Get } from "services";
@@ -26,6 +27,7 @@ import {
   RootState,
   filterLogs,
   updateDriverState,
+  clearCompany,
 } from "../../../redux";
 
 ChartJS.register(
@@ -237,6 +239,23 @@ export const Dashboard: React.FC = () => {
             </Txt>
           )}
         </Container>
+        <Container
+          width="100%"
+          justify="center"
+          align="center"
+          style={{ position: "absolute", bottom: 50, left: 0 }}
+        >
+          <Btn
+            onClick={() => {
+              dispatch(clearCompany());
+            }}
+          >
+            <Txt fs="16px " color="#000000" bold pointer>
+              Log out
+            </Txt>{" "}
+            <IoIosLogOut color="#000000" size={30} />
+          </Btn>
+        </Container>
       </Container>
       <Container
         style={{
@@ -261,9 +280,20 @@ export const Dashboard: React.FC = () => {
           justify="flex-start"
           direction="column"
         >
-          <Txt fs="20px" bold color="#000000" margin="5px 0px 20px 10px">
-            Last Risks
-          </Txt>
+          <Container width="100%" justify="space-between" align="center">
+            <Txt fs="20px" bold color="#000000" margin="5px 0px 20px 10px">
+              Last Alerts
+            </Txt>
+            <TxtBtn
+              color="#0094FF"
+              margin="10px 10px 20px 0px"
+              onClick={() => {
+                navigation("/main/rouging");
+              }}
+            >
+              Details
+            </TxtBtn>
+          </Container>
           <div
             style={{
               width: "100%",
@@ -326,9 +356,20 @@ export const Dashboard: React.FC = () => {
           justify="flex-start"
           direction="column"
         >
-          <Txt fs="20px" bold color="#000000" margin="10px 0px 20px 10px">
-            Last Alerts
-          </Txt>
+          <Container width="100%" justify="space-between" align="center">
+            <Txt fs="20px" bold color="#000000" margin="10px 0px 20px 10px">
+              Last Alerts
+            </Txt>
+            <TxtBtn
+              color="#0094FF"
+              margin="10px 10px 20px 0px"
+              onClick={() => {
+                navigation("/main/logging");
+              }}
+            >
+              Details
+            </TxtBtn>
+          </Container>
           <Table
             data={company.logs
               ?.filter((u) => u.action === "None")
