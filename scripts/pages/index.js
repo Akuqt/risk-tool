@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import fs from "fs";
 import yargs from "yargs";
 import { getFileText, capitalize } from "s-common";
@@ -6,26 +7,33 @@ import { pageTemplate } from "./template/index.js";
 import { hideBin } from "yargs/helpers";
 import { join } from "path";
 
-const { n, r, Help } = yargs(hideBin(process.argv)).argv;
+const { n, r, d, f, Help } = yargs(hideBin(process.argv)).argv;
 const __web = join(fileURLToPath(import.meta.url), "../../../apps/web/");
 
-main(n, r, Help);
+main(n, r, d, f, Help);
 
 /**
  *
  * @param {string} n_ page name
  * @param {string} r_ route name
+ * @param {string} d_ directory
+ * @param {boolean} f_ folder
  * @param {boolean} Help_ show help
  */
-async function main(n_, r_, Help_) {
+async function main(n_, r_, d_, f_, Help_) {
   if (Help_) {
     showHelp();
     return;
   }
   if (n_ && r_) {
     const __name = capitalize(n_);
-    const __pages = join(__web, "/src/pages/index.tsx");
-    const page = fs.createWriteStream(join(__web, `/src/pages/${__name}.tsx`));
+    const __dir = `/src/pages/${d_ ? d_ + "/" : ""}`;
+    const __pages = join(__web, __dir + "index.tsx");
+    const __route = `${f_ ? __name + "/index.tsx" : __name + ".tsx"}`;
+    if (f_) {
+      fs.mkdirSync(join(__web, __dir + __name));
+    }
+    const page = fs.createWriteStream(join(__web, __dir + __route));
     page.write(pageTemplate(__name), (err) => {
       if (err) throw err;
       page.close();
@@ -39,7 +47,12 @@ async function main(n_, r_, Help_) {
 
 function showHelp() {
   console.log("\nUsage:\n");
-  console.log("yarn gen:page -n <page_name> -r <route_name>\n");
+  console.log(
+    "yarn gen:page -n <page_name> -r <route_name> -d <directory> -f\n",
+  );
+  console.log(
+    "-n page name\n-r route name\n-d directory\n-f folder\n--Help show help\n",
+  );
 }
 
 /**
@@ -54,7 +67,8 @@ async function addToPages(path, name, route) {
   let i = 0;
   let final = "";
   for (const line of lines) {
-    if (!line.startsWith("import")) {
+    if (line.startsWith("export")) {
+      i--;
       break;
     }
     final += line + "\n";

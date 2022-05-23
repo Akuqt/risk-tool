@@ -1,4 +1,8 @@
 export const errors = {
+  badRequest: {
+    status: 400,
+    message: "Bad request",
+  },
   invalidAuth: { code: 6000, message: "Invalid auth type." },
   invalidLogin: {
     code: 6001,
@@ -18,6 +22,10 @@ export const errors = {
   },
   invalidAuthToken: {
     message: "Invalid auth token.",
+    code: 9091,
+  },
+  invalidEndOfRoute: {
+    message: "You need to end the route correctly.",
     code: 9091,
   },
 };

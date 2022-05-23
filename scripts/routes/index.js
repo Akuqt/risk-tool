@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import fs from "fs";
 import yargs from "yargs";
 import { fileURLToPath } from "url";

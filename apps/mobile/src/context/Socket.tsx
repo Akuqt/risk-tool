@@ -3,7 +3,9 @@ import { Socket, io } from "socket.io-client";
 
 export const socketContext = createContext<Socket | null>(null);
 
-export const SocketProvider: React.FC = ({ children }) => {
+export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [socket, setSocket] = useState<Socket | null>(null);
 
   const connect = useCallback(() => {

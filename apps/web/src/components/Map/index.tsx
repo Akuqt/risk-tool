@@ -1,9 +1,13 @@
-import React, { useCallback, useState, useEffect, memo } from "react";
+import React, { useCallback, useState, useEffect, memo, useRef } from "react";
+import { getAlertIcon, getClosestIndex, getTimeColor } from "../../utils";
 import { containerStyle, initOptions, mapOptions } from "./helper";
 import { Container, UserLocation } from "./Elements";
 import { AiOutlineAim } from "react-icons/ai";
 import { Information } from "./Information";
-import { useLocation, useApiUrl } from "../../hooks";
+import { useSelector } from "react-redux";
+import { RootState } from "../../redux";
+import { useApiUrl } from "../../hooks";
+import { Coord } from "types";
 import { Post } from "services";
 import {
   PolyPath,
@@ -25,20 +29,41 @@ type MAP = ReturnType<typeof useGoogleMap>;
 
 interface Props {
   polys?: PolyPath[];
+  markers?: {
+    icon?: any;
+    coords: Coord | null;
+    clickable?: boolean;
+    svgPath?: string;
+    svgColor?: string;
+    info?: {
+      name?: string;
+      address?: string;
+      description?: string;
+      recalculate?: {
+        label: string;
+        action: () => void;
+      };
+    };
+  }[];
   showWazeAlertsLayer?: boolean;
   showWazeTrafficLayer?: boolean;
   showGoogleTrafficLayer?: boolean;
+  canClick?: boolean;
+  onClick?: (coord: Coord) => void;
 }
 
 export const Map: React.FC<Props> = memo(
   ({
     polys,
+    markers,
+    onClick,
+    canClick,
     showWazeAlertsLayer,
     showWazeTrafficLayer,
     showGoogleTrafficLayer,
   }) => {
+    const mounted = useRef(false);
     const apiUrl = useApiUrl();
-    const { location } = useLocation();
     const { isLoaded } = useJsApiLoader(initOptions);
     const [map, setMap] = useState<MAP>(null);
     const [wazeTrafficInfo, setWazeTrafficInfo] = useState<WazeTrafficInfo[]>(
@@ -51,71 +76,86 @@ export const Map: React.FC<Props> = memo(
       lng: -74.809196472168,
     });
 
-    const [count, setCount] = useState<{
-      coord: { lat: number; lng: number }[];
-      c: number;
-    }>({ coord: [], c: 0 });
+    const [init, setInit] = useState(true);
 
-    const onClick = useCallback(
-      ({ lat, lng }: { lat: number; lng: number }) => {
-        setCount((ci) => ({ c: ci.c + 1, coord: [...ci.coord, { lat, lng }] }));
-      },
-      [],
+    const company = useSelector(
+      (state: RootState) => state.companyReducer.company,
     );
 
-    const panToUserLocation = useCallback(() => {
-      if (location) {
-        map?.panTo(location);
-      }
-    }, [location, map]);
-
-    const onLoad = useCallback((map: MAP) => {
-      setMap(map);
-    }, []);
-
-    const onUnmount = useCallback(() => {
-      setMap(null);
-    }, []);
-
-    useEffect(() => {
+    const updateWazeInfo = useCallback(() => {
       if (map) {
         Post<{ result: WazeTrafficInfo[] }>(apiUrl, "/report/traffic", {
           lat: map.getCenter()?.lat(),
           lng: map.getCenter()?.lng(),
-        }).then((res) => {
-          setWazeTrafficInfo(res.data.result);
+        }).then(({ data: { result } }) => {
+          if (mounted.current) {
+            setWazeTrafficInfo(result);
+          }
         });
 
         Post<{ result: WazeAlertInfo[] }>(apiUrl, "/report/alerts", {
           lat: map.getCenter()?.lat(),
           lng: map.getCenter()?.lng(),
-        }).then((res) => {
-          setWazeAlertInfo(res.data.result);
+        }).then(({ data: { result } }) => {
+          if (mounted.current) {
+            setWazeAlertInfo(result);
+          }
         });
       }
-    }, [map, apiUrl]);
+    }, [apiUrl, map]);
+
+    const panToUserLocation = useCallback(() => {
+      if (company && company.lat && company.lng) {
+        map?.panTo({
+          lat: company.lat,
+          lng: company.lng,
+        });
+        map?.setZoom(14);
+      }
+    }, [company, map]);
+
+    const onLoad = useCallback((map: MAP) => {
+      if (mounted.current) {
+        setMap(map);
+      }
+    }, []);
+
+    const onUnmount = useCallback(() => {
+      if (mounted.current) {
+        setMap(null);
+      }
+    }, []);
 
     useEffect(() => {
-      if (count.c === 2) {
-        Post<any>(apiUrl, "/path", {
-          points: count.coord,
-        }).then((res) => {
-          setWazeTrafficInfo([
-            {
-              city: "" + res.data.time,
-              date: 0,
-              description: "" + res.data.distance,
-              level: 0,
-              path: res.data.coords,
-              speedKh: 0,
-              street: "",
-              time: 0,
-            },
-          ]);
-        });
-        setCount({ coord: [], c: 0 });
+      const condition = map && (showWazeAlertsLayer || showWazeTrafficLayer);
+      if (init && map) {
+        if (mounted.current) {
+          updateWazeInfo();
+          setInit(false);
+        }
+      } else if (condition) {
+        const interval = setInterval(() => {
+          if (mounted.current) {
+            updateWazeInfo();
+          }
+        }, 6 * 1000 * 60);
+        return () => clearInterval(interval);
       }
-    }, [count, apiUrl]);
+    }, [
+      map,
+      init,
+      apiUrl,
+      updateWazeInfo,
+      showWazeAlertsLayer,
+      showWazeTrafficLayer,
+    ]);
+
+    useEffect(() => {
+      mounted.current = true;
+      return () => {
+        mounted.current = false;
+      };
+    }, []);
 
     return isLoaded ? (
       <Container>
@@ -130,7 +170,9 @@ export const Map: React.FC<Props> = memo(
           onUnmount={onUnmount}
           options={mapOptions}
           onClick={(e) => {
-            onClick({ lat: e.latLng?.lat() || 0, lng: e.latLng?.lng() || 0 });
+            if (onClick && canClick) {
+              onClick({ lat: e.latLng?.lat() || 0, lng: e.latLng?.lng() || 0 });
+            }
           }}
         >
           {showGoogleTrafficLayer && <TrafficLayer />}
@@ -142,6 +184,35 @@ export const Map: React.FC<Props> = memo(
                 path={poly.path}
                 options={{
                   strokeColor: poly.color,
+                  strokeWeight: 6,
+                }}
+                onClick={(e) => {
+                  if (poly.clickable) {
+                    if (poly.onClick) {
+                      poly.onClick(
+                        getClosestIndex(
+                          {
+                            lat: e.latLng?.lat() || 0,
+                            lng: e.latLng?.lng() || 0,
+                          },
+                          poly.path,
+                        ),
+                      );
+                    } else {
+                      setInfo({
+                        duration: poly.info?.time,
+                        distance: poly.info?.distance,
+                        risk: poly.info?.risk,
+                        material: poly.info?.material,
+                        route: poly.info?.route,
+                        driver: poly.info?.driver,
+                        location: {
+                          lat: e.latLng?.lat() || 0,
+                          lng: e.latLng?.lng() || 0,
+                        },
+                      });
+                    }
+                  }
                 }}
               />
             ))}
@@ -152,8 +223,9 @@ export const Map: React.FC<Props> = memo(
                 key={i}
                 path={poly.path}
                 options={{
-                  strokeColor: "black",
+                  strokeColor: getTimeColor(poly.time / 60),
                   clickable: true,
+                  strokeWeight: 3,
                 }}
                 onClick={(e) => {
                   setInfo({
@@ -166,20 +238,71 @@ export const Map: React.FC<Props> = memo(
                 }}
               />
             ))}
+          {markers &&
+            markers.length > 0 &&
+            markers.map((marker, i) => {
+              if (marker.coords) {
+                const Point = window.google.maps.Point;
+                return (
+                  <Marker
+                    key={i}
+                    position={{
+                      lat: marker.coords.lat,
+                      lng: marker.coords.lng,
+                    }}
+                    icon={{
+                      url: marker.icon,
+                      path: marker.svgPath,
+                      fillColor: marker.svgColor,
+                      fillOpacity: 1,
+                      strokeColor: "black",
+                      scale: 1.5,
+                      anchor: marker.svgPath ? new Point(5, 20) : undefined,
+                    }}
+                    onClick={(e) => {
+                      if (marker.clickable) {
+                        setInfo({
+                          location: {
+                            lat: e.latLng?.lat() || 0,
+                            lng: e.latLng?.lng() || 0,
+                          },
+                          cName: marker.info?.name,
+                          dAddress: marker.info?.address,
+                          description: marker.info?.description,
+                          recalculate: marker.info?.recalculate,
+                        });
+                      }
+                    }}
+                  />
+                );
+              }
+            })}
+
           {showWazeAlertsLayer &&
             wazeAlertInfo.length > 0 &&
-            wazeAlertInfo.map((alert, i) => (
-              <Marker
-                position={alert.location}
-                key={i}
-                onClick={() => {
-                  setInfo({
-                    ...alert,
-                  });
-                }}
-              />
-            ))}
+            wazeAlertInfo.map((alert, i) => {
+              if (alert.type !== "JAM") {
+                const Sizer = window.google.maps.Size;
+                return (
+                  <Marker
+                    position={alert.location}
+                    icon={{
+                      url: getAlertIcon(alert),
+                      scaledSize: new Sizer(35, 40),
+                    }}
+                    key={i}
+                    onClick={() => {
+                      setInfo({
+                        ...alert,
+                      });
+                    }}
+                  />
+                );
+              }
+            })}
           {info && (
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
             <InfoWindow
               position={info.location}
               onCloseClick={() => {

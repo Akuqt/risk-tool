@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import config from "../config";
 import { ICompany, IDriver } from "types";
 import { CookieOptions } from "express";
@@ -15,7 +16,7 @@ export const createAcessToken = (user: IDriver | ICompany): string => {
     },
     config.JWT.ACCESS,
     {
-      expiresIn: "1d",
+      expiresIn: "1y",
     },
   );
 };
@@ -30,7 +31,7 @@ export const createRefreshToken = (user: IDriver | ICompany): string => {
     },
     config.JWT.REFRESH,
     {
-      expiresIn: "1d",
+      expiresIn: "1y",
     },
   );
 };

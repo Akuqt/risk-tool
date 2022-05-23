@@ -12,8 +12,21 @@ const driverSchema = new Schema(
     },
     lat: Number,
     lng: Number,
+    dlat: Number,
+    dlng: Number,
     material: String,
+    address: String,
     gender: String,
+    active: {
+      type: Boolean,
+      default: false,
+    },
+    route: [
+      {
+        lat: Number,
+        lng: Number,
+      },
+    ],
     role: {
       ref: "Role",
       type: Schema.Types.ObjectId,

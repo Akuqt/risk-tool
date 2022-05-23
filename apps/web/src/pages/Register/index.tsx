@@ -1,4 +1,7 @@
-import React, { useReducer } from "react";
+import React, { useReducer, useEffect, useCallback, useRef } from "react";
+import Geocode from "react-geocode";
+import config from "../../config";
+import toast from "react-hot-toast";
 import { Btn, Container, TextInput, Txt } from "components/src/Elements";
 import { initialState, reducer } from "./helper";
 import { FCompany, IError } from "types";
@@ -6,18 +9,49 @@ import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { saveCompany } from "../../redux";
 import { useApiUrl } from "../../hooks";
+import { debounce } from "../../utils";
 import { Navbar } from "components";
 import { truck } from "assets";
 import { Post } from "services";
 
+Geocode.setApiKey(config.apiKey);
+Geocode.setLanguage("en");
+Geocode.setRegion("co");
+
 export const Register: React.FC = () => {
+  const mounted = useRef(false);
   const navigation = useNavigate();
   const apiUrl = useApiUrl();
-  const [{ address, name, password, username }, dispatcher] = useReducer(
-    reducer,
-    initialState,
-  );
+  const [{ address, name, password, username, error, coords }, dispatcher] =
+    useReducer(reducer, initialState);
   const dispatch = useDispatch();
+
+  const latlngFromAddress = useCallback(async (address: string) => {
+    try {
+      const res = await Geocode.fromAddress(address);
+      if (mounted.current) {
+        const { lat, lng } = res.results[0].geometry.location;
+        dispatcher({ type: "setError", payload: false });
+        dispatcher({ type: "setCoords", payload: { lat, lng } });
+      }
+    } catch (err) {
+      if (mounted.current) {
+        dispatcher({ type: "setError", payload: true });
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    if (address) debounce(() => latlngFromAddress(address))();
+  }, [address, latlngFromAddress]);
+
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
+
   return (
     <Container
       width="100%"
@@ -157,26 +191,38 @@ export const Register: React.FC = () => {
               borderRadius="4px"
               margin="30px 0px 0px 0px"
               onClick={async () => {
-                const res = await Post<{
-                  ok: boolean;
-                  result: FCompany;
-                  error?: IError;
-                }>(apiUrl, "/auth/sign-up", {
-                  type: "company",
-                  name,
-                  password,
-                  username,
-                  address,
-                  lat: NaN,
-                  lng: NaN,
-                  materials: [],
-                });
-                if (res.data.ok) {
-                  dispatch(saveCompany(res.data.result));
-                  dispatcher({ type: "clearAll" });
-                  navigation("/main/dashboard");
+                if (!error) {
+                  const res = await Post<{
+                    ok: boolean;
+                    result: FCompany;
+                    error?: IError;
+                  }>(apiUrl, "/auth/sign-up", {
+                    type: "company",
+                    name,
+                    password,
+                    username,
+                    address,
+                    lat: coords.lat,
+                    lng: coords.lng,
+                    materials: [],
+                  });
+                  if (res.data.ok) {
+                    if (mounted.current) {
+                      dispatch(saveCompany(res.data.result));
+                      dispatcher({ type: "clearAll" });
+                      navigation("/main/dashboard");
+                    }
+                  } else {
+                    toast.error(
+                      res.data.error?.message || "Something went wrong!",
+                      { id: "error-api-reg", position: "bottom-right" },
+                    );
+                  }
                 } else {
-                  console.log(res.data.error);
+                  toast.error("Invalid Address!", {
+                    id: "error-loc-reg",
+                    position: "bottom-right",
+                  });
                 }
               }}
             >

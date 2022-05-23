@@ -1,4 +1,5 @@
-import React, { useReducer } from "react";
+import React, { useReducer, useRef, useEffect } from "react";
+import toast from "react-hot-toast";
 import { Container, Txt, TextInput, Btn } from "components/src/Elements";
 import { initialState, reducer } from "./helper";
 import { FCompany, IError } from "types";
@@ -11,6 +12,7 @@ import { truck } from "assets";
 import { Post } from "services";
 
 export const Login: React.FC = () => {
+  const mounted = useRef(false);
   const navigation = useNavigate();
   const apiUrl = useApiUrl();
   const [{ password, username }, dispatcher] = useReducer(
@@ -18,6 +20,13 @@ export const Login: React.FC = () => {
     initialState,
   );
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
   return (
     <Container
       width="100%"
@@ -140,11 +149,16 @@ export const Login: React.FC = () => {
                   username,
                 });
                 if (res.data.ok) {
-                  dispatch(saveCompany(res.data.result));
-                  dispatcher({ type: "clearAll" });
-                  navigation("/main/dashboard");
+                  if (mounted.current) {
+                    dispatch(saveCompany(res.data.result));
+                    dispatcher({ type: "clearAll" });
+                    navigation("/main/dashboard");
+                  }
                 } else {
-                  console.log(res.data.error);
+                  toast.error(res.data.error?.message || "", {
+                    id: "error-api-login",
+                    position: "bottom-right",
+                  });
                 }
               }}
             >

@@ -7,7 +7,10 @@ import { truckDark } from "assets";
 import { NotFound } from "../NotFound";
 import { General } from "./General";
 import { Planner } from "./Planner";
+import { Logging } from "./Logging";
 import { Navbar } from "components";
+import { Driver } from "./Driver";
+import { Edit } from "./Edit";
 import {
   Route,
   Routes,
@@ -15,6 +18,8 @@ import {
   useLocation,
   useNavigate,
 } from "react-router-dom";
+
+import { Rouging } from "./Rouging";
 
 export const Main: React.FC = () => {
   const company = useSelector(
@@ -89,6 +94,10 @@ export const Main: React.FC = () => {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/planner" element={<Planner />} />
         <Route path="/general" element={<General />} />
+        <Route path="/edit" element={<Edit />} />
+        <Route path="/driver" element={<Driver />} />
+        <Route path="/logging" element={<Logging />} />
+        <Route path="/rouging" element={<Rouging />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </>

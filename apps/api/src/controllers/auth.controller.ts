@@ -53,6 +53,12 @@ export const signIn = async (
           lng: _driver.company.lng,
         },
         token: createAcessToken(_driver),
+        route: _driver.route,
+        active: _driver.active,
+        address: _driver.address,
+        dlat: _driver.dlat,
+        dlng: _driver.dlng,
+        material: _driver.material,
       },
     });
   }
@@ -60,7 +66,10 @@ export const signIn = async (
   if (type === "company") {
     const _company: ICompany | null = await CompanyModel.findOne({
       username,
-    }).populate("role");
+    })
+      .populate("role")
+      .populate("logs")
+      .populate("routes");
 
     if (!_company)
       return res.status(401).json({ ok: false, error: errors.invalidLogin });
@@ -73,7 +82,7 @@ export const signIn = async (
     const _drivers: IDriver[] = await DriverModel.find()
       .populate("company")
       .where({
-        company: _company,
+        company: _company._id,
       });
 
     res.cookie("jid", createRefreshToken(_company), cookieConf);
@@ -89,14 +98,33 @@ export const signIn = async (
         address: _company.address,
         materials: _company.materials,
         role: _company.role.name,
+        logs: _company.logs.reverse().map((log) => ({
+          id: log._id,
+          alert: {
+            reason: log.alert.reason,
+            description: log.alert.description,
+          },
+          action: log.action,
+          driver: log.driver,
+          lat: log.lat,
+          lng: log.lng,
+          createdAt: log.createdAt,
+          updatedAt: log.updatedAt,
+        })),
+        lastRoutes: _company.routes.map((route) => ({
+          risk: route.risk,
+          date: route.updatedAt,
+        })),
         drivers: _drivers.map((d) => ({
           name: d.name,
           lastname: d.lastname,
+          user: d.username,
           gender: d.gender,
           id: d._id,
           plate: d.plate,
           lat: d.lat,
           lng: d.lng,
+          active: d.active,
         })),
         token: createAcessToken(_company),
       },
@@ -224,4 +252,77 @@ export const signUp = async (
   }
 
   return res.status(401).json({ ok: false, error: errors.invalidAuth });
+};
+
+export const editCompany = async (
+  req: Request,
+  res: Response,
+): Promise<Response> => {
+  const { lat, lng, name, address, materials } = req.body;
+
+  const _company: ICompany | null = await CompanyModel.findById(req.id)
+    .populate("logs")
+    .populate("routes")
+    .populate("role");
+
+  if (!_company) {
+    return res.status(401).json({ ok: false, error: errors.invalidAuth });
+  }
+
+  _company.lat = lat;
+  _company.lng = lng;
+  _company.name = name;
+  _company.address = address;
+  _company.materials = materials;
+
+  const company_ = await _company.save();
+
+  const _drivers: IDriver[] = await DriverModel.find().populate("role").where({
+    company: _company,
+  });
+
+  res.cookie("jid", createRefreshToken(company_), cookieConf);
+
+  return res.json({
+    ok: true,
+    result: {
+      name: _company.name,
+      id: _company._id,
+      username: _company.username,
+      lat: _company.lat,
+      lng: _company.lng,
+      address: _company.address,
+      materials: _company.materials,
+      role: _company.role.name,
+      logs: _company.logs.reverse().map((log) => ({
+        id: log._id,
+        alert: {
+          reason: log.alert.reason,
+          description: log.alert.description,
+        },
+        action: log.action,
+        driver: log.driver,
+        lat: log.lat,
+        lng: log.lng,
+        createdAt: log.createdAt,
+        updatedAt: log.updatedAt,
+      })),
+      lastRoutes: _company.routes.map((route) => ({
+        risk: route.risk,
+        date: route.updatedAt,
+      })),
+      drivers: _drivers.map((d) => ({
+        name: d.name,
+        lastname: d.lastname,
+        user: d.username,
+        gender: d.gender,
+        id: d._id,
+        plate: d.plate,
+        lat: d.lat,
+        lng: d.lng,
+        active: d.active,
+      })),
+      token: createAcessToken(_company),
+    },
+  });
 };
