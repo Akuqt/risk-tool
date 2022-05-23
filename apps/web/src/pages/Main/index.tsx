@@ -19,6 +19,8 @@ import {
   useNavigate,
 } from "react-router-dom";
 
+import { Rouging } from "./Rouging";
+
 export const Main: React.FC = () => {
   const company = useSelector(
     (state: RootState) => state.companyReducer.company,
@@ -95,6 +97,7 @@ export const Main: React.FC = () => {
         <Route path="/edit" element={<Edit />} />
         <Route path="/driver" element={<Driver />} />
         <Route path="/logging" element={<Logging />} />
+        <Route path="/rouging" element={<Rouging />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </>
