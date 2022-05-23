@@ -1,4 +1,5 @@
-import React, { useReducer, useRef } from "react";
+import React, { useReducer, useRef, useEffect } from "react";
+import toast from "react-hot-toast";
 import { Container, Txt, TextInput, Btn } from "components/src/Elements";
 import { initialState, reducer } from "./helper";
 import { FCompany, IError } from "types";
@@ -9,7 +10,6 @@ import { useApiUrl } from "../../hooks";
 import { Navbar } from "components";
 import { truck } from "assets";
 import { Post } from "services";
-import { useEffect } from "react";
 
 export const Login: React.FC = () => {
   const mounted = useRef(false);
@@ -155,7 +155,10 @@ export const Login: React.FC = () => {
                     navigation("/main/dashboard");
                   }
                 } else {
-                  // TODO: notify error
+                  toast.error(res.data.error?.message || "", {
+                    id: "error-api-login",
+                    position: "bottom-right",
+                  });
                 }
               }}
             >

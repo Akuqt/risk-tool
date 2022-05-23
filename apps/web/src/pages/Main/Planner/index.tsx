@@ -1,16 +1,19 @@
 import React, { useEffect, useCallback, useReducer, useRef } from "react";
 import Geocode from "react-geocode";
 import config from "../../../config";
-import { Container, Btn, Txt, Check, Spinner } from "components/src/Elements";
+import toast from "react-hot-toast";
 import { RootState, updateDriverAndLogs, updateLogState } from "../../../redux";
+import { Container, Btn, Txt, Check, Spinner } from "components/src/Elements";
+import { BestPath, Coord, FLog2, IError } from "types";
 import { destinationIcon, originIcon } from "assets";
 import { MdClear, MdSettingsSuggest } from "react-icons/md";
 import { useDispatch, useSelector } from "react-redux";
 import { initialState, reducer } from "./helper";
-import { BestPath, Coord, FLog2 } from "types";
+import { useLocation, Location } from "react-router-dom";
+import { driverIcon } from "../General/helper";
 import { useApiUrl } from "../../../hooks";
-import { Risk } from "./Risk";
 import { Post, Put } from "services";
+import { Risk } from "./Risk";
 import { Map } from "../../../components";
 import {
   CustomBtn,
@@ -21,15 +24,12 @@ import {
 } from "components";
 import {
   debounce,
+  getDriver,
   randomColor,
   riskPathMap,
   formatNumber,
   formatAddress,
-  getDriver,
 } from "../../../utils";
-
-import { useLocation, Location } from "react-router-dom";
-import { driverIcon } from "../General/helper";
 
 Geocode.setApiKey(config.apiKey);
 Geocode.setLanguage("en");
@@ -87,7 +87,10 @@ export const Planner: React.FC = () => {
         dispatcher({ type: "setMapLoading", payload: false });
       }
     } catch (error) {
-      // TODO: Notify error
+      toast.error("Something went wrong!", {
+        id: "planner-error-data-add1",
+      });
+      dispatcher({ type: "setMapLoading", payload: false });
     }
   }, []);
 
@@ -109,6 +112,10 @@ export const Planner: React.FC = () => {
       if (mounted.current) {
         dispatcher({ type: "setAddress", payload: "" });
       }
+      toast.error("Something went wrong!", {
+        id: "planner-error-data-add2",
+        position: "bottom-right",
+      });
     }
   }, []);
 
@@ -182,7 +189,10 @@ export const Planner: React.FC = () => {
                 dispatcher({ type: "setShowModal", payload: false });
               }
             } else {
-              // TODO: Notify error
+              toast.error("Something went wrong!", {
+                id: "planner-error-data-risk",
+                position: "bottom-right",
+              });
             }
           }}
         />
@@ -373,14 +383,12 @@ export const Planner: React.FC = () => {
                 const origin_ = logState?.log
                   ? { lat: logState.log.lat, lng: logState.log.lng }
                   : { lat: company.lat, lng: company.lng };
-                const res = await Post<{ ok: boolean } & BestPath>(
-                  apiUrl,
-                  "/path/best",
-                  {
-                    origin: origin_,
-                    destination,
-                  },
-                );
+                const res = await Post<
+                  { ok: boolean; error: IError } & BestPath
+                >(apiUrl, "/path/best", {
+                  origin: origin_,
+                  destination,
+                });
                 if (res.data.ok) {
                   if (mounted.current) {
                     dispatcher({
@@ -390,6 +398,11 @@ export const Planner: React.FC = () => {
                     dispatcher({ type: "setPathSelector", payload: true });
                     dispatcher({ type: "setMapLoading", payload: false });
                   }
+                } else {
+                  toast.error(res.data.error?.message || "", {
+                    id: "planner-error-data-set-route",
+                    position: "bottom-right",
+                  });
                 }
               }
             }}
@@ -485,7 +498,11 @@ export const Planner: React.FC = () => {
             label="Set Route"
             lock={fixedPath.length === 0 || risk === 0}
             onClick={async () => {
-              const res = await Post<{ ok: boolean; path: Coord[] }>(
+              const res = await Post<{
+                ok: boolean;
+                path: Coord[];
+                error?: IError;
+              }>(
                 apiUrl,
                 "/path/new",
                 {
@@ -506,23 +523,36 @@ export const Planner: React.FC = () => {
                 if (mounted.current) {
                   dispatch(updateDriverAndLogs({ risk, id: driver?.value }));
                   if (logState?.log) {
-                    const res = await Put<{ ok: boolean }>(
+                    const res_ = await Put<{ ok: boolean; error?: IError }>(
                       apiUrl,
                       "/alerts/edit",
                       { action: "Recalculate", log: logState.log.id },
                       company.token,
                     );
-                    if (res.data.ok) {
+                    if (res_.data.ok) {
                       dispatch(
                         updateLogState({
                           id: logState.log.id,
                           action: "Recalculate",
                         }),
                       );
+                    } else {
+                      toast.error(res_.data.error?.message || "", {
+                        id: "planner-error-data-set-log-rec",
+                        position: "bottom-right",
+                      });
                     }
                   }
-                  // TODO: notify user
+
+                  toast.success("Route set successfully", {
+                    id: "bottom-left-planner-set-route",
+                  });
                 }
+              } else {
+                toast.error(res.data.error?.message || "", {
+                  id: "planner-error-data-new-route-idk",
+                  position: "bottom-right",
+                });
               }
             }}
           />

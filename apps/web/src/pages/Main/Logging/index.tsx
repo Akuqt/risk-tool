@@ -1,15 +1,16 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import config from "../../../config";
 import Geocode from "react-geocode";
+import config from "../../../config";
+import toast from "react-hot-toast";
 import { filterLogs, RootState, updateDriverState } from "../../../redux";
 import { useDispatch, useSelector } from "react-redux";
 import { formatAddress, getDriver } from "../../../utils";
 import { useApiUrl, useSocket } from "../../../hooks";
 import { Container, Spinner } from "components/src/Elements";
+import { FLog2, IError } from "types";
 import { useNavigate } from "react-router-dom";
 import { Get, Put } from "services";
 import { LogCard } from "components";
-import { FLog2 } from "types";
 
 Geocode.setApiKey(config.apiKey);
 Geocode.setLanguage("en");
@@ -31,7 +32,7 @@ export const Logging: React.FC = () => {
   const handleDismiss = useCallback(
     async (log: FLog2 | null) => {
       if (log) {
-        const res = await Put<{ ok: boolean }>(
+        const res = await Put<{ ok: boolean; error?: IError }>(
           apiUrl,
           "/alerts/edit",
           {
@@ -49,6 +50,11 @@ export const Logging: React.FC = () => {
               ),
             );
           }
+        } else {
+          toast.error(res.data.error?.message || "", {
+            id: "logg-error-data-add",
+            position: "bottom-right",
+          });
         }
       }
     },
@@ -66,13 +72,16 @@ export const Logging: React.FC = () => {
         return address;
       }
     } catch (error) {
-      // TODO: notify user
+      toast.error("Something went wrong!", {
+        id: "error-logg-address",
+        position: "bottom-right",
+      });
     }
     return "";
   }, []);
 
   useEffect(() => {
-    Get<{ ok: boolean; logs: FLog2[] }>(
+    Get<{ ok: boolean; logs: FLog2[]; error?: IError }>(
       apiUrl,
       "alerts/all",
       company.token,
@@ -82,6 +91,11 @@ export const Logging: React.FC = () => {
           setLogs(res.data.logs);
           setLoading(false);
         }
+      } else {
+        toast.error(res.data.error?.message || "", {
+          id: "loggg-error-logs-g",
+          position: "bottom-right",
+        });
       }
     });
   }, [company.token, apiUrl]);

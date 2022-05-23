@@ -6,8 +6,9 @@ import { useNavigate } from "react-router-dom";
 import { useApiUrl } from "../../../hooks";
 import { RouteCard } from "components";
 import { RootState } from "../../../redux";
-import { BestRoute } from "types";
+import { BestRoute, IError } from "types";
 import { Get } from "services";
+import toast from "react-hot-toast";
 
 export const Rouging: React.FC = () => {
   const mounted = useRef(false);
@@ -21,7 +22,7 @@ export const Rouging: React.FC = () => {
   const navigation = useNavigate();
 
   useEffect(() => {
-    Get<{ ok: boolean; result: BestRoute[] }>(
+    Get<{ ok: boolean; result: BestRoute[]; error: IError }>(
       apiUrl,
       "/path/all",
       company.token,
@@ -31,6 +32,11 @@ export const Rouging: React.FC = () => {
           setRoutes(res.data.result.reverse());
           setLoading(false);
         }
+      } else {
+        toast(res.data.error.message, {
+          id: "loggs-error-data-entry",
+          position: "bottom-right",
+        });
       }
     });
   }, [company.token, apiUrl]);

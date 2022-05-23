@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import Select, { MultiValue } from "react-select";
 import Geocode from "react-geocode";
 import config from "../../../config";
+import toast from "react-hot-toast";
 import { Container, Txt, TextInput, Btn } from "components/src/Elements";
 import { useDispatch, useSelector } from "react-redux";
 import { Coord, FCompany, IError } from "types";
@@ -186,12 +187,22 @@ export const Edit: React.FC = () => {
                   if (res.data.ok) {
                     if (mounted.current) {
                       dispatch(saveCompany(res.data.result));
+                      toast.success("Information Updated!", {
+                        id: "success-edit-caaa",
+                      });
                       navigation("/main/dashboard");
                     }
+                  } else {
+                    toast.error(res.data.error?.message || "", {
+                      id: "error-edit-c",
+                      position: "bottom-right",
+                    });
                   }
                 } else {
-                  // eslint-disable-next-line no-alert
-                  alert("Please enter a valid address");
+                  toast.error("Invalid Address!", {
+                    id: "error-loc-edit",
+                    position: "bottom-right",
+                  });
                 }
               }}
             >

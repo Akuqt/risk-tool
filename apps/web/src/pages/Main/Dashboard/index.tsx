@@ -1,7 +1,9 @@
 import React, { useState, useCallback, useEffect, useRef } from "react";
+import toast from "react-hot-toast";
 import { BsPencil, BsBoxArrowUpRight } from "react-icons/bs";
-import { useDispatch, useSelector } from "react-redux";
 import { Btn, Container, Txt, TxtBtn } from "components/src/Elements";
+import { useDispatch, useSelector } from "react-redux";
+import { FLog2, IError } from "types";
 import { useNavigate } from "react-router-dom";
 import { CustomModal } from "components";
 import { IoIosLogOut } from "react-icons/io";
@@ -10,7 +12,6 @@ import { getDriver } from "../../../utils";
 import { Put, Get } from "services";
 import { Table } from "./Table";
 import { Alert } from "./Alert";
-import { FLog2 } from "types";
 import { Line } from "react-chartjs-2";
 import {
   Title,
@@ -26,8 +27,8 @@ import {
   saveLogs,
   RootState,
   filterLogs,
-  updateDriverState,
   clearCompany,
+  updateDriverState,
 } from "../../../redux";
 
 ChartJS.register(
@@ -56,7 +57,7 @@ export const Dashboard: React.FC = () => {
   const handleDismiss = useCallback(
     async (log: FLog2 | null) => {
       if (log) {
-        const res = await Put<{ ok: boolean }>(
+        const res = await Put<{ ok: boolean; error?: IError }>(
           apiUrl,
           "/alerts/edit",
           {
@@ -69,6 +70,11 @@ export const Dashboard: React.FC = () => {
           if (mounted.current) {
             dispatch(filterLogs(log.id));
           }
+        } else {
+          toast.error(res.data.error?.message || "", {
+            id: "dash-error-alerts",
+            position: "bottom-right",
+          });
         }
       }
     },
@@ -83,7 +89,7 @@ export const Dashboard: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    Get<{ ok: boolean; logs: FLog2[] }>(
+    Get<{ ok: boolean; logs: FLog2[]; error?: IError }>(
       apiUrl,
       "/alerts/all",
       company.token,
@@ -92,6 +98,11 @@ export const Dashboard: React.FC = () => {
         if (mounted.current) {
           dispatch(saveLogs(res.data.logs));
         }
+      } else {
+        toast.error(res.data.error?.message || "", {
+          id: "dash-error-alerts",
+          position: "bottom-right",
+        });
       }
     });
   }, [dispatch, apiUrl, company.token]);
