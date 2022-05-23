@@ -1,6 +1,7 @@
 import React, { useReducer, useEffect, useCallback, useRef } from "react";
 import Geocode from "react-geocode";
 import config from "../../config";
+import toast from "react-hot-toast";
 import { Btn, Container, TextInput, Txt } from "components/src/Elements";
 import { initialState, reducer } from "./helper";
 import { FCompany, IError } from "types";
@@ -212,8 +213,16 @@ export const Register: React.FC = () => {
                       navigation("/main/dashboard");
                     }
                   } else {
-                    // TODO: notify error
+                    toast.error(
+                      res.data.error?.message || "Something went wrong!",
+                      { id: "error-api-reg", position: "bottom-right" },
+                    );
                   }
+                } else {
+                  toast.error("Invalid Address!", {
+                    id: "error-loc-reg",
+                    position: "bottom-right",
+                  });
                 }
               }}
             >

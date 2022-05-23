@@ -1,13 +1,15 @@
 import React, { useReducer, useEffect, useRef } from "react";
+import toast from "react-hot-toast";
 import { destinationIcon, driverIcon, initialState, reducer } from "./helper";
 import { Btn, Check, Container, Spinner, Txt } from "components/src/Elements";
+import { useLocation, Location, useNavigate } from "react-router-dom";
 import { MdClear, MdSettingsSuggest } from "react-icons/md";
 import { CustomModal, CustomSelect } from "components";
+import { BestRoute, FLog2, IError } from "types";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState, saveCompany } from "../../../redux";
 import { originIcon, alertIcon } from "assets";
 import { useApiUrl, useSocket } from "../../../hooks";
-import { BestRoute, FLog2 } from "types";
 import { Map } from "../../../components";
 import { Get } from "services";
 import {
@@ -18,8 +20,6 @@ import {
   formatNumber,
   getDestinations,
 } from "../../../utils";
-
-import { useLocation, Location, useNavigate } from "react-router-dom";
 
 export const General: React.FC = () => {
   const mounted = useRef(false);
@@ -127,7 +127,7 @@ export const General: React.FC = () => {
         ],
       });
     } else {
-      Get<{ ok: boolean; result: BestRoute[] }>(
+      Get<{ ok: boolean; result: BestRoute[]; error?: IError }>(
         apiUrl,
         "/path/all",
         company.token,
@@ -153,6 +153,11 @@ export const General: React.FC = () => {
 
             dispatcher({ type: "setDestinations", payload: destinations });
           }
+        } else {
+          toast.error(res.data.error?.message || "", {
+            id: "error-gen-routes",
+            position: "bottom-right",
+          });
         }
       });
     }

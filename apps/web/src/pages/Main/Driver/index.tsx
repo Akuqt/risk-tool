@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useReducer, useRef } from "react";
+import toast from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
 import { addDriver, RootState } from "../../../redux";
 import { FDriver, IError } from "types";
@@ -367,10 +368,14 @@ export const FormDriver: React.FC<IState> = ({ changeModalState }) => {
                   }),
                 );
                 changeModalState((c) => !c);
+                toast.success("New driver added!", {
+                  id: "driver-sucess-alerts",
+                });
               }
             } else {
-              // eslint-disable-next-line no-alert
-              alert(res.data.error?.message);
+              toast.error(res.data.error?.message || "", {
+                id: "driver-error-alerts",
+              });
             }
           }}
           bg="#FF0000"
