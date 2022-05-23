@@ -5,8 +5,8 @@ import { MdClear, MdSettingsSuggest } from "react-icons/md";
 import { CustomModal, CustomSelect } from "components";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState, saveCompany } from "../../../redux";
-import { useApiUrl, useSocket } from "../../../hooks";
 import { originIcon, alertIcon } from "assets";
+import { useApiUrl, useSocket } from "../../../hooks";
 import { BestRoute, FLog2 } from "types";
 import { Map } from "../../../components";
 import { Get } from "services";
@@ -31,7 +31,7 @@ export const General: React.FC = () => {
   );
 
   const { state: logState } = useLocation() as Location & {
-    state?: { log: FLog2 & { address: string } };
+    state?: { log: FLog2 & { address: string }; route: BestRoute };
   };
 
   const navigate = useNavigate();
@@ -106,34 +106,56 @@ export const General: React.FC = () => {
         },
       });
     }
-    Get<{ ok: boolean; result: BestRoute[] }>(
-      apiUrl,
-      "/path/all",
-      company.token,
-    ).then((res) => {
-      if (res.data.ok) {
-        if (mounted.current) {
-          const routes_ = res.data.result
-            .filter((r) => logFilter(logState?.log || null, r.driver))
-            .filter((r) => r.active);
-          dispatcher({
-            type: "setRoutes",
-            payload: routes_,
-          });
-          const destinations = routes_.map((r) => ({
-            coords: r.coords[r.coords.length - 1],
-            svgColor: r.color,
+    if (logState?.route) {
+      dispatcher({
+        type: "setRoutes",
+        payload: [logState.route],
+      });
+
+      dispatcher({
+        type: "setDestinations",
+        payload: [
+          {
+            coords: logState.route.coords[logState.route.coords.length - 1],
+            svgColor: logState.route.color,
             svgPath: destinationIcon,
             clickable: true,
             info: {
-              address: r.address,
+              address: logState.route.address,
             },
-          }));
+          },
+        ],
+      });
+    } else {
+      Get<{ ok: boolean; result: BestRoute[] }>(
+        apiUrl,
+        "/path/all",
+        company.token,
+      ).then((res) => {
+        if (res.data.ok) {
+          if (mounted.current) {
+            const routes_ = res.data.result
+              .filter((r) => logFilter(logState?.log || null, r.driver))
+              .filter((r) => r.active);
+            dispatcher({
+              type: "setRoutes",
+              payload: routes_,
+            });
+            const destinations = routes_.map((r) => ({
+              coords: r.coords[r.coords.length - 1],
+              svgColor: r.color,
+              svgPath: destinationIcon,
+              clickable: true,
+              info: {
+                address: r.address,
+              },
+            }));
 
-          dispatcher({ type: "setDestinations", payload: destinations });
+            dispatcher({ type: "setDestinations", payload: destinations });
+          }
         }
-      }
-    });
+      });
+    }
   }, [company.token, apiUrl, logState]);
 
   useEffect(() => {
