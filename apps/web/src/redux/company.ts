@@ -53,7 +53,7 @@ export const companySlice = createSlice({
       state,
       action: PayloadAction<{ risk: number; id?: string }>,
     ) => {
-      const date = new Date().toLocaleString();
+      const date = new Date().toISOString();
       state.company.drivers = state.company.drivers.map((d) => {
         if (d.id === action.payload.id) {
           return { ...d, active: true };

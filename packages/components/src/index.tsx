@@ -7,3 +7,5 @@ export * from "./CustomBtn";
 export * from "./RadioGroup";
 export * from "./CustomModal";
 export * from "./CustomSlider";
+export * from "./LogCard";
+export * from "./RouteCard";

@@ -25,6 +25,7 @@ export const Risk: React.FC<Props> = ({ close, url }) => {
     splitRoad: "0",
     roadWorks: "0",
     separator: "0",
+    material: "0",
   });
 
   useEffect(() => {
@@ -164,6 +165,27 @@ export const Risk: React.FC<Props> = ({ close, url }) => {
         color="tomato"
         onChange={(v) => {
           setValues((c) => ({ ...c, separator: (v * 5).toString() }));
+        }}
+      />
+      <CustomSlider
+        placeholder="Material"
+        max={10}
+        labels={[
+          "0",
+          "10",
+          "20",
+          "30",
+          "40",
+          "50",
+          "60",
+          "70",
+          "80",
+          "90",
+          "100",
+        ]}
+        color="tomato"
+        onChange={(v) => {
+          setValues((c) => ({ ...c, material: (v * 10).toString() }));
         }}
       />
       <Btn

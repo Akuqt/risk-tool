@@ -269,7 +269,7 @@ export const getRoutePaths = async (req: Request, res: Response) => {
     driver: route.driver,
     coords: route.coords,
     createdAt: route.createdAt,
-    updateAt: route.updatedAt,
+    updatedAt: route.updatedAt,
     id: route._id,
     address: route.address,
     active: route.active,
