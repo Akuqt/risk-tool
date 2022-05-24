@@ -8,7 +8,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "../../redux";
 import { useApiUrl } from "../../hooks";
 import { Coord } from "types";
-import { Post } from "services";
+import { Get, Post } from "services";
 import {
   PolyPath,
   WazeAlertInfo,
@@ -24,8 +24,16 @@ import {
   useGoogleMap,
   useJsApiLoader,
 } from "@react-google-maps/api";
+import { companyIcon } from "assets";
 
 type MAP = ReturnType<typeof useGoogleMap>;
+
+interface Companies {
+  address: string;
+  lat: number;
+  lng: number;
+  name: string;
+}
 
 interface Props {
   polys?: PolyPath[];
@@ -48,8 +56,10 @@ interface Props {
   showWazeAlertsLayer?: boolean;
   showWazeTrafficLayer?: boolean;
   showGoogleTrafficLayer?: boolean;
+  showCompanies?: boolean;
   canClick?: boolean;
   onClick?: (coord: Coord) => void;
+  onCompanyClick?: (add: string) => void;
 }
 
 export const Map: React.FC<Props> = memo(
@@ -61,6 +71,8 @@ export const Map: React.FC<Props> = memo(
     showWazeAlertsLayer,
     showWazeTrafficLayer,
     showGoogleTrafficLayer,
+    showCompanies,
+    onCompanyClick,
   }) => {
     const mounted = useRef(false);
     const apiUrl = useApiUrl();
@@ -77,6 +89,8 @@ export const Map: React.FC<Props> = memo(
     });
 
     const [init, setInit] = useState(true);
+
+    const [companies, setCompanies] = useState<Companies[]>([]);
 
     const company = useSelector(
       (state: RootState) => state.companyReducer.company,
@@ -101,8 +115,16 @@ export const Map: React.FC<Props> = memo(
             setWazeAlertInfo(result);
           }
         });
+
+        Get<{ result: Companies[] }>(apiUrl, "/auth/all", company.token).then(
+          ({ data: { result } }) => {
+            if (mounted.current) {
+              setCompanies(result);
+            }
+          },
+        );
       }
-    }, [apiUrl, map]);
+    }, [apiUrl, map, company.token]);
 
     const panToUserLocation = useCallback(() => {
       if (company && company.lat && company.lng) {
@@ -185,6 +207,7 @@ export const Map: React.FC<Props> = memo(
                 options={{
                   strokeColor: poly.color,
                   strokeWeight: 6,
+                  zIndex: i * 100,
                 }}
                 onClick={(e) => {
                   if (poly.clickable) {
@@ -276,6 +299,40 @@ export const Map: React.FC<Props> = memo(
                   />
                 );
               }
+            })}
+
+          {showCompanies &&
+            companies.length > 0 &&
+            companies.map((company_, i) => {
+              return (
+                <Marker
+                  key={i}
+                  position={{
+                    lat: company_.lat,
+                    lng: company_.lng,
+                  }}
+                  icon={{
+                    url: companyIcon,
+                    scale: 1.5,
+                  }}
+                  onClick={(e) => {
+                    setInfo({
+                      location: {
+                        lat: e.latLng?.lat() || 0,
+                        lng: e.latLng?.lng() || 0,
+                      },
+                      cName: company_.name,
+                      dAddress: company_.address,
+                      recalculate: {
+                        action: () => {
+                          onCompanyClick && onCompanyClick(company_.address);
+                        },
+                        label: "Set Destination",
+                      },
+                    });
+                  }}
+                />
+              );
             })}
 
           {showWazeAlertsLayer &&
