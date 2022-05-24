@@ -10,5 +10,5 @@ hooks:
       runas: root
   AfterInstall:
     - location: aws/after_install.sh
-      timeout: 300
+      timeout: 3600
       runas: root
