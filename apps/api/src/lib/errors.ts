@@ -10,7 +10,7 @@ export const errors = {
   },
   invalidRegister: {
     code: 6002,
-    message: "Username is already taken or you pass invalid params.",
+    message: "Username or address is already taken or you pass invalid params.",
   },
   generic: {
     code: 5000,
