@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
 import { formatNumber, getDriver } from "../../../utils";
-import { Container, Spinner } from "components/src/Elements";
+import { Container, Spinner, Txt } from "components/src/Elements";
+import { BestRoute, IError } from "types";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { useApiUrl } from "../../../hooks";
 import { RouteCard } from "components";
 import { RootState } from "../../../redux";
-import { BestRoute, IError } from "types";
 import { Get } from "services";
 import toast from "react-hot-toast";
 
@@ -62,33 +62,47 @@ export const Rouging: React.FC = () => {
           direction="column"
           padding="20px 0px"
           bg="#e7e7e7"
+          style={{ overflow: "auto", minHeight: "calc(100vh - 30px)" }}
         >
-          {routes.map((route, index) => (
-            <RouteCard
-              origin={company.address}
-              formatNumber={(n) => formatNumber(n, 2, "")}
-              bg="#f5f5f5"
-              data={route}
-              width="90%"
-              key={index}
-              margin="10px 0px"
-              getDriver={(id) => {
-                const driver = getDriver(id, company.drivers);
-                return driver ? driver.name + " " + driver?.lastname : "";
-              }}
-              actions={{
-                view: () => {
-                  navigation("/main/general", {
-                    state: {
-                      route: {
-                        ...route,
+          {routes.length > 0 ? (
+            routes.map((route, index) => (
+              <RouteCard
+                origin={company.address}
+                formatNumber={(n) => formatNumber(n, 2, "")}
+                bg="#f5f5f5"
+                data={route}
+                width="90%"
+                key={index}
+                margin="10px 0px"
+                getDriver={(id) => {
+                  const driver = getDriver(id, company.drivers);
+                  return driver ? driver.name + " " + driver?.lastname : "";
+                }}
+                actions={{
+                  view: () => {
+                    navigation("/main/general", {
+                      state: {
+                        route: {
+                          ...route,
+                        },
                       },
-                    },
-                  });
-                },
-              }}
-            />
-          ))}
+                    });
+                  },
+                }}
+              />
+            ))
+          ) : (
+            <Container
+              width="100%"
+              heigh="100%"
+              justify="center"
+              align="center"
+            >
+              <Txt fs="20px" color="#000000" bold>
+                Route Logging is empty
+              </Txt>
+            </Container>
+          )}
         </Container>
       )}
     </>

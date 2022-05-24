@@ -135,7 +135,13 @@ export const General: React.FC = () => {
         if (res.data.ok) {
           if (mounted.current) {
             const routes_ = res.data.result
-              .filter((r) => logFilter(logState?.log || null, r.driver))
+              .filter((r) =>
+                logFilter(
+                  logState?.log || null,
+                  logState?.route || null,
+                  r.driver,
+                ),
+              )
               .filter((r) => r.active);
             dispatcher({
               type: "setRoutes",
@@ -369,7 +375,9 @@ export const General: React.FC = () => {
               currentRoute?.value.split("*")[1] || "",
               company.drivers,
             )
-              .filter((d) => logFilter(logState?.log || null, d.id))
+              .filter((d) =>
+                logFilter(logState?.log || null, logState?.route || null, d.id),
+              )
               .map((k, i) => ({
                 coords: {
                   lat: k.lat,

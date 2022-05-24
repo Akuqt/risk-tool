@@ -76,6 +76,16 @@ export const getClosestIndex = (origin: Coord, destinations: Coord[]) => {
   return closest;
 };
 
+export const riskColor = (risk: number) => {
+  if (risk <= 35) {
+    return "green";
+  } else if (risk > 35 && risk <= 70) {
+    return "orange";
+  } else {
+    return "red";
+  }
+};
+
 export const randomColor = () =>
   "#" +
   Math.floor(Math.random() * 16777215)
@@ -131,7 +141,12 @@ export const getDestinations = (
   }
 };
 
-export const logFilter = (log: FLog2 | null, id: string) => {
-  if (log === null) return true;
-  return id === log.driver;
+export const logFilter = (
+  log: FLog2 | null,
+  route: BestRoute | null,
+  id: string,
+) => {
+  if (log !== null) return id === log.driver;
+  if (route !== null) return id === route.driver;
+  return true;
 };

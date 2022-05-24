@@ -8,6 +8,8 @@ interface Props {
   right?: string;
   top?: string;
   bottom?: string;
+  height?: string;
+  up?: boolean;
 }
 
 export const CustomModal: React.FC<Props> = ({
@@ -18,13 +20,16 @@ export const CustomModal: React.FC<Props> = ({
   left,
   right,
   top,
+  height,
+  up,
 }) => {
   return (
     <Container
       width="100%"
-      heigh="100%"
-      align="center"
+      heigh={height || "100%"}
       justify="center"
+      align={up ? "flex-start" : "center"}
+      padding="10px"
       bg={bg}
       style={{
         position: "absolute",

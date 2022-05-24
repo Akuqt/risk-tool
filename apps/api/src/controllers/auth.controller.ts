@@ -212,9 +212,14 @@ export const signUp = async (
     const _company2: ICompany | null = await CompanyModel.findOne({
       username,
     });
+
+    const _company3: ICompany | null = await CompanyModel.findOne({
+      address,
+    });
+
     const _role2: IRole | null = await RoleModel.findOne({ name: type });
 
-    if (_company2 || !_role2) {
+    if (_company2 || !_role2 || _company3) {
       return res.status(401).json({ ok: false, error: errors.invalidRegister });
     }
 
@@ -324,5 +329,30 @@ export const editCompany = async (
       })),
       token: createAcessToken(_company),
     },
+  });
+};
+
+export const getCompanies = async (
+  req: Request,
+  res: Response,
+): Promise<Response> => {
+  const _company: ICompany | null = await CompanyModel.findById(req.id);
+
+  if (!_company) {
+    return res.status(401).json({ ok: false, error: errors.invalidAuth });
+  }
+
+  const companies = await CompanyModel.find().where({
+    _id: { $ne: _company._id },
+  });
+
+  return res.json({
+    ok: true,
+    result: companies.map((company) => ({
+      name: company.name,
+      address: company.address,
+      lat: company.lat,
+      lng: company.lng,
+    })),
   });
 };

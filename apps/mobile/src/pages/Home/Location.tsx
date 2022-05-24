@@ -1,15 +1,16 @@
 import React, { useEffect } from "react";
+import config from "../../config";
 import { ButtonsContainer, Container } from "./Elements";
 import { useDispatch, useSelector } from "react-redux";
 import { UserCard, DataCard, Btn } from "components/src/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { ToastAndroid } from "react-native";
+import { Data, IError } from "types";
 import { setLocation } from "../../redux/location";
 import { useLocation } from "../../hooks";
 import { clearRoute } from "../../redux/user";
 import { RootState } from "../../redux";
 import { useSocket } from "../../hooks/useSocket";
-import { Data, IError } from "types";
 import { Post } from "services";
 
 type Props = NativeStackScreenProps<
@@ -81,7 +82,7 @@ export const Location: React.FC<Props> = ({ navigation }) => {
           onPress={async () => {
             removeLocationUpdates();
             const res = await Post<{ ok: boolean; error?: IError }>(
-              "http://10.0.2.2:4000/api/v1",
+              config.apiUrl,
               "/path/end",
               {
                 current: {

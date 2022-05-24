@@ -22,7 +22,13 @@ export const Home: React.FC = () => {
     >
       <Navbar
         logo={truckDark}
-        logoHandler={() => navigation("/")}
+        logoHandler={() => {
+          if (company.token !== "") {
+            navigation("/main/dashboard");
+          } else {
+            navigation("/");
+          }
+        }}
         content={
           <Container justify="flex-end" align="center" width="100%">
             {company.token ? (

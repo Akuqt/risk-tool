@@ -1,9 +1,11 @@
 import React, { useState } from "react";
+import config from "../../config";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useSelector } from "react-redux";
 import { RootState } from "../../redux";
 import { Select } from "components/src/native";
+import { IError } from "types";
 import { Post } from "services";
 import {
   View,
@@ -13,7 +15,6 @@ import {
   ToastAndroid,
   TouchableOpacity,
 } from "react-native";
-import { IError } from "types";
 
 type Props = NativeStackScreenProps<
   {
@@ -64,7 +65,7 @@ export const Alerts: React.FC<Props> = ({ navigation }) => {
       <View style={{ width: "100%", marginTop: 4, marginBottom: 20 }}>
         <Select
           reset={reset}
-          items={["Test 1", "Test 2", "Test 3", "Test 4", "Test 5", "Test 6"]}
+          items={["Traffic", "Police", "Crash", "Hazard", "Close", "Warning"]}
           onSelect={(item) => {
             setReason(item);
           }}
@@ -115,7 +116,7 @@ export const Alerts: React.FC<Props> = ({ navigation }) => {
               if (driver.active) {
                 if (reason.length > 0) {
                   const res = await Post<{ ok: boolean; error?: IError }>(
-                    "http://10.0.2.2:4000/api/v1",
+                    config.apiUrl,
                     "/alerts/new",
                     {
                       reason,

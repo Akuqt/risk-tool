@@ -37,11 +37,12 @@ export const Risk: React.FC<Props> = ({ close, url }) => {
 
   return (
     <Container
-      width="30%"
+      width="600px"
       padding="10px"
       align="center"
       justify="center"
-      bg="#ffffffdd"
+      heigh="750px"
+      bg="#ffffff"
       borderRadius="4px"
       direction="column"
       shadow

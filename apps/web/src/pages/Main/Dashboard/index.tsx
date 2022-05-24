@@ -177,7 +177,7 @@ export const Dashboard: React.FC = () => {
             navigation("/main/edit");
           }}
         >
-          <BsPencil color="#000000a0" size={16} />
+          <BsPencil color="#0094FF" size={18} />
         </Btn>
         <Container
           width="100%"
@@ -207,7 +207,7 @@ export const Dashboard: React.FC = () => {
               navigation("/main/driver");
             }}
           >
-            <BsBoxArrowUpRight color="#00000033" size={14} />
+            <BsBoxArrowUpRight color="#0094FF" size={15} />
           </Btn>
         </Container>
         <Container
@@ -293,7 +293,7 @@ export const Dashboard: React.FC = () => {
         >
           <Container width="100%" justify="space-between" align="center">
             <Txt fs="20px" bold color="#000000" margin="5px 0px 20px 10px">
-              Last Alerts
+              Last Risks
             </Txt>
             <TxtBtn
               color="#0094FF"

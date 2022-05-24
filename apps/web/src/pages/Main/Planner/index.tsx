@@ -24,8 +24,8 @@ import {
 } from "components";
 import {
   debounce,
+  riskColor,
   getDriver,
-  randomColor,
   riskPathMap,
   formatNumber,
   formatAddress,
@@ -125,7 +125,6 @@ export const Planner: React.FC = () => {
 
   useEffect(() => {
     mounted.current = true;
-
     if (logState?.log) {
       dispatcher({
         type: "setAddress",
@@ -166,22 +165,28 @@ export const Planner: React.FC = () => {
       align="center"
       justify="space-between"
       heigh="calc(100% - 30px)"
-      style={{ position: "relative", overflow: "hidden" }}
+      style={{ position: "relative", overflowX: "hidden", overflowY: "auto" }}
     >
-      <CustomModal show={showModal && riskCalculation} bg="#2c2c2cac">
+      <CustomModal
+        show={showModal && riskCalculation}
+        bg="transparent"
+        height="fit-content"
+        up
+      >
         <Risk
           url={apiUrl}
           close={(risk_) => {
             if (risk_) {
               if (mounted.current) {
+                const t = fixedPath[fixedPathIndex].coords.slice(
+                  currentIndex > 0 ? currentIndex - 1 : 0,
+                  newIndex,
+                );
                 dispatcher({
                   type: "setRiskPaths",
                   payload: {
-                    path: fixedPath[fixedPathIndex].coords.slice(
-                      currentIndex > 0 ? currentIndex - 1 : 0,
-                      newIndex,
-                    ),
-                    color: randomColor(),
+                    path: t,
+                    color: riskColor(risk_),
                     risk: risk_,
                   },
                 });
@@ -317,7 +322,7 @@ export const Planner: React.FC = () => {
         bg="#f3f3f3"
         padding="10px"
         direction="column"
-        style={{ zIndex: 310 }}
+        style={{ zIndex: 310, overflowY: "auto" }}
       >
         <Container
           width="100%"
@@ -591,7 +596,7 @@ export const Planner: React.FC = () => {
         <Map
           polys={[
             {
-              color: "tomato",
+              color: "#8c00ff",
               path: fixedPath[fixedPathIndex]?.coords || [],
               clickable: riskCalculation && risk === 0,
               onClick: (i) => {
@@ -635,6 +640,10 @@ export const Planner: React.FC = () => {
           showWazeAlertsLayer={wazeTA}
           showWazeTrafficLayer={wazeTL}
           showGoogleTrafficLayer={googleTL}
+          showCompanies
+          onCompanyClick={(add) => {
+            dispatcher({ type: "setAddress", payload: add });
+          }}
         />
       </Container>
     </Container>

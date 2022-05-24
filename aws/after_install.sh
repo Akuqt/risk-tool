@@ -9,7 +9,6 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion" 
 
 npm i -g yarn
-yarn set version stable
 yarn install
 
 cd apps/web/
