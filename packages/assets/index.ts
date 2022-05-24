@@ -6,3 +6,4 @@ export { default as destinationIcon } from "./images/destination.svg";
 export { default as originIcon } from "./images/origin.svg";
 export { default as alertIcon } from "./images/alert-icon.png";
 export { default as homeTruck1 } from "./images/home-truck1.png";
+export { default as companyIcon } from "./images/company-icon.png";
