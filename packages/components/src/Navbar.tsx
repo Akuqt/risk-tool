@@ -4,7 +4,7 @@ import { Container, Img } from "./Elements";
 interface Props {
   reverse?: boolean;
   content: React.ReactNode;
-  logoHandler?: () => void;
+  logoHandler: () => void;
   logo: string;
 }
 
@@ -34,7 +34,7 @@ export const Navbar: React.FC<Props> = ({
           src={logo}
           alt="truck-logo"
           pointer
-          onClick={logoHandler}
+          onClick={() => logoHandler()}
         />
       </Container>
       <Container justify="center" align="center" width="auto" heigh="30px">
