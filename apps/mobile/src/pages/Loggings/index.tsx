@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
+import config from "../../config";
 import { View, Text, ScrollView } from "react-native";
 import { useSelector } from "react-redux";
-import { Get } from "services";
-import { FLog2 } from "types";
 import { RootState } from "../../redux";
+import { FLog2 } from "types";
+import { Get } from "services";
 
 export const Logs: React.FC = () => {
   const user = useSelector((state: RootState) => state.userReducer.user);
@@ -11,7 +12,7 @@ export const Logs: React.FC = () => {
 
   useEffect(() => {
     Get<{ ok: boolean; result: FLog2[] }>(
-      "http://10.0.2.2:4000/api/v1",
+      config.apiUrl,
       "/alerts/driver",
       user.token,
     ).then((res) => {

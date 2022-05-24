@@ -1,4 +1,5 @@
 import React from "react";
+import config from "../../config";
 import { Container, Logo, LogoContainer, Form } from "./Elements";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useInputHandler } from "../../hooks";
@@ -47,7 +48,7 @@ export const Login: React.FC<Props> = ({ navigation }) => {
               ok: boolean;
               result: FDriver;
               error?: IError;
-            }>("http://10.0.2.2:4000/api/v1", "/auth/sign-in", {
+            }>(config.apiUrl, "/auth/sign-in", {
               ...values,
               type: "driver",
             });
