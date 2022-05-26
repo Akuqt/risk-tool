@@ -50,3 +50,61 @@ export const simplePost = (
 export const simpleGet = (url: string): Promise<request.Response> => {
   return api.get(baseUrl + url);
 };
+
+export const invalidToken = (
+  url: string,
+  token: string,
+): Promise<request.Response> => {
+  return api.get(baseUrl + url).set("Authorization", "bearer " + token);
+};
+
+/* istanbul ignore next */
+export const authPost = async (
+  url: string,
+  data: object,
+  type: "in" | "up" = "up",
+  drv?: boolean,
+) => {
+  const token = (await simplePost("/auth/sign-" + type, drv ? driver : company))
+    .body.result.token;
+  return api
+    .post(baseUrl + url)
+    .set("Authorization", `bearer ${token}`)
+    .send(data);
+};
+
+/* istanbul ignore next */
+export const authPut = async (
+  url: string,
+  data: object,
+  type: "in" | "up" = "up",
+  drv?: boolean,
+) => {
+  const token = (await simplePost("/auth/sign-" + type, drv ? driver : company))
+    .body.result.token;
+  return api
+    .put(baseUrl + url)
+    .set("Authorization", `bearer ${token}`)
+    .send(data);
+};
+
+export const saveDriver = async () => {
+  const res1 = await simplePost("/auth/sign-up", company);
+  const res = await simplePost("/auth/sign-up", driver);
+  /* istanbul ignore next */
+  return {
+    dvr: res.body.result.id,
+    cpn: res1.body?.result?.id || "",
+  };
+};
+
+/* istanbul ignore next */
+export const authGet = async (
+  url: string,
+  type: "in" | "up" = "up",
+  drv?: boolean,
+) => {
+  const token = (await simplePost("/auth/sign-" + type, drv ? driver : company))
+    .body.result.token;
+  return api.get(baseUrl + url).set("Authorization", `bearer ${token}`);
+};

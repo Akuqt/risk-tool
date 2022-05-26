@@ -7,8 +7,8 @@
     "dev": "ts-node-dev --respawn src",
     "build": "tsc",
     "start": "node dist",
-    "test": "jest",
-    "test:staged": "jest --bail --findRelatedTests"
+    "test": "jest --runInBand",
+    "test:staged": "jest --bail --findRelatedTests --runInBand"
   },
   "dependencies": {
     "argon2": "^0.28.4",
