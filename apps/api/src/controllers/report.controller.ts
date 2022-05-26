@@ -9,6 +9,7 @@ export const getAlerts = async (req: Request, res: Response) => {
     hideTraffic: true,
     hideUsers: true,
   });
+  /* istanbul ignore next */
   const result = resWaze.alerts?.map((el) => ({
     city: el.city,
     type: el.type,
@@ -31,6 +32,7 @@ export const getTraffic = async (req: Request, res: Response) => {
     hideAlerts: true,
     hideUsers: true,
   });
+  /* istanbul ignore next */
   const result = resWaze.jams
     ?.map((el) => ({
       city: el.city,

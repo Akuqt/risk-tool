@@ -87,6 +87,7 @@ export const signIn = async (
 
     res.cookie("jid", createRefreshToken(_company), cookieConf);
 
+    /* istanbul ignore next */
     return res.json({
       ok: true,
       result: {
@@ -270,6 +271,7 @@ export const editCompany = async (
     .populate("routes")
     .populate("role");
 
+  /* istanbul ignore next */
   if (!_company) {
     return res.status(401).json({ ok: false, error: errors.invalidAuth });
   }
@@ -288,6 +290,7 @@ export const editCompany = async (
 
   res.cookie("jid", createRefreshToken(company_), cookieConf);
 
+  /* istanbul ignore next */
   return res.json({
     ok: true,
     result: {
@@ -338,6 +341,7 @@ export const getCompanies = async (
 ): Promise<Response> => {
   const _company: ICompany | null = await CompanyModel.findById(req.id);
 
+  /* istanbul ignore next */
   if (!_company) {
     return res.status(401).json({ ok: false, error: errors.invalidAuth });
   }
@@ -346,6 +350,7 @@ export const getCompanies = async (
     _id: { $ne: _company._id },
   });
 
+  /* istanbul ignore next */
   return res.json({
     ok: true,
     result: companies.map((company) => ({

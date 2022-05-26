@@ -49,7 +49,7 @@ export const getBestRoutePath = (origin: Coord, destination: Coord) => {
   const destinationIndex = getClosestIndex(destination, barranquilla);
   let path: Coord[] = [];
   let path2: Coord[] = [];
-
+  /* istanbul ignore next */
   if (originIndex <= destinationIndex) {
     path = barranquilla.slice(originIndex, destinationIndex + 1);
     path2 = barranquilla.slice(0, originIndex);

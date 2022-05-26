@@ -12,6 +12,8 @@ export const newAlert = async (
     req.body;
   const driver_ = await DriverModel.findById(id);
   const company_ = await CompanyModel.findById(company);
+
+  /* istanbul ignore next */
   if (!driver_ || !company_) {
     return res.status(400).json({ ok: false, msg: errors.badRequest });
   }
@@ -57,10 +59,12 @@ export const getCompanyAlerts = async (
 ): Promise<Response> => {
   const id = req.id;
   const company_ = await CompanyModel.findById(id).populate("logs");
+  /* istanbul ignore next */
   if (!company_) {
     return res.status(400).json({ ok: false, msg: errors.badRequest });
   }
 
+  /* istanbul ignore next */
   return res.status(200).json({
     ok: true,
     logs: company_.logs.reverse().map((l) => ({
@@ -89,6 +93,7 @@ export const setLogAction = async (
   const { action, log } = req.body;
   const company_ = await CompanyModel.findById(id);
   const log_ = await LogModel.findById(log);
+  /* istanbul ignore next */
   if (!company_ || !log_) {
     return res.status(400).json({ ok: false, msg: errors.badRequest });
   }
@@ -103,10 +108,7 @@ export const getDriverLogs = async (
 ): Promise<Response> => {
   const id = req.id;
   const logs_ = await LogModel.find({ driver: id });
-  if (!logs_) {
-    return res.status(400).json({ ok: false, msg: errors.badRequest });
-  }
-
+  /* istanbul ignore next */
   return res.status(200).json({
     ok: true,
     result: logs_.reverse().map((l) => ({

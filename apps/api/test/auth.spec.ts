@@ -1,5 +1,13 @@
 import mongoose from "mongoose";
-import { company, driver, simplePost } from "./helper";
+import {
+  authGet,
+  authPut,
+  company,
+  driver,
+  invalidToken,
+  simpleGet,
+  simplePost,
+} from "./helper";
 import { CompanyModel, DriverModel } from "../src/models";
 import { connect } from "../src/database";
 
@@ -117,5 +125,40 @@ describe("POST /api/v1/auth/sign-in", () => {
     });
     expect(res.status).toBe(401);
     expect(res.body.ok).toEqual(false);
+  });
+});
+
+describe("POST /api/v1/auth/edit-company", () => {
+  it("should edit a company", async () => {
+    const res = await authPut("/auth/edit-company", company, "in");
+    expect(res.status).toBe(200);
+    expect(res.body.ok).toEqual(true);
+    expect(res.body.result).toBeDefined();
+  });
+});
+
+describe("GET /api/v1/auth/all", () => {
+  it("should get all companies", async () => {
+    const res = await authGet("/auth/all", "in");
+    expect(res.status).toBe(200);
+    expect(res.body.ok).toEqual(true);
+    expect(res.body.result).toBeDefined();
+  });
+});
+
+describe("Auth Verification", () => {
+  test("No token", async () => {
+    const res = await simpleGet("/auth/all");
+    expect(res.status).toBe(401);
+  });
+
+  test("Invalid token (1)", async () => {
+    const res = await invalidToken("/auth/all", "");
+    expect(res.status).toBe(401);
+  });
+
+  test("Invalid token (2)", async () => {
+    const res = await invalidToken("/auth/all", "jbcdhbcnjdncjd");
+    expect(res.status).toBe(401);
   });
 });
